@@ -6,6 +6,7 @@
 @inject IOptions<AttachmentOptions> ApplicationOption
 @inject IStringLocalizer Localizer
 @{
+
     var extension = ".xml";
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
 }
