@@ -1,0 +1,50 @@
+﻿@(await Component.InvokeAsync(typeof(Ais.Office.Components.HomeMessageViewComponent)))
+@{
+    var officeId = this.ViewBag.OfficeId as Guid?;
+}
+<div class="content login-after">
+    <section class="center">
+        <div class="steps-body">
+            <div class="column-wrap charts-wrap flex-gap-20">
+                <div class="three left">
+                    <div class="step-box">
+                        <div class="step-box-head">
+                            <h3 class="step-box-title">Общо статистика за периода:</h3>
+                            <a href=" popup-ref-1" class="right k-button k-small" title="Title Dialog">
+                                <i class="k-icon k-font-icon k-i-gear"></i>
+                            </a>
+                        </div>
+                        <div class="step-box-body">
+                            <div class="form-row">
+                                @Html.Hidden("OfficeId", officeId)
+                                <div class="flex k-flex-nowrap">
+                                    <div class="form-input column">
+                                        @Html.Kendo().DatePicker().Name("TaskByPeriodFrom").HtmlAttributes(new { @class = "office" }).Value(DateTime.Now.AddDays(-7)).Events(x => x.Change("account.periodFromChange")).Deferred(true)
+                                    </div>
+                                    <div class="form-input-dash"></div>
+                                    <div class="form-input column">
+                                        @Html.Kendo().DatePicker().Name("TaskByPeriodTo").HtmlAttributes(new { @class = "office" }).Value(DateTime.Now).Events(x => x.Change("account.periodToChange")).Deferred(true)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-horizontal" id="donut-charts-wrapper">
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                @{
+                    await Html.RenderPartialAsync("_TodayStats.cshtml");
+                    await Html.RenderPartialAsync("_GridData.cshtml");
+                }
+                </div>
+        </div>
+    </section>
+</div>
+@section Scripts{
+    <script src="@Url.Content($"~/bundles/account.min.js")" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function() {
+            $("#TaskByPeriodFrom").data("kendoDatePicker").trigger("change")}
+         )
+    </script>
+}

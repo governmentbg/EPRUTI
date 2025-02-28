@@ -1,0 +1,242 @@
+﻿@using Ais.Data.Models.Address
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Address.Address
+@inject IStringLocalizer Localizer;
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var prefix = ViewBag.Prefix as string;
+    var showDefaultCheckBox = ViewBag.ShowDefaultCheckBox is bool && (bool)ViewBag.ShowDefaultCheckBox;
+    var requiredFields = ViewBag.RequiredFields as ICollection<string> ?? Array.Empty<string>();
+    var provinceElementId = Guid.NewGuid().ToString();
+    var municipalityElementId = Guid.NewGuid().ToString();
+    var settlementElementId = Guid.NewGuid().ToString();
+    var regionElementId = Guid.NewGuid().ToString();
+    var postCodeElementId = Guid.NewGuid().ToString();
+    var descriptionElementId = Guid.NewGuid().ToString();
+}
+<input name="@($"{prefix}Id")" type="hidden" value="@Model.Id"/>
+<input name="@($"{prefix}UniqueId")" type="hidden" value="@(Model.UniqueId)"/>
+<input name="@($"{prefix}ClientId")" type="hidden" value="@(Model.ClientId)"/>
+<div class="form-row">
+    <div class="form-input fullwidth privacy">
+        @Html.InfoLabel(Localizer["OriginType"], "OriginType", requiredFields.Contains("Origin") ? "required" : null)
+        @(Html.Kendo().DropDownList()
+            .Name($"{prefix}Origin.Id")
+              .OptionLabel(Localizer["Choose"].ToString())
+              .Value(Model?.Origin?.Id.HasValue == true ? Model.Origin.Id.ToString() : string.Empty)
+              .DataValueField("Id")
+              .DataTextField("Name")
+              .ValueTemplate(
+                  $"<input type='hidden' name='{prefix}Origin.Name' value='#:Name#'/>" +
+                  "<span>#:Name#</span>")
+              .Filter(FilterType.Contains)
+              .DataSource(d => d.Read(r => r.Action("Index", "Nomenclature", new { area = string.Empty, name = "naddrtype" })))
+              .Deferred(deferred))
+        @Html.ValidationMessage($"{prefix}Origin")
+    </div>
+</div>
+<div class="form-row">
+    @if (!string.IsNullOrEmpty(Model?.MigrationAddress))
+    {
+        <div class="form-input fullwidth">
+            @Html.LabelFor(m => m.MigrationAddress, Localizer["MigrationAddress"])
+            @Html.DisplayFor(m => m.MigrationAddress)
+        </div>
+    }
+    <div class="form-input third privacy">
+        @Html.InfoLabel(Localizer["Email"], "Email", requiredFields.Contains("Email") ? "required" : null)
+        @Html.EditorFor(m => m.Email, "EmailAddress", $"{prefix}Email")
+        @Html.ValidationMessage($"{prefix}Email")
+    </div>
+    <div class="form-input third privacy">
+        @Html.InfoLabel(Localizer["Phone"], "Phone", requiredFields.Contains("Phone") ? "required" : null)
+        @Html.EditorFor(m => m.Phone, "String", $"{prefix}Phone")
+        @Html.ValidationMessage($"{prefix}Phone")
+    </div>
+    <div class="form-input third">
+        @Html.InfoLabel(Localizer["Country"], "Country", requiredFields.Contains("Country") ? "required" : null)
+        @(Html.Kendo().DropDownList()
+            .Name($"{prefix}Country.Id")
+            .HtmlAttributes(
+                new
+                {
+                    data_provinceselector = $"#{provinceElementId}",
+                    data_municipalityselector = $"#{municipalityElementId}",
+                    data_settlementselector = $"#{settlementElementId}",
+                    data_regionselector = $"#{regionElementId}",
+                    data_descriptionselector = $"#{descriptionElementId}",
+                    data_default = Address.Bulgaria.ToString()
+                })
+            .Filter(FilterType.Contains)
+            .Value((Model?.Country?.Id ?? Address.Bulgaria).ToString()) // Set Bulgaria as default value
+            .DataValueField("Id")
+            .ValueTemplate(
+                $"<input type='hidden' name='{prefix}Country.Name' value='#:Name#'/>" +
+                "<span>#:Name#</span>")
+            .DataTextField("Name")
+            .DataSource(d => d.Read(r => r.Action("GetCountries", "Address", new { area = string.Empty })))
+            .Events(e => e.Change("core.onCountryChange").DataBound("core.onCountryDataBound"))
+            .Deferred(deferred))
+        @Html.ValidationMessage($"{prefix}Country")
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-input column">
+        @Html.InfoLabel(Localizer["Province"], "Province", requiredFields.Contains("Province") ? "required" : null)
+        @(Html.Kendo().DropDownList()
+              .Name($"{prefix}Province.Id")
+              .HtmlAttributes(new { id = provinceElementId })
+              .OptionLabel(Localizer["Choose"].ToString())
+              .Value(Model?.Province?.Id.HasValue == true ? Model.Province.Id.ToString() : string.Empty)
+              .DataValueField("Id")
+              .DataTextField("Name")
+              .ValueTemplate(
+                  $"<input type='hidden' name='{prefix}Province.Name' value='#:Name#'/>" +
+                  "<span>#:Name#</span>")
+              .Filter(FilterType.Contains)
+              .DataSource(d => d.Read(r => r.Action("GetProvinces", "Address", new { area = string.Empty })))
+              .Deferred(deferred))
+        @Html.ValidationMessage($"{prefix}Province")
+    </div>
+    <div class="form-input column">
+        @Html.InfoLabel(Localizer["Municipality"], "Municipality", requiredFields.Contains("Municipality") ? "required" : null)
+        @(Html.Kendo().DropDownList()
+              .Name($"{prefix}Municipality.Id")
+              .HtmlAttributes(new { id = municipalityElementId })
+              .OptionLabel(Localizer["Choose"].ToString())
+              .Value(Model?.Municipality?.Id.HasValue == true ? Model.Municipality.Id.ToString() : string.Empty)
+              .DataValueField("Id")
+              .DataTextField("Name")
+              .ValueTemplate(
+                  $"<input type='hidden' name='{prefix}Municipality.Name' value='#:Name#'/>" +
+                  "<span>#:Name#</span>")
+              .Filter(FilterType.Contains)
+              .CascadeFrom(provinceElementId)
+              .CascadeFromField("provinceId")
+              .DataSource(
+                  d => d.Read(r => r.Action("GetMunicipalities", "Address", new { area = string.Empty }).Data("core.filterData"))
+                        .ServerFiltering(true))
+              .Deferred(deferred))
+        @Html.ValidationMessage($"{prefix}Municipality")
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-input column">
+        @Html.InfoLabel(Localizer["Settlement"], "Settlement", requiredFields.Contains("Settlement") ? "required" : null)
+        @(Html.Kendo().DropDownList()
+            .Name($"{prefix}Settlement.Id")
+            .HtmlAttributes(new { id = settlementElementId, data_postcodeinputselector = $"#{postCodeElementId}", data_regionelementselector = $"#{regionElementId}", data_sofiaid = Address.Sofia, data_varnaid = Address.Varna })
+            .OptionLabel(Localizer["Choose"].ToString())
+            .Value(Model?.Settlement?.Id.HasValue == true ? Model.Settlement.Id.ToString() : string.Empty)
+            .DataValueField("Id")
+            .DataTextField("Name")
+            .ValueTemplate(
+                $"<input type='hidden' name='{prefix}Settlement.Name' value='#:Name#'/>" +
+                "<span>#:Name#</span>")
+            .Filter(FilterType.Contains)
+            .CascadeFrom(municipalityElementId)
+            .CascadeFromField("municipalityId")
+            .DataSource(
+                d => d.Read(r => r.Action("GetEkattes", "Address", new { area = string.Empty }).Data("core.filterData"))
+                      .ServerFiltering(true))
+            .Events(e => e.Change("core.onSettlementChange"))
+            .Deferred(deferred))
+        @Html.ValidationMessage($"{prefix}Settlement")
+    </div>
+    <div class="form-input column">
+        @Html.InfoLabel(Localizer["Region"], "Region", requiredFields.Contains("Region") || Model?.Settlement?.Id == Address.Sofia || Model?.Settlement?.Id == Address.Varna ? "required" : null)
+        @(Html.Kendo().DropDownList()
+            .Name($"{prefix}Region.Id")
+            .HtmlAttributes(new { id = regionElementId })
+            .OptionLabel(Localizer["Choose"].ToString())
+            .Value(Model?.Region?.Id.HasValue == true ? Model.Region.Id.ToString() : string.Empty)
+            .DataValueField("Id")
+            .DataTextField("Name")
+            .ValueTemplate(
+                $"<input type='hidden' name='{prefix}Region.Name' value='#:Name#'/>" +
+                "<span>#:Name#</span>")
+            .Filter(FilterType.Contains)
+            .CascadeFrom(settlementElementId)
+            .CascadeFromField("ekatteId")
+            .DataSource(
+                d => d.Read(r => r.Action("GetRegions", "Address", new { area = string.Empty }).Data("core.filterData"))
+                      .ServerFiltering(true))
+            .Deferred(deferred))
+        @Html.ValidationMessage($"{prefix}Region")
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-input third">
+        @Html.InfoLabel(Localizer["Street"], "Street", requiredFields.Contains("Street") ? "required" : null)
+        @Html.EditorFor(m => m.Street, null, $"{prefix}Street")
+        @Html.ValidationMessage($"{prefix}Street")
+    </div>
+    <div class="form-input half">
+        @Html.InfoLabel(Localizer["StreetNumber"], "StreetNumber", requiredFields.Contains("StreetNumber") ? "required" : null)
+        @Html.EditorFor(m => m.StreetNumber, null, $"{prefix}StreetNumber")
+        @Html.ValidationMessage($"{prefix}StreetNumber")
+    </div>
+    <div class="form-input third">
+        @Html.InfoLabel(Localizer["Quarter"], "Quarter", requiredFields.Contains("Quarter") ? "required" : null)
+        @Html.EditorFor(m => m.Quarter, null, $"{prefix}Quarter")
+        @Html.ValidationMessage($"{prefix}Quarter")
+    </div>
+    <div class="form-input half">
+        @Html.InfoLabel(Localizer["BuildingNumber"], "BuildingNumber", requiredFields.Contains("BuildingNumber") ? "required" : null)
+        @Html.EditorFor(m => m.BuildingNumber, null, $"{prefix}BuildingNumber")
+        @Html.ValidationMessage($"{prefix}BuildingNumber")
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-input quad">
+        @Html.InfoLabel(Localizer["Entrance"], "Entrance", requiredFields.Contains("Entrance") ? "required" : null)
+        @Html.EditorFor(m => m.Entrance, null, $"{prefix}Entrance")
+        @Html.ValidationMessage($"{prefix}Entrance")
+    </div>
+    <div class="form-input quad">
+        @Html.InfoLabel(Localizer["FloorNumber"], "FloorNumber", requiredFields.Contains("FloorNumber") ? "required" : null)
+        @Html.EditorFor(m => m.FloorNumber, null, $"{prefix}FloorNumber")
+        @Html.ValidationMessage($"{prefix}FloorNumber")
+    </div>
+    <div class="form-input quad">
+        @Html.InfoLabel(Localizer["ApartmentNumber"], "ApartmentNumber", requiredFields.Contains("ApartmentNumber") ? "required" : null)
+        @Html.EditorFor(m => m.ApartmentNumber, null, $"{prefix}ApartmentNumber")
+        @Html.ValidationMessage($"{prefix}ApartmentNumber")
+    </div>
+    <div class="form-input quad">
+        @Html.InfoLabel(Localizer["PostCode"], "PostCode", requiredFields.Contains("PostCode") ? "required" : null)
+        @Html.EditorFor(m => m.PostCode, null, $"{prefix}PostCode", new { htmlAttributes = new { id = postCodeElementId } })
+        @Html.ValidationMessage($"{prefix}PostCode")
+    </div>
+    @if (Model?.Country?.Id == Address.Bulgaria)
+    {
+        <div class="form-input fullwidth hidden">
+            @Html.InfoLabel(Localizer["Description"], "Description", requiredFields.Contains("Description") ? "required" : null)
+            @Html.EditorFor(m => m.Description, null, $"{prefix}Description", new { htmlAttributes = new { id = descriptionElementId, disabled = "disabled" } })
+            @Html.ValidationMessage($"{prefix}Description")
+        </div>
+    }
+    else
+    {
+        <div class="form-input fullwidth ">
+            @Html.InfoLabel(Localizer["Description"], "Description", requiredFields.Contains("Description") ? "required" : null)
+            @Html.EditorFor(m => m.Description, null, $"{prefix}Description", new { htmlAttributes = new { id = descriptionElementId } })
+            @Html.ValidationMessage($"{prefix}Description")
+        </div>
+    }
+</div>
+@if (showDefaultCheckBox)
+{
+    <div class="form-row">
+        <div class="form-input column privacy">
+            @Html.EditorFor(m => m.Default, null, $"{prefix}Default", new { label = Localizer["Default"] })
+            @Html.ValidationMessageFor(m => m.Default)
+        </div>
+    </div>
+}
+else
+{
+    @Html.Hidden($"{prefix}Default", Model.Default)
+}

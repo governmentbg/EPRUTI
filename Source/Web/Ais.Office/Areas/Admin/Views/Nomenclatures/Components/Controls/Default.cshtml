@@ -1,0 +1,10 @@
+﻿@using Ais.Infrastructure.Roles
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer localizer
+
+@if (User.IsInRole(UserRolesConstants.NomenclaturesEdit))
+{
+    <a class="k-small k-button edit-nomenclature-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@localizer["Edit"]">
+        <i class="k-i-edit k-icon k-font-icon"></i>
+    </a>
+}

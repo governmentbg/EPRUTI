@@ -1,0 +1,22 @@
+﻿@using System.Web
+@using Ais.Office.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.Office.ViewModels.Help
+
+@model HelpContentViewModel
+
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+<div class="inner-center">
+    <article class="ctrl">
+        @if (!string.IsNullOrEmpty(Model?.Content))
+        {
+            @Html.Raw(HttpUtility.HtmlDecode(Model.Content))
+        }
+    </article>
+</div>

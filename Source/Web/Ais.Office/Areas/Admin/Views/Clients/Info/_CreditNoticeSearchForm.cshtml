@@ -1,0 +1,58 @@
+﻿@using Ais.Office.Areas.Admin.Controllers;
+@using Ais.WebUtilities.Extensions;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+@model Ais.Data.Models.CreditNotice.CreditNoticeQueryModel
+<section id="top-search" class="top-search k-pb-0">
+    <div class="center">
+        <div class="white-box">
+            <form action="@Url.ActionLink("SearchCreditNotices", "Clients")"
+                  class="dirty-check"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-update="#credit-notice-search-result"
+                  class="search">
+                <div class="form-row">
+                    @Html.HiddenFor(x => x.ClientId)
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.InquiryNum, Localizer["InquiryNum"])
+                        @Html.EditorFor(x => x.InquiryNum)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.RegDateFrom, Localizer["RegDateFrom"])
+                        @Html.EditorFor(x => x.RegDateFrom, "Date")
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.RegDateTo, Localizer["RegDateTo"])
+                        @Html.EditorFor(x => x.RegDateTo, "Date")
+                    </div>
+                    <div class="form-input autosize k-ml-auto nest">
+                        <label class="empty"></label>
+                        <button class="bttn bttn-icon search" title="@Localizer["Search"]" value="@Localizer["Search"]" id="search-notices">
+                            <svg class="icon">
+                                <use xlink:href="#icon-search"></use>
+                            </svg>
+                        </button>
+                    </div>
+                    @{
+                        var controllerType = typeof(ClientsController);
+                        if (Url.HasRightsToAction("UpsertCreditNotice", controllerType))
+                        {
+                            <div class="form-input autosize additional-buttons">
+                                <label class="empty"></label>
+                                <a class="bttn bttn-icon blue add-notice-js" href="\\#" title="@Localizer["Create"]" data-clientid="@(Model?.ClientId)">
+                                    <i class="k-i-plus k-icon k-font-icon"></i>
+                                </a>
+                            </div>
+                        }
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<section id="datatable">
+    <div class="center fullwidth">
+        <div class="table-wrapper" id="credit-notice-search-result"></div>
+    </div>
+</section>

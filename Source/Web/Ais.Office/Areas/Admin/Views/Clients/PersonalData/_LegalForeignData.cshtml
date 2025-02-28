@@ -1,0 +1,48 @@
+﻿@using Ais.Office.ViewModels.Clients
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Client
+@using Ais.Data.Models.Helpers
+@using Ais.Data.Models.Nomenclature
+@using Kendo.Mvc.TagHelpers
+@inject IStringLocalizer Localizer;
+@model ClientUpsertModel
+@{
+    var nameAndNumberId = EnumHelper.GetRegisterTypeIdByType(ForeignLegalRegisterType.NameAndNumber);
+    var otherDataId = EnumHelper.GetRegisterTypeIdByType(ForeignLegalRegisterType.OtherData);
+    var foreignLegalRegisterTypes = new[] { nameAndNumberId, otherDataId };
+
+    if (Model.RegisterType?.Id.HasValue != true || !foreignLegalRegisterTypes.Contains(Model?.RegisterType?.Id))
+    {
+        Model.RegisterType = new Nomenclature { Id = nameAndNumberId };
+    }
+
+    <div class="clientType-js foreignlegal-js k-mt-2" style="display: none;">
+        <div class="form-row">
+            <label class="inline k-mr-3">
+                @Html.RadioButtonFor(m => m.RegisterType.Id, EnumHelper.GetRegisterTypeIdByType(ForeignLegalRegisterType.NameAndNumber), new { id = Guid.NewGuid(), @class = "k-radio registerType-js" })
+                @Localizer["RegisterTypeNameAndNumber"]
+            </label>
+            <label class="inline">
+                @Html.RadioButtonFor(m => m.RegisterType.Id, EnumHelper.GetRegisterTypeIdByType(ForeignLegalRegisterType.OtherData), new { id = Guid.NewGuid(), @class = "k-radio registerType-js" })
+                @Localizer["RegisterTypeOtherData"]
+            </label>
+        </div>
+        <div class="form-row">
+            <div class="form-input column registerType-js @EnumHelper.GetRegisterTypeIdByType(ForeignLegalRegisterType.NameAndNumber)-js">
+                @Html.LabelFor(m => m.RegisterIdentifier)
+                @Html.EditorFor(m => m.RegisterIdentifier)
+                @Html.ValidationMessageFor(m => m.RegisterIdentifier)
+            </div>
+            <div class="form-input column p-0 registerType-js @EnumHelper.GetRegisterTypeIdByType(ForeignLegalRegisterType.NameAndNumber)-js">
+                @Html.LabelFor(m => m.RegisterNumber, new { @class = "required" })
+                @Html.EditorFor(m => m.RegisterNumber)
+                @Html.ValidationMessageFor(m => m.RegisterNumber)
+            </div>
+            <div class="form-input fullwidth registerType-js @EnumHelper.GetRegisterTypeIdByType(ForeignLegalRegisterType.OtherData)-js">
+                @Html.LabelFor(m => m.RegisterAdditionData)
+                @Html.EditorFor(m => m.RegisterAdditionData)
+                @Html.ValidationMessageFor(m => m.RegisterAdditionData)
+            </div>
+        </div>
+    </div>
+}

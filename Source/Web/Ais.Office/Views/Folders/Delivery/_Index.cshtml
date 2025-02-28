@@ -1,0 +1,30 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using FormTagHelper = Kendo.Mvc.TagHelpers.FormTagHelper
+@inject IStringLocalizer Localizer;
+<script src="~/bundles/admin_clients.min.js" asp-append-version="true"></script>
+<form method="post" action="@Url.DynamicAction(nameof(FoldersController.DeliverPost), typeof(FoldersController))"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.Hidden("key", ViewBag.Key as string)
+    @{
+        await Html.RenderPartialAsync("Delivery/_OutDocuments");
+        await Html.RenderPartialAsync("Delivery/_Recipients", null);
+    }
+    <div class="k-actions right">
+        <button class="bttn right" name="operation" value="sign">
+            @Localizer["Sign"]
+        </button>
+        <button class="bttn right" name="operation" value="print">
+            @Localizer["Print"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

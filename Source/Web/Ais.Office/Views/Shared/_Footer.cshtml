@@ -1,0 +1,19 @@
+﻿@using Microsoft.Extensions.Localization
+@using System.Reflection
+@using System.Net
+@using System.Net.Sockets
+@inject IStringLocalizer Localizer
+@{
+    var assemblyName = Assembly.GetEntryAssembly()?.GetName();
+}
+<footer itemscope="" itemtype="http://schema.org/WPFooter">
+    <div class="clear"></div>
+    <div class="footer-bottom">
+        <div class="center">
+            <div class="text-center copyleft">
+                @Localizer["AisOfficeCopyright"] - v@(assemblyName?.Version?.ToString(3))/@((await Dns.GetHostEntryAsync(Dns.GetHostName())).AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork)?.ToString().Split('.').Last())
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+</footer>

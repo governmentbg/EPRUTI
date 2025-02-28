@@ -1,0 +1,14 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using Ais.Office.Areas.Admin.Controllers.Employees
+@inject IStringLocalizer localizer
+@if (this.Url.HasRightsToAction("Upsert", typeof(EmployeeRolesController)))
+{
+    <div class="form-input autosize additional-buttons">
+        <label class="empty"></label>
+        <a class="bttn bttn-icon add-role-js" title="@localizer["Add"]" data-searchqueryid="@ViewBag.SearchQueryId">
+            <i class="k-i-plus k-icon k-font-icon"></i>
+        </a>
+    </div>
+}

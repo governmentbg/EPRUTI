@@ -1,0 +1,109 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.Office.Controllers.Documents
+@using Ais.Office.ViewModels.Documents.OutDocuments
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@model Ais.Office.ViewModels.Documents.DocShortQueryViewModel
+@{
+    var wrapperId = Guid.NewGuid().ToString();
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var data = ViewBag.ProofDocument is OutDocShortViewModel outDocShortViewModel ? new[] { outDocShortViewModel } : Array.Empty<OutDocShortViewModel>();
+}
+<div class="steps-body">
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["SearchProofDoc"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div action="@Url.DynamicAction(nameof(OutDocumentsController.SearchProofDocs), typeof(OutDocumentsController))"
+                 class="form-row"
+                 data-ajax="true"
+                 data-ajax-method="POST"
+                 data-ajax-update="#@wrapperId">
+                @Html.HiddenFor(x => x.EntryTypeId)
+                <div class="form-input">
+                    @Html.LabelFor(x => x.Name)
+                    @(Html.Kendo().TextBoxFor(x => x.Name)
+                        .HtmlAttributes(new { @class = "click-on-enter-js", data_wrapper = ".form-row", data_element = "svg", id = Guid.NewGuid().ToString() })
+                        .Deferred(deferred))
+                </div>
+                <div class="form-input">
+                    @Html.LabelFor(x => x.From)
+                    @(Html.Kendo().DatePickerFor(x => x.From)
+                        .HtmlAttributes(new { @class = "click-on-enter-js", data_wrapper = ".form-row", data_element = "svg", id = Guid.NewGuid().ToString() })
+                        .Deferred(deferred))
+                </div>
+                <div class="form-input">
+                    @Html.LabelFor(x => x.To)
+                    @(Html.Kendo().DatePickerFor(x => x.To)
+                        .HtmlAttributes(new { @class = "click-on-enter-js", data_wrapper = ".form-row", data_element = "svg", id = Guid.NewGuid().ToString() })
+                        .Deferred(deferred))
+                </div>
+                <div class="form-input auto w100">
+                    @Html.LabelFor(m => m.Limit)
+                    @Html.EditorFor(m => m.Limit, "ResultLimit", new { htmlAttributes = new { @class = "click-on-enter-js", data_wrapper = ".form-row", data_element = "svg" } })
+                </div>
+                <div class="form-input w-auto">
+                    <label class="empty"></label>
+                    <button class="bttn bttn-icon blue" title="@Localizer["Search"]" ajax-button-submit>
+                        <svg class="icon">
+                            <use xlink:href="#icon-search"></use>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="@wrapperId">
+            </div>
+        </div>
+    </div>
+    <form action="@Url.ActionLink("AddProofDoc", "OutDocuments")"
+          data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-success="core.onKendoWindowSuccessCallback">
+        @Html.Hidden("sessionId", ViewBag.SessionId as Guid?)
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["Selected"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    @(Html.Kendo().Grid(data)
+                        .Name("proofDocsToAdd")
+                        .HtmlAttributes(new { @class = "fullwidth" })
+                        .Columns(
+                            col =>
+                            {
+                                col.Bound(x => x.RegNumber)
+                                   .Title(Localizer["RegNumber"]);
+                                col.Bound(x => x.Type.Name)
+                                   .Title(Localizer["Type"]);
+                                col.Bound(x => x.RegDate)
+                                   .Title(Localizer["Date"])
+                                   .Format("{0:G}");
+                                col.Bound(x => x.UniqueId)
+                                   .Title(Localizer["Actions"])
+                                   .ClientTemplate(
+                                       "<input type='hidden' name='ProofDoc.Id' value='#:Id#' />" +
+                                       "<input type='hidden' name='ProofDoc.RegNumber' value='#:RegNumber ? RegNumber : ''#' />" +
+                                       "<input type='hidden' name='ProofDoc.RegDate' value='#:RegDate ? kendo.toString(RegDate, 'G') : ''#' />" +
+                                       "<input type='hidden' name='ProofDoc.Type.Name' value='#:Type && Type.Name ? Type.Name : ''#' />" +
+                                       "<a class='k-button k-small dirtyignore remove-proof-doc-js'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a>");
+                            }))
+                </div>
+            </div>
+        </div>
+        <div class="k-dialog-buttongroup">
+            <button class="bttn right main">
+                @Localizer["Save"]
+            </button>
+            <button class="bttn right third closeKendoWindow-js">
+                @Localizer["Close"]
+            </button>
+        </div>
+    </form>
+</div>

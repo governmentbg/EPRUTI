@@ -1,0 +1,93 @@
+﻿@using Ais.Office.ViewModels.Clients;
+@using Microsoft.Extensions.Localization;
+@using Ais.Office.ViewModels.ClientRoles;
+@inject IStringLocalizer Localizer;
+@model ClientRoleChangeViewModel
+<form method="post" class="dirty-check" action="@Url.ActionLink("ChangeClientRoles", "Clients")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">@Localizer["BaseData"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input quad">
+                        @Html.Label(Localizer["Name"])
+                        @Model.FullName
+                    </div>
+                    <div class="form-input quad">
+                        @Html.Label(Localizer["EgnBulstat"])
+                        @Model.EgnBulstat
+                    </div>
+                    <div class="form-input quad">
+                        @Html.Label(Localizer["UserName"])
+                        @Model.UserName
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">@Localizer["RolesSettings"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input column">
+                        @Html.Label(Localizer["AllRoles"])
+                        @(
+                            Html.Kendo().DropDownList()
+                                    .Name("rolesDropdown")
+                                    .DataTextField("Name")
+                                    .DataValueField("Id")
+                                    .OptionLabel(Localizer["Choose"].ToString())
+                                    .Filter(FilterType.Contains)
+                                .DataSource(x => x.Ajax().Read("GetRoles", "Clients", new { Area = "Admin"})))
+                    </div>
+                    <div class="form-input quad">
+                        <button class="bttn right main add-clientrole-js">
+                            @Localizer["Add"]
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @Html.Label(Localizer["ClientRoles"])
+                        @(
+                            Html.Kendo().Grid<ClientRoleViewModel>()
+                                    .Name("rolesGrid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(c => c.Name).Title(Localizer["Name"]);
+                                columns.Bound(c => c.Scopes).Title(Localizer["Scope"]).ClientTemplate("<span>#:Scopes && Scopes.length > 0 ? Scopes.map(x => x['Description']).join() : ''#</span>");
+                                        columns.Bound(c => c.Id).Title(Localizer["Actions"]).Width("20%")
+                                .ClientTemplate($"<a href='\\#' class='k-button k-small edit-scope-js dirtyignore'> <span class='k-i-edit k-icon k-font-icon k-button-icon'></span> </a><a href='\\#' class='k-button k-small remove-scope-js dirtyignore'> <span class='k-i-delete k-icon k-font-icon k-button-icon'></span> </a>");
+                                    })
+                                .DataSource(x => x.Ajax().Read("GetClientRolesWithScope", "Clients", new { Area = "Admin", clientId = Model.Id }))
+                                )
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third  closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+
+<script id="scopesTemplate" type="text/x-kendo-template">
+   
+</script>

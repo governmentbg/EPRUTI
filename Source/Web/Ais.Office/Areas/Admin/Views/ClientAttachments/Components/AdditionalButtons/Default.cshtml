@@ -1,0 +1,30 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var signDeclarationTitle = ViewBag.ESignDeclaration is string title && title.IsNotNullOrEmpty() ? title : Localizer["Declaration"];
+    var downloadSignDeclarationUrl = Url.DynamicActionWithRightsCheck(nameof(ClientAttachmentsController.DownloadSignDeclaration), typeof(ClientAttachmentsController), new { searchqueryid = ViewBag.SearchQueryId, name = signDeclarationTitle });
+    if (downloadSignDeclarationUrl.IsNotNullOrEmpty())
+    {
+        <div class="form-input autosize additional-buttons">
+            <label class="empty"></label>
+            <a href="@downloadSignDeclarationUrl" class="bttn bttn-icon" target="_blank" title="@(signDeclarationTitle)">
+                <i class="k-i-download k-icon k-font-icon"></i>
+            </a>
+        </div>
+    }
+
+    var createUrl = Url.DynamicActionWithRightsCheck(nameof(ClientAttachmentsController.Upsert), typeof(ClientAttachmentsController));
+    if (createUrl.IsNotNullOrEmpty())
+    {
+        <div class="form-input autosize additional-buttons">
+            <label class="empty"></label>
+            <a href="@createUrl" class="bttn bttn-icon add-client-attachment-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Create"]">
+                <i class="k-i-plus k-icon k-font-icon"></i>
+            </a>
+        </div>
+    }
+}

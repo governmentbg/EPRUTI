@@ -1,0 +1,29 @@
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@model DateTime?
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var min = ViewData.ContainsKey("min")
+    ? ViewData["min"] as DateTime?
+    : null;
+
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+
+    var widget = Html.Kendo().DatePickerFor(m => m).HtmlAttributes(attributes);
+
+    if (min != null)
+    {
+        widget.Min(min.ToString());
+    }
+}
+
+@widget.Deferred(!Context.Request.IsAjaxRequest())

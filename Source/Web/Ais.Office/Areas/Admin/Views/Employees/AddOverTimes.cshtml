@@ -1,0 +1,51 @@
+﻿@using Ais.Office.ViewModels.Employees
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model OverTimeAddModel
+<form method="post" action="@Url.ActionLink("AddOverTimes", "Employees")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.EmployeeId)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["OverTime"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.FromDate, new { @class = "required" })
+                        @Html.EditorFor(m => m.FromDate, "Date", additionalViewData: new { min = DateTime.Now })
+                        @Html.ValidationMessageFor(m => m.FromDate)
+                    </div>
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.ToDate, new { @class = "required" })
+                        @Html.EditorFor(m => m.ToDate, "Date", additionalViewData: new { min = DateTime.Now })
+                        @Html.ValidationMessageFor(m => m.ToDate)
+                    </div>
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.FromTime, new { @class = "required" })
+                        @Html.EditorFor(m => m.FromTime, "Time")
+                        @Html.ValidationMessageFor(m => m.FromTime)
+                    </div>
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.ToTime, new { @class = "required" })
+                        @Html.EditorFor(m => m.ToTime, "Time")
+                        @Html.ValidationMessageFor(m => m.ToTime)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

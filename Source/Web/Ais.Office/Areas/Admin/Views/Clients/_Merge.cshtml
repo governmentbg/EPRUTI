@@ -1,0 +1,40 @@
+﻿@using Ais.Office.ViewModels.Clients
+@using Ais.Data.Models.Nomenclature
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var data = (ViewBag.Cart as List<ClientTableViewModel> ?? new List<ClientTableViewModel>()).Select(item => new Nomenclature { Id = item.Id, Name = $"{item.FullName} ({Localizer["Knik"]}: {item.Knik}) {Localizer["EgnBulstat"]}: {item.EgnBulstat}".Trim() });
+}
+<form method="post" class="dirty-check" action="@Url.ActionLink("Merge", "Clients")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @Html.Label("clientId", Localizer["Client"], new { @class = "required" })
+                        @(Html.Kendo().DropDownList()
+                            .Name("clientId")
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .Filter(FilterType.Contains)
+                            .BindTo(data))
+                        @Html.ValidationMessage("clientId")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn third right closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+    </div>
+</form>

@@ -1,0 +1,60 @@
+﻿@using Ais.Data.Models.Attachment
+@using Ais.Office.Controllers
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using Ais.Data.Models.Document
+@using Ais.WebUtilities.Extensions
+@using System.Text.RegularExpressions
+@inject IStringLocalizer Localizer
+@model List<Attachment>
+@{
+    string GetFileIconByName(string name)
+    {
+        var pattern = @"\.[a-z]+";
+        var match = Regex.Match(name ?? string.Empty, pattern);
+        var icon = match.Value switch
+        {
+            ".jpg" => "k-i-image",
+            ".jpeg" => "k-i-image",
+            ".pdf" => "k-i-pdf",
+            ".xml" => "k-i-file-programming",
+            ".xlsx" => "k-i-excel",
+            _ => "k-i-file"
+        };
+
+        return icon;
+    }
+    var firstFileCount = 20;
+    if (Model.IsNotNullOrEmpty())
+    {
+        var hasMoreAttachments = Model.Count > firstFileCount;
+        var collection = hasMoreAttachments ? Model.Take(firstFileCount).ToList() : Model;
+        foreach (var attachment in collection)
+        {
+            var fileIcon = GetFileIconByName(attachment.Name);
+            <div class="flex gap-5 elements uploadedFile align-center">
+                <i class="@fileIcon k-font-icon k-icon"></i>
+                <div class="fullwidth flex wrap gap-5 align-center">
+                    <span>@(attachment.Type?.Title?.ToString()) |</span>
+                    @{
+                        if (attachment.Description.IsNotNullOrEmpty())
+                        {
+                            <span class="word-break">@(attachment.Description)  |</span>
+                        }
+
+                        var downloadData = attachment.GetDownloadData();
+                        var downloadLink = downloadData != null
+                        ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                        : null;
+                        if (downloadLink.IsNotNullOrEmpty())
+                        {
+                            <a href="@downloadLink" class="simplelink filename" target="_blank">
+                                @(attachment.Name ?? Localizer["Download"])
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    }
+}

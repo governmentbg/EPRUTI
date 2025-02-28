@@ -1,0 +1,10 @@
+﻿@using Ais.Utilities.Extensions
+@model string
+@if (Model.IsNotNullOrEmpty())
+{
+    @(Html.Kendo().QRCode()
+        .Name("qrUrl")
+        .Value(Model)
+        .ErrorCorrection(QRErrorCorrectionLevel.Q)
+        .Size(300))
+}

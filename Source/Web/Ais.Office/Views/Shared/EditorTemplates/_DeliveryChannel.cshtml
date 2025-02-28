@@ -1,0 +1,24 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+@(Html.Kendo().DropDownList()
+    .Name(Guid.NewGuid().ToString())
+    .HtmlAttributes(attributes)
+    .DataTextField("Name")
+    .DataValueField("Id")
+    .OptionLabel(Localizer["ChooseChanel"].ToString())
+    .Events(ev => ev.Select("outdocuments.onChannelSelect"))
+    .DataSource(r => r.Read(x => x.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nreceivemethod", flag = 1 })))))

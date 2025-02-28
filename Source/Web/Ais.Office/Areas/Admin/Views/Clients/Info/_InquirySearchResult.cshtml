@@ -1,0 +1,46 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Office.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model string
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var downloadLink = Url.DynamicActionWithRightsCheck(nameof(AttachmentController.Download), typeof(AttachmentController));
+    var regNumName = nameof(Ais.Office.ViewModels.Inquiries.InquiryTableViewModel.RegNum);
+    var fileIdsName = nameof(Ais.Office.ViewModels.Inquiries.InquiryTableViewModel.FileIds);
+}
+@(Html.Kendo().Grid<Ais.Office.ViewModels.Inquiries.InquiryTableViewModel>()
+      .Name(Guid.NewGuid().ToString())
+      .Pageable()
+      .Sortable()
+      .Columns(
+          column =>
+          {
+              column.Bound(c => c.RegNum)
+                    .Title(Localizer["RegNum"])
+                    .ClientTemplate(
+                        downloadLink.IsNotNullOrEmpty()
+                            ? $"#if(data.{fileIdsName} && data.{fileIdsName}.length > 0){{#<a href=\"{downloadLink}?ids=#:{fileIdsName}.join('&ids=')#\" target='_blank'>#:{regNumName}#</a>#}}else{{# #:{regNumName}# #}}#"
+                            : $"#:{regNumName}#");
+              column.Bound(c => c.RegDate)
+                    .Format("{0:G}")
+                    .Title(Localizer["RegDate"]);
+              column.Bound(c => c.Inquiry)
+                    .Title(Localizer["Inquiry"]);
+              column.Bound(c => c.Object)
+                    .Title(Localizer["Object"]);
+              column.Bound(c => c.Status)
+                    .Title(Localizer["Status"]);
+              column.Bound(c => c.PaymentStatus)
+                    .Title(Localizer["PaymentStatus"]);
+          })
+      .HtmlAttributes(new { @class = "fullwidth" })
+      .Events(e => e.DataBound("searchTable.onGridDataBound"))
+      .DataSource(
+          dataSource => dataSource
+                        .Ajax()
+                        .PageSize(10)
+                        .Read(read => read.Url(Url.DynamicAction(nameof(ClientsController.ReadInquiries), typeof(ClientsController), new { key = Model }))))
+      .Deferred(deferred))

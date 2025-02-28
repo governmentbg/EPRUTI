@@ -1,0 +1,142 @@
+﻿@using System.Globalization
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
+@using Ais.Utilities.Extensions
+@using Breadcrumb = Ais.Data.Models.Breadcrumb;
+@inject IStringLocalizer Localizer
+@inject IConfiguration Configuration
+@{
+    var bodyClass = ViewBag.BodyClass as string ?? string.Empty;
+    var contentClass = ViewBag.ContentClass as string;
+    var isNotCenterContent = ViewBag.IsNotCenterContent is bool && (bool)ViewBag.IsNotCenterContent;
+    var scheme = Context.Request.Scheme;
+    var host = Context.Request.Host;
+    var culture = CultureInfo.CurrentCulture;
+    var path = $"{scheme}://{host}/{culture.TwoLetterISOLanguageName}/";
+    var area = ViewContext.RouteData.Values["area"];
+    var breadcrumbs = TempData.Get<IEnumerable<Breadcrumb>>("Breadcrumbs");
+    var title = breadcrumbs?.LastOrDefault()?.Title;
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+    if (title.IsNullOrEmpty())
+    {
+        title = Localizer["AISOfficeTitle"];
+    }
+}
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentCulture.ToString()" charset="UTF-8">
+<head>
+    <title>@title</title>
+    <meta name="Author" content="" />
+    <meta name="Keywords" content="" />
+    <meta name="Description" content="" />
+    <meta charset="utf-8" />
+
+    <!-- Favicons -->
+    <link rel="shortcut icon" href="~/images/favicon@(mrrbFlag ? "MRRB": null).png">
+
+    <!-- Responsiveness -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    @await RenderSectionAsync("BeforeStyles", required: false)
+
+    <!-- Common styles -->
+    <environment exclude="Development">
+        <link href="~/bundles/common.min.css" rel="stylesheet" asp-append-version="true" />
+    </environment>
+
+    <environment include="Development">
+        <link href="~/css/ais.css" rel="stylesheet" />
+        <link href="~/css/perfect-scrollbar.css" rel="stylesheet" />
+        <link href="~/css/owl.carousel.min.css" rel="stylesheet" />
+        <link href="~/css/magnific-popup.css" rel="stylesheet" />
+    </environment>
+
+    <link href="~/scss/style@(mrrbFlag ?  "-mrrb" : null).css" rel="stylesheet" />
+    <link href="~/css/style.custom@(mrrbFlag ? "-mrrb" : null).css" rel="stylesheet" />
+
+    <script>
+        var globalVariables = this;
+        var BaseUrl = '@path';
+        var area = '@area';
+    </script>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="@bodyClass">
+    <noscript> JavaScript is required in order to use this app </noscript>
+    @* Used for ajax requests - always present *@
+    <form id="__AjaxAntiForgeryForm" method="post"></form>
+    <div id="fixed-bgr"></div>
+    <div id="wrap">
+        <div id="main">
+            <input type="checkbox" id="respmenu" class="hidden" />
+            <div class="overlay"></div>
+            @if (!(ViewBag.DontRenderMenu is true))
+            {
+                @(await Component.InvokeAsync(typeof(Ais.Office.Components.HeaderViewComponent)))
+            }
+            <div class="clear"></div>
+            <div class="content @contentClass">
+                @{
+                    @await RenderSectionAsync("Breadcrumbs", false)
+                    if (isNotCenterContent)
+                    {
+                        @RenderBody()
+                    }
+                    else
+                    {
+                        <div class="content-pre-wrap">
+                            <div class="center">
+                                @RenderBody()
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <partial name="_Notifications" />
+
+    @if (bodyClass != "map")
+    {
+        <partial name="_Footer" />
+    }
+    <script src="~/bundles/jquery.min.js" asp-append-version="true"></script>
+    <!--[if lt IE 9]><script src="~/js/html5shiv.js"></script><![endif]-->
+    <script src="https://kendo.cdn.telerik.com/2024.2.514/js/kendo.all.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2024.2.514/js/kendo.aspnetmvc.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2024.2.514/js/cultures/kendo.culture.bg-BG.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2024.2.514/js/messages/kendo.messages.bg-BG.min.js"></script>
+    @if (culture.TwoLetterISOLanguageName.Equals("bg", StringComparison.InvariantCultureIgnoreCase))
+    {
+        <script src="~/bundles/kendo-custom-messages-bg.min.js" asp-append-version="true"></script>
+    }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.js"></script>
+    <script>
+        kendo.syncReady(function () { window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.2.2/pdf.worker.js'; });
+    </script>
+    @Html.RenderCustomScriptsBefore()
+    <script src="~/bundles/common.min.js" asp-append-version="true"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            sessionTimeOut({
+                keepAliveMethod: "POST",
+                keepAliveUrl: "@(Url.DynamicAction(nameof(HomeController.KeepAlive), typeof(HomeController)))",
+                message: '@Localizer["SessionTimeOutMessage"]',
+                stayConnectedBtnText: '@Localizer["SessionTimeOutStayConnectedButtonTitle"]',
+                cancelBtnText: '@Localizer["Cancel"]',
+                timeOutAfter: @(TimeSpan.FromMinutes(Configuration.GetValue<long>("Authentication:Expires")).TotalMilliseconds + 1000),
+                timeOutUrl: "@(Url.Content($"~/{culture.TwoLetterISOLanguageName}"))",
+                titleText: '@Localizer["SessionTimeOutTitle"]',
+                warnAfter: @(TimeSpan.FromMinutes(Configuration.GetValue<long>("Session:WarningTimeout")).TotalMilliseconds - 1000)
+                                    });
+        </script>
+    }
+    @Html.Kendo().DeferredScripts()
+    @await RenderSectionAsync("Scripts", required: false)
+    @Html.RenderCustomScripts()
+</body>
+</html>

@@ -1,0 +1,9 @@
+﻿@using Ais.Office.ViewModels.Application
+@model Ais.Data.Models.Document.OutDocument
+<div class="steps-body k-flex-column">
+@{
+    ViewBag.ApplicationUniqueId = Model.UniqueId;
+    await Html.RenderPartialAsync("~/Views/OutApplication/Applicant/_SearchClients.cshtml", new ClientQueryViewModel());
+    await Html.RenderPartialAsync("~/Views/OutApplication/Applicant/_Applicants.cshtml");
+}
+</div>

@@ -1,0 +1,16 @@
+﻿@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Address.Address
+@if (Model != null)
+{
+    <div class="fullwidth">
+        <div class="ib">
+            @Localizer["Email"]: <strong>@(Model.Email)</strong>
+        </div>
+        <div class="ib">@Localizer["Phone"]: <strong>@(Model.Phone)</strong></div>
+        <div class="bb">
+            @Localizer["Address"]:
+            <strong>@(Model.FullDescription)</strong>
+        </div>
+    </div>
+}

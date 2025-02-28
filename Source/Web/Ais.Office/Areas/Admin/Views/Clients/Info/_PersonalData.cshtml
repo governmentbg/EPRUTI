@@ -1,0 +1,83 @@
+﻿@using Ais.Data.Models.Helpers
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Client
+@inject IStringLocalizer Localizer;
+@model Ais.Data.Models.Client.Client
+@{
+    var isAgent = ViewBag.IsAgent is bool && (bool)ViewBag.IsAgent;
+    void RenderText(string value, string title = null, bool isDead = false)
+    {
+        if (value.IsNotNullOrEmpty())
+        {
+            <div class="ib">
+                <div>@(title.IsNotNullOrEmpty() ? $"{title}:" : string.Empty) <strong class="@(isDead ? "statusDead" : null)">@value</strong></div>
+            </div>
+        }
+    }
+    if (Model != null)
+    {
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @(isAgent ? Localizer["Representative"] : Localizer["PersonalData"])
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    @{
+                        RenderText(Model.Type?.Name, Localizer["Type"]);
+                        switch (Model.ClientType)
+                        {
+                            case ClientType.Physical:
+                            case ClientType.PhysicalWithBulstat:
+                                {
+                                    if (Model.ClientType == ClientType.Physical)
+                                    {
+                                        RenderText(Model.EgnBulstat, Model.IsLnch ? Localizer["Lnch"] : Localizer["Egn"], Model.IsDead);
+                                    }
+                                    else
+                                    {
+                                        RenderText(Model.EgnBulstat, Localizer["Bulstat"]);
+                                    }
+                                    RenderText(Model.IsLnch ? Localizer["Yes"] : Localizer["No"], Localizer["EgnBulstat"]);
+                                    RenderText(Model.FullName, Localizer["FullName"]);
+                                    RenderText(Model.FullNameLatin, Localizer["FullNameLatin"]);
+                                    break;
+                                }
+
+                            case ClientType.Legal:
+                                {
+                                    RenderText(Model.FullName, string.Empty);
+                                    RenderText(Model.EgnBulstat, Localizer["EgnBulstat"], Model.IsDead);
+                                    break;
+                                }
+
+                            case ClientType.ForeignPhysical:
+                                {
+                                    RenderText(Model.HomeCountry?.Name, Localizer["HomeCountry"]);
+                                    RenderText(Model.PlaceAbroad, Localizer["PlaceAbroad"]);
+                                    RenderText(Model.DateOfBirth?.ToString("d"), Localizer["DateOfBirth"]);
+                                    RenderText(Model.IdNumber, Localizer["IdNumber"]);
+                                    RenderText(Model.IdType, Localizer["IdType"]);
+                                    break;
+                                }
+
+                            case ClientType.ForeignLegal:
+                                {
+                                    RenderText(Model.FullName, Localizer["FullName"]);
+                                    RenderText(Model.HomeCountry?.Name, Localizer["HomeCountry"]);
+                                    RenderText(Model.PlaceAbroad, Localizer["PlaceAbroad"]);
+                                    RenderText(Model.RegisterType.Id == EnumHelper.GetRegisterTypeIdByType(ForeignLegalRegisterType.NameAndNumber) ? Localizer["RegisterTypeNameAndNumber"] : Localizer["RegisterTypeOtherData"], Localizer["RegisterType"]);
+                                    RenderText(Model.RegisterIdentifier, Localizer["RegisterIdentifier"]);
+                                    RenderText(Model.RegisterNumber, Localizer["RegisterNumber"]);
+                                    RenderText(Model.RegisterAdditionData, Localizer["RegisterAdditionData"]);
+                                    break;
+                                }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}

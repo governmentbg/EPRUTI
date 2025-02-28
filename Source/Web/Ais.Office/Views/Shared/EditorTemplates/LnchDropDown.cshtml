@@ -1,0 +1,25 @@
+﻿@using Ais.WebUtilities.Extensions;
+@using Ais.WebUtilities.Helpers;
+@using Microsoft.Extensions.Localization
+@model bool
+@inject IStringLocalizer Localizer;
+
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+
+@{
+    var editor = Html.Kendo().DropDownListFor(m => m)
+                     .BindTo(new List<SelectListItem> { new() { Text = this.Localizer["EGN"], Value = "false" }, new() { Text = this.Localizer["Lnch"], Value = "true" } });
+    editor.HtmlAttributes(attributes);
+    @editor.Deferred(!Context.Request.IsAjaxRequest())
+}

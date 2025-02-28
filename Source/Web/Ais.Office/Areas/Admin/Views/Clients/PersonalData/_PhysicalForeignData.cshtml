@@ -1,0 +1,48 @@
+﻿@using Ais.Office.ViewModels.Clients;
+@using Microsoft.Extensions.Localization
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@inject IStringLocalizer Localizer;
+@model ClientUpsertModel
+<div class="clientType-js foreignphysical-js" style="display: none;">
+    @{
+        ViewBag.RequiredFields = new List<string> { "FirstNamesLatin", "FamilyNamesLatin" };
+    }
+    <partial name="PersonalData/_Names" />
+    <div class="form-row">
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.HomeCountry, new { @class = "required" })
+            @(Html.Kendo().DropDownListFor(m => m.HomeCountry.Id)
+                .HtmlAttributes(new { id = Guid.NewGuid().ToString() })
+                .Filter(FilterType.Contains)
+                .OptionLabel(Localizer["Choose"].ToString())
+                .DataValueField("Id")
+                .DataTextField("Name")
+                .DataSource(d => d.Read(r => r.Action("GetCountries", "Address", new { area = string.Empty }))))
+            @Html.ValidationMessageFor(m => m.HomeCountry)
+        </div>
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.PlaceAbroad)
+            @Html.EditorFor(m => m.PlaceAbroad)
+            @Html.ValidationMessageFor(m => m.PlaceAbroad)
+        </div>
+
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.IdNumber)
+            @Html.EditorFor(m => m.IdNumber)
+            @Html.ValidationMessageFor(m => m.IdNumber)
+        </div>
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.IdType)
+            @Html.EditorFor(m => m.IdType)
+            @Html.ValidationMessageFor(m => m.IdType)
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.DateOfBirth, new { @class = "required" })
+            @Html.EditorFor(m => m.DateOfBirth)
+            @Html.ValidationMessageFor(m => m.DateOfBirth)
+        </div>
+        <partial name="PersonalData/_DeathData" />
+    </div>
+</div>

@@ -1,0 +1,48 @@
+﻿@using Ais.Data.Models.Document
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.Document
+@if (Model.AttachedDocuments.IsNotNullOrEmpty())
+{
+    var groups = Model.AttachedDocuments.GroupBy(item => item.EntryType);
+
+    void Render(string title, IGrouping<EntryType, Document> group)
+    {
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @title
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <ul>
+                    @{
+                        foreach (var document in group)
+                        {
+                            <li>@document.GetShortDescription()</li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+
+    foreach (var group in groups)
+    {
+        switch (group.Key)
+        {
+            case EntryType.InDocument:
+                {
+                    Render(Localizer["AttachedApplications"], group);
+                    break;
+                }
+
+            case EntryType.OutDocument:
+                {
+                    Render(Localizer["AttachedOutDocuments"], group);
+                    break;
+                }
+        }
+    }
+}

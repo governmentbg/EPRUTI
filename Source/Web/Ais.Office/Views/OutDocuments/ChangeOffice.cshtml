@@ -1,0 +1,83 @@
+﻿@using Ais.Office.Controllers.Documents
+@using Ais.Office.ViewModels.Documents.OutDocuments
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Nomenclature
+@inject IStringLocalizer Localizer;
+@model OutDocsOfficesUpdateViewModel
+@{
+    var offices = ViewBag.Offices as List<Nomenclature>;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+<form action="@Url.ActionLink(nameof(OutDocumentsController.ChangeOffice), "OutDocuments")"
+      data-ajax="true"
+      data-ajax-success="core.onKendoWindowSuccessCallback"
+      data-ajax-method="POST">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">@Localizer["BasicData"]</h3>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input column">
+                        @Html.LabelFor(m => m.SendingOffice)
+                        @(Html.Kendo().DropDownListFor(m => m.SendingOffice.Id)
+                            .BindTo(offices)
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .Filter(FilterType.Contains)
+                            .Deferred(deferred))
+                        @Html.ValidationMessageFor(m => m.SendingOffice)
+                    </div>
+                    <div class="form-input column">
+                        @Html.LabelFor(m => m.SendingEmployee)
+                        @(Html.Kendo().DropDownListFor(m => m.SendingEmployee.Id)
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .CascadeFrom("SendingOffice_Id")
+                            .CascadeFromField("officeId")
+                            .DataSource(d => d.Read(r => r.Action(nameof(OutDocumentsController.GetsEmployeesByOffice), "OutDocuments").Data("core.filterData")).ServerFiltering(true))
+                            .Filter(FilterType.Contains)
+                            .Deferred(deferred))
+                    </div>
+                    <div class="form-input column">
+                        @Html.LabelFor(m => m.ConfirmOffice)
+                        @(Html.Kendo().DropDownListFor(m => m.ConfirmOffice.Id)
+                            .BindTo(offices)
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .Filter(FilterType.Contains)
+                            .Deferred(deferred))
+                        @Html.ValidationMessageFor(m => m.ConfirmOffice)
+                    </div>
+                    <div class="form-input column">
+                        @Html.LabelFor(m => m.ConfirmEmployee)
+                        @(Html.Kendo().DropDownListFor(m => m.ConfirmEmployee.Id)
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .CascadeFrom("ConfirmOffice_Id")
+                            .CascadeFromField("officeId")
+                            .DataSource(d => d.Read(r => r.Action(nameof(OutDocumentsController.GetsEmployeesByOffice), "OutDocuments").Data("core.filterData")).ServerFiltering(true))
+                            .Filter(FilterType.Contains)
+                            .Deferred(deferred))
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

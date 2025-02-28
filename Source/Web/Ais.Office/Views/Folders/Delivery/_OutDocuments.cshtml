@@ -1,0 +1,46 @@
+﻿@using Ais.Office.ViewModels.Folders
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var key = ViewBag.Key as string;
+    var downloadUrl = Url.DynamicActionWithRightsCheck(nameof(FoldersController.Download), typeof(FoldersController), new { key = key });
+    var downloadAllOutDocumentsUrl = Url.DynamicActionWithRightsCheck(nameof(FoldersController.DownloadAllOutDocuments), typeof(FoldersController), new { key = key });
+}
+<div class="steps-body">
+    <div class="step-box fullwidth">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["OutDocuments"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            @(
+            Html.Kendo().Grid<FolderTreeItemViewModel>()
+                .Name(Guid.NewGuid().ToString())
+                .ToolBar(
+                    t =>
+                    {
+                        t.Spacer();
+                        t.Custom()
+                         .ClientTemplate($"<a href='{downloadAllOutDocumentsUrl}' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base k-icon-button k-toolbar-button k-toolbar-tool' type='button' role='button' target='_blank'><span class='k-icon k-font-icon k-i-download k-button-icon'></span></a>");
+                    })
+                .Columns(
+                    c =>
+                    {
+                        c.Bound(m => m.Title)
+                         .Title(Localizer["Title"]);
+                        c.Template($"#if(FileId || HasFiles == true){{#<a href='{downloadUrl}&id=#=Id#' class='k-button k-button-md k-rounded-md k-button-solid k-button-solid-base k-icon-button k-toolbar-button k-toolbar-tool' type='button' role='button' target='_blank'><span class='k-icon k-font-icon k-i-download k-button-icon'></span></a>#}}#")
+                         .Title(Localizer["File"])
+                         .Width(60);
+                    })
+                .Filterable()
+                .Sortable()
+                .Width("auto")
+                .Events(e => e.DataBound("searchTable.onGridDataBound"))
+                .DataSource(d => d.Ajax().Read(x => x.Action("ReadDeliverOutDocuments", "Folders", new { key = key })))
+                .Deferred(deferred))
+        </div>
+    </div>
+</div>

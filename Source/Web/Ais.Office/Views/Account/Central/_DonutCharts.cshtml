@@ -1,0 +1,175 @@
+﻿@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Account.DonutChartsDataCentral
+<div class="chart-horizontal-item">
+    <div class="relative left">
+        @(Html.Kendo()
+            .Chart()
+            .Name("registered-applications")
+            .Legend(x => x.Visible(false))
+            .SeriesDefaults(x => x.Donut().Overlay(s => s.Gradient(ChartSeriesGradient.None)))
+            .Series(
+                s =>
+                {
+                    s.Donut(
+                         new dynamic[]
+                         {
+                             new { value = Model.RegIndocOfficeCount, color = "#e5f4ef", category = Localizer["RegIndocOfficeCount"].ToString() },
+                             new { value = Model.RegIndocPortalCount, color = "#caeaf8", category = Localizer["RegIndocPortalCount"].ToString() },
+                             new { value = Model.RegIndocOzlCount, color = "#c5d6fe", category = Localizer["RegIndocOzlCount"].ToString() }
+                         })
+                     .HoleSize(50)
+                     .AutoFit(true)
+                     .StartAngle(90)
+                     .Name("registered-applications-donut");
+                })
+            .Tooltip(x => x.Visible(true).Template("#=value# - #=category#")))
+    </div>
+    <div class="column-wrap">
+        <div class="column flex">
+            <div class="oval ib" style=" background: #e5f4ef">@Model.RegIndocOfficeCount</div>
+            <div class="ib">@Localizer["RegIndocOfficeCount"]</div>
+        </div>
+        <div class="column flex ">
+            <div class="oval ib" style="background: #caeaf8">@Model.RegIndocPortalCount</div>
+            <div class="ib">@Localizer["RegIndocPortalCount"]</div>
+        </div>
+        <div class="column flex ">
+            <div class="oval " style=" background: #c5d6fe">@Model.RegIndocOzlCount</div>
+            <div class="ib">@Localizer["RegIndocOzlCount"]</div>
+        </div>
+
+    </div>
+</div>
+<div class="chart-horizontal-item">
+    <div class="relative left">
+        <div class="relative left">
+            @(Html.Kendo()
+                .Chart()
+                .Name("registered-services")
+                .Legend(x => x.Visible(false))
+                .SeriesDefaults(x => x.Donut().Overlay(s => s.Gradient(ChartSeriesGradient.None)))
+                .Series(
+                    s =>
+                    {
+                        s.Donut(
+                             new dynamic[]
+                             {
+                                 new { value = Model.RegServiceOfficeCount, color = "#e5f4ef", category = Localizer["RegServiceOfficeCount"].ToString() },
+                                 new { value = Model.RegServicePortalCount, color = "#caeaf8", category = Localizer["RegServicePortalCount"].ToString() },
+                                 new { value = Model.RegServiceOzlCount, color = "#c5d6fe", category = Localizer["RegServiceOzlCount"].ToString() }
+                             })
+                         .HoleSize(50)
+                         .AutoFit(true)
+                         .StartAngle(90)
+                         .Name("registered-services-donut");
+                    })
+                .Tooltip(x => x.Visible(true).Template("#=value# - #=category#")))
+        </div>
+        <div class="column-wrap">
+            <div class="column flex">
+                <div class="oval ib" style=" background: #e5f4ef">@Model.RegServiceOfficeCount</div>
+                <div class="ib">@Localizer["RegServiceOfficeCount"]</div>
+            </div>
+            <div class="column flex ">
+                <div class="oval ib" style="  background: #caeaf8">@Model.RegServicePortalCount</div>
+                <div class="ib"> @Localizer["RegServicePortalCount"]</div>
+            </div>
+            <div class="column flex ">
+                <div class="oval " style=" background: #c5d6fe">@Model.RegServiceOzlCount</div>
+                <div class="ib">@Localizer["RegServiceOzlCount"]</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="chart-horizontal-item">
+    <div class="relative left">
+        <div class="relative left">
+            @(Html.Kendo()
+                .Chart()
+                .Name("delivered-applications")
+                .Legend(x => x.Visible(false))
+                .SeriesDefaults(x => x.Donut().Overlay(s => s.Gradient(ChartSeriesGradient.None)))
+                .Series(
+                    s =>
+                    {
+                        s.Donut(
+                             new dynamic[]
+                             {
+                                 new { value = Model.DeliverIndocOfficeCount, color = "#009060", category = Localizer["DeliverIndocOfficeCount"].ToString() },
+                                 new { value = Model.DeliverIndocPortalCount, color = "#37d581", category = Localizer["DeliverIndocPortalCount"].ToString() },
+                                 new { value = Model.AddDocIndocCount, color = "#febf21", category = Localizer["AddDocIndocCount"].ToString() },
+                                 new { value = Model.CorrectionIndocCount, color = "#fd7272", category = Localizer["CorrectionIndocCount"].ToString() },
+                                 new { value = Model.RefuseIndocCount, color = "#da6bf3", category = Localizer["RefuseIndocCount"].ToString() }
+                             })
+                         .HoleSize(50)
+                         .AutoFit(true)
+                         .StartAngle(90)
+                         .Name("delivered-applications-donut");
+                    })
+                .Tooltip(x => x.Visible(true).Template("#=value# - #=category#")))
+        </div>
+        <div class="column-wrap">
+            <div class="column flex">
+                <div class="oval ib" style="background: #009060">@Model.DeliverIndocOfficeCount</div>
+                <div class="ib">@Localizer["DeliverIndocOfficeCount"] </div>
+            </div>
+            <div class="column flex ">
+                <div class="oval ib" style="background: #37d581">@Model.DeliverIndocPortalCount</div>
+                <div>@Localizer["DeliverIndocPortalCount"]</div>
+            </div>
+            <div class="column flex">
+                <div class="oval " style="background: #febf21">@Model.AddDocIndocCount</div>
+                <div>@Localizer["AddDocIndocCount"]</div>
+            </div>
+            <div class="column flex">
+                <div class="oval ib" style="background: #fd7272">@Model.CorrectionIndocCount</div>
+                <div class="ib">@Localizer["CorrectionIndocCount"] </div>
+            </div>
+            <div class="column flex ">
+                <div class="oval " style="background: #da6bf3">@Model.RefuseIndocCount</div>
+                <div>@Localizer["RefuseIndocCount"]</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="chart-horizontal-item">
+    <div class="relative left">
+        @(
+        Html.Kendo()
+            .Chart()
+            .Name("destributed-tasks")
+            .Legend(x => x.Visible(false))
+            .SeriesDefaults(x => x.Donut().Overlay(s => s.Gradient(ChartSeriesGradient.None)))
+            .Series(
+                s =>
+                {
+                    s.Donut(
+                         new dynamic[]
+                         {
+                             new { value = Model.DistributeTaskCount, color = "#b7f9fa", category = Localizer["DistributeTaskCount"].ToString() },
+                             new { value = Model.InProgressTaskCount, color = "#b7fae3", category = Localizer["InProgressTaskCount"].ToString() },
+                             new { value = Model.FinishTaskCount, color = "#CDDFA0", category = Localizer["FinishTaskCount"].ToString() }
+                         })
+                     .HoleSize(50)
+                     .AutoFit(true)
+                     .StartAngle(90)
+                     .Name("destributed-tasks-donut");
+                })
+            .Tooltip(x => x.Visible(true).Template("#=value# - #=category#")))
+    </div>
+    <div class="column-wrap">
+        <div class="column flex">
+            <div class="oval ib" style="background: #b7f9fa">@Model.DistributeTaskCount</div>
+            <div class="ib">@Localizer["DistributeTaskCount"]</div>
+        </div>
+        <div class="column flex ">
+            <div class="oval ib" style="background: #b7fae3">@Model.InProgressTaskCount</div>
+            <div class="ib">@Localizer["InProgressTaskCount"]</div>
+        </div>
+        <div class="column flex ">
+            <div class="oval ib" style=" background: #CDDFA0">@Model.FinishTaskCount</div>
+            <div class="ib">@Localizer["FinishTaskCount"] </div>
+        </div>
+    </div>
+</div>

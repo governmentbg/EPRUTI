@@ -1,0 +1,17 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var controllerType = typeof(ClientRolesController);
+    if (this.Url.HasRightsToAction("Create", controllerType))
+    {
+        <div class="form-input autosize additional-buttons">
+            <label class="empty"></label>
+           <a class="bttn bttn-icon add-role-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Create"]">
+                   <i class="k-i-plus k-icon k-font-icon"></i>
+            </a>
+         </div>
+    }
+}

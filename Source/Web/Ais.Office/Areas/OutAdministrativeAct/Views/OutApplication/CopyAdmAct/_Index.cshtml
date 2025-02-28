@@ -1,0 +1,38 @@
+﻿@using Ais.Data.Models.AdmActAttachment
+@using Ais.Data.Models.Attachment
+@using Ais.Data.Models.Document
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model OutAdmAct
+
+@{
+    <div class="steps-body k-flex-column">
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    Вид на документа:
+                </h3>
+            </div>
+            <div class="step-box-body">
+                Вид на административния акт: @Model?.Type?.Name
+            </div>
+        </div>
+        @if (Model.AttachmentGroups != null)
+        {
+            @foreach (var group in Model.AttachmentGroups)
+            {
+                ViewBag.Group = group as AttachmentGroup;
+                <div class="step-box">
+                    <div class="step-box-head">
+                        <h3 class="step-box-title fullwidth">
+                            @(group?.Name)
+                        </h3>
+                    </div>
+                    <div class="step-box-body">
+                        @await Html.PartialAsync("Attachment/_Index", Model)
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}

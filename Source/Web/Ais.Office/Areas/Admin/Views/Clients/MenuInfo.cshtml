@@ -1,0 +1,49 @@
+﻿@using Ais.Office.Areas.Admin.Controllers;
+@using Ais.Office.Controllers.Documents;
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@model Guid
+@inject IStringLocalizer Localizer
+@{
+    var amount = ViewBag.Amount is decimal v ? v : 0;
+    var id = Guid.NewGuid().ToString();
+}
+@(Html.Kendo().TabStrip()
+     .Name(id)
+     .SelectedIndex(0)
+     .Items(
+         tabstrip =>
+          {
+              tabstrip.Add()
+                      .Text(Localizer["UserInfo"])
+                      .LoadContentFrom(Url.DynamicAction(nameof(ClientsController.Info), typeof(ClientsController), new { id = Model }));
+              tabstrip.Add()
+                      .Text(Localizer["ClientDocuments"])
+                      .LoadContentFrom(Url.DynamicAction(nameof(ClientAttachmentsController.Index), typeof(ClientAttachmentsController), new { ClientId = Model }));
+              tabstrip.Add()
+                      .Text(Localizer["OutDocuments"])
+                      .LoadContentFrom(Url.DynamicAction(nameof(OutDocumentsController.Index), typeof(OutDocumentsController), new { ClientId = Model, RegDateFrom = DateTime.Now.ToString("d"), RegDateTo = DateTime.Now.ToString("d") }));
+              tabstrip.Add()
+                      .Text(Localizer["Inquiries"])
+                      .LoadContentFrom(Url.DynamicAction(nameof(ClientsController.Inquiries), typeof(ClientsController), new { ClientId = Model, RegDateFrom = DateTime.Now.AddDays(-7).ToString("d"), RegDateTo = DateTime.Now.ToString("d") }));
+              tabstrip.Add()
+                      .Text(Localizer["CreditNotices"])
+                      .LoadContentFrom(Url.DynamicAction(nameof(ClientsController.CreditNotices), typeof(ClientsController), new { ClientId = Model, RegDateFrom = DateTime.Now.AddDays(-7).ToString("d"), RegDateTo = DateTime.Now.ToString("d") }));
+              tabstrip.Add()
+                      .Text(Localizer["Roles"])
+                      .LoadContentFrom(Url.DynamicAction(nameof(ClientsController.Roles), typeof(ClientsController), new { clientId = Model }));
+          }))
+
+<button class="bttn right third closeKendoWindow-js">
+    @Localizer["Close"]
+</button>
+
+<script>
+    $(document).ready(function () {
+        var titleElement = $("#@id").closest(".k-window").find(".k-window-title:first");
+        if (titleElement && titleElement.length == 1) {
+            titleElement.html(titleElement.text() + ' @(Localizer["AmountOnAccount"]):<span class="k-ml-1 @(amount < 0 ? "badge-danger" : "")">@(amount.ToString("c2"))</span>');
+        }
+    });
+</script>

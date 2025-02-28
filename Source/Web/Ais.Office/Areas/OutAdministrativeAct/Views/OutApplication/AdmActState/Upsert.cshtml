@@ -1,0 +1,28 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Kendo.Mvc.TagHelpers
+@using OutApplicationController = Ais.Office.Areas.OutAdministrativeAct.Controllers.OutApplicationController
+@model Ais.Data.Models.Document.OutAdmAct
+@inject IStringLocalizer Localizer;
+<form id="AdmActStateForm" class="dirty-check" action="@Url.DynamicAction(nameof(OutApplicationController.AdmActStateUpsertPost), typeof(OutApplicationController))"
+      data-ajax="true"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    <div>
+        @{
+            await Html.RenderPartialAsync("AdmActState/_State", Model);
+        }
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn  third  right clear-grid-data closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

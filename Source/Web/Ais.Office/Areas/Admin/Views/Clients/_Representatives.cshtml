@@ -1,0 +1,82 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.Office.ViewModels.Application
+@using Microsoft.Extensions.Localization
+@using AgentViewModel = Ais.Office.ViewModels.Clients.AgentViewModel
+@model Ais.Office.ViewModels.Clients.ClientUpsertModel
+@{
+    var representativeKey = ViewBag.RepresentativesKey as string;
+}
+<div class="step-box fullwidth">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["Representatives"]
+        </h3>
+    </div>
+    <div class="step-box-body">
+        @{
+            ViewBag.Client = Model;
+            await Html.RenderPartialAsync("_SearchAgents", new ClientQueryViewModel());
+        }
+        @Html.HiddenFor(m => m.UserId)
+        @(Html.Kendo().Grid<AgentViewModel>()
+            .Name("RepresentativesGrid")
+            .HtmlAttributes(new { data_clientid = Model?.UniqueId, @class = "withoutpager k-mt-2" })
+            .Pageable()
+            .Columns(
+                column =>
+                {
+                    column.Bound(c => c.FullName)
+                          .Title(Localizer["Name"])
+                          .ClientTemplate(
+                              "# var representativesIndex = kendo.guid(); #" +
+                              "<input type='hidden' name='Representatives.Index' value='#= representativesIndex #' />" +
+                              "<input type='hidden' name='Representatives[#= representativesIndex #].Id' value='#: Id #' />" +
+                              "<span> #: FullName # </span>");
+                    column.Bound(c => c.EgnBulstat)
+                          .Title(Localizer["EgnBulstat"])
+                          .ClientTemplate("#:EgnBulstat ? EgnBulstat : ''#");
+                    column.Bound(c => c.StatusName)
+                          .Title(Localizer["Status"]);
+                    column.Bound(c => c.QualityType)
+                          .Title(Localizer["Quality"]);
+                    column.Bound(c => c.QualityPowerOfAttorneyFile)
+                          .Title(Localizer["PowerOfAttorney"])
+                          .ClientTemplate(
+                              "#var url = core.GetFileUrl(data[\"QualityPowerOfAttorneyFile\"]);#" +
+                              $"#if(url){{# <a href='#:url#'>#:QualityPowerOfAttorneyFile.Name ? QualityPowerOfAttorneyFile.Name : '{Localizer["Download"]}'#</a> #}}#");
+                    column.Bound(c => c.QualityPowerOfAttorneyDenialFile).Title(Localizer["DenialPowerOfAttorney"])
+                          .ClientTemplate(
+                              "#var url = core.GetFileUrl(data[\"QualityPowerOfAttorneyDenialFile\"]);#" +
+                              $"#if(url){{# <a href='#:url#'>#:QualityPowerOfAttorneyDenialFile.Name ? QualityPowerOfAttorneyDenialFile.Name : '{Localizer["Download"]}'#</a> #}}#");
+                    column.Bound(c => c.QualityPowerOfAttorneyRegNumber)
+                          .Title(Localizer["PowerOfAttorneyRegNumber"]);
+                    column.Bound(c => c.QualityPowerOfAttorneyNotaryNumber)
+                          .Title(Localizer["NotaryNumber"]);
+                    column.Bound(c => c.QualityPowerOfAttorneyRegDate)
+                          .Title(Localizer["DateOfRegNumber"]);
+                    column.Bound(c => c.QualityPowerOfAttorneyEndDate)
+                          .Title(Localizer["PowerOfAttorneyEndDate"])
+                          .ClientTemplate(
+                              " #if(data.QualityPowerOfAttorneyIsExpired){#" +
+                              " <span class='red'>#: data.QualityPowerOfAttorneyEndDate #</span> " +
+                              "# } else {# <span>#: data.QualityPowerOfAttorneyEndDate ? data.QualityPowerOfAttorneyEndDate : '' #</span> #}#");
+                    column.Bound(c => c.QualityPowerOfAttorneyComment)
+                          .Title(Localizer["Comment"]);
+                    column.Template(
+                              "<div class='flex'>" +
+                              $"<a href='\\#' class='k-button k-small edit-representative-js' data-clientuniqueid='{Model.UniqueId}'> <span class='k-i-pencil k-icon k-font-icon k-button-icon'></span> </a>" +
+                              "<a href='\\#' class='k-button k-small remove-representative-js'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a>" +
+                              "</div>")
+                          .Title(Localizer["Actions"]);
+                })
+            .Events(e => e.DataBound("searchTable.onGridDataBound"))
+            .DataSource(
+                d =>
+                    d.Ajax()
+                     .Read(
+                         r =>
+                             r.Action("ReadRepresentatives", "Clients", new { key = representativeKey }))
+                     .PageSize(10)))
+        @Html.ValidationMessageFor(m => m.Representatives)
+    </div>
+</div>

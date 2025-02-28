@@ -1,0 +1,76 @@
+﻿@using Ais.Office.ViewModels.Cms
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+
+@section Scripts
+{
+    <script src="~/bundles/cms.min.js" asp-append-version="true"></script>
+}
+
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+
+<script type="text/x-kendo-template" id="pageTitleTemplate">
+    <span class="k-icon k-font-icon #: cms.getPageVisibilityTypeIcon(Visibility) #"></span>
+    <span class="k-icon k-font-icon #: cms.getPageTypeIcon(PageType) #"></span>
+    #: Title #
+</script>
+
+<script type="text/x-kendo-template" id="pageToolbarTemplate">
+    <div class="flex gap-5 k-p-2">
+        <span class="k-textbox k-grid-search fg-1">
+            <input type="text" autocomplete="off" placeholder="@($"{Localizer["Search"]}...")" title="@($"{Localizer["Search"]}...")">
+        </span>
+        <button class="bttn bttn-icon blue" ><svg class="icon"><use xlink:href="\\#icon-search"></use></svg></button>
+        <a href="@Url.Action("Upsert")" title="@Localizer["Create"]" class="k-button k-small">
+            <span class="k-i-plus k-icon k-font-icon k-button-icon"></span>
+        </a>
+    </div>
+</script>
+
+<script type="text/x-kendo-template" id="pageMenuColumnTemplate">
+    <div class="flex k-pt-1">
+        <a href="@Url.Action("Upsert")?id=#: Id #" title="@Localizer["Edit"]" class="k-small k-button">
+            <span class="k-i-edit k-icon k-font-icon k-button-icon"></span>
+        </a>
+
+        <a href="\\#" tittle="@Localizer["Remove"]"  class="k-small k-button page-remove-js">
+            <span class="k-i-delete k-icon k-font-icon k-button-icon"></span>
+        </a>
+
+        <a href="\\#" title="@Localizer["CopyLink"]"  class="k-small k-button copy-link-js">
+            <span class="k-i-copy k-icon k-font-icon k-button-icon"></span>
+        </a>
+
+        <a href="@Url.Action("Upsert")?parentId=#: Id #" title="@($"{Localizer["Add"]} {Localizer["Subpage"].ToString().ToLower()}")"  class="k-small k-button">
+            <span class="k-i-file-add k-icon k-font-icon k-button-icon"></span>
+        </a>
+    </div>
+</script>
+
+<div class="center">
+    @(Html.Kendo().TreeList<PageViewModel>()
+        .Name("pages")
+        .HtmlAttributes(new { @class = "overwrite-table pages" })
+        .Columns(columns =>
+        {
+            columns.Add().Field(f => f.Title).Title(Localizer["Page"]).TemplateId("pageTitleTemplate");
+            columns.Add().TemplateId("pageMenuColumnTemplate").Width(145);
+        })
+        .Editable(editable => editable.Move(move => move.Reorderable(true)))
+        .Events(e => e.Drop("cms.onDrop"))
+        .DataSource(d => d.Read("ReadAllPages", "Cms")
+        .ServerOperation(false)
+        .Model(m =>
+        {
+            m.Id(f => f.DbId);
+            m.ParentId(f => f.ParentDbId).Nullable(true);
+            m.Expanded(true);
+        }))
+        .Deferred())
+</div>

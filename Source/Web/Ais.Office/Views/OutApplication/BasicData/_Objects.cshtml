@@ -1,0 +1,12 @@
+﻿@using Ais.Data.Models.Service.Object;
+@using Ais.Utilities.Extensions
+@model IEnumerable<IServiceObject>
+@{
+    if (Model.IsNotNullOrEmpty())
+    {
+        foreach (var service in Model)
+        {
+            await Html.RenderPartialAsync("BasicData/_Object", service);
+        }
+    }
+}

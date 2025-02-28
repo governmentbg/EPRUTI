@@ -1,0 +1,87 @@
+﻿@using Ais.Office.Utilities.Helpers;
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions;
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Document
+@using Ais.Infrastructure.Roles
+@model List<Ais.Data.Models.ApplicationType.ApplicationType>
+@inject IStringLocalizer Localizer
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+@{
+    ViewBag.IsNotCenterContent = true;
+    var groups = Model?.Where(item => item.IsVisibleInOffice)?.GroupBy(item => item.EntryType).ToDictionary(item => item.Key, item => item);    
+}
+
+<section class="center">
+    <div class="steps-body">
+        <div class="column-wrap charts-wrap flex-gap-20">
+            @{
+                if (groups.ContainsKey(EntryType.InDocument) && groups[EntryType.InDocument].IsNotNullOrEmpty())
+                {
+                    <div class="column left">
+                        <div class="step-box">
+                            <div class="step-box-head">
+                                <h3 class="step-box-title">@Localizer["InDocuments"]</h3>
+                            </div>
+                            <div class="step-box-body">
+                                @{
+                                    <div class="center">
+                                        <ul class="docs">
+                                            @foreach (var type in groups[EntryType.InDocument].OrderBy(item => item.RegisterIndex.Name))
+                                            {
+                                                <li>
+                                                    @*  TODO - link to redirect is not valid *@
+                                                    @if (User.IsInRole(UserRolesConstants.RegistrationDocIndexation))
+                                                    {
+                                                        <div class="@($"oval ib indx indx{type.RegisterIndex.Name}")">@type.RegisterIndex.Name</div>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                                @{
+                                    await Html.RenderPartialAsync("~/Views/Application/_LoadApplication.cshtml");
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                if (groups.ContainsKey(EntryType.OutDocument) && groups[EntryType.OutDocument].IsNotNullOrEmpty())
+                {
+                    <div class="column">
+                        <div class="step-box ">
+                            <div class="step-box-head">
+                                <h3 class="step-box-title">@Localizer["OutDocuments"]</h3>
+                            </div>
+                            <div class="step-box-body">
+                                <div class="center">
+                                    <ul class="docs">
+                                        <dli>
+                                            @foreach (var type in groups[EntryType.OutDocument].OrderBy(item => item.RegisterIndex.Name))
+                                            {
+                                                <li>
+                                                    @*  TODO - link to redirect is not valid *@
+                                                    @if (User.IsInRole(UserRolesConstants.RegistrationDocIndexation))
+                                                    {
+                                                    <div class="@($"oval ib indx indx{type.RegisterIndex.Name}")">@type.RegisterIndex.Name</div>
+                                                    }
+                                                <div class="name"> <a href="@Url.Action("Index", "OutApplication", new { type = type.Id, name = type.Name, groupType = type.DocGroupTypeId })" title="@type.Name">@type.ShortNames</a></div>
+                                            </li>
+                                            }
+                                        </dli>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>

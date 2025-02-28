@@ -1,0 +1,232 @@
+﻿@using Ais.Office.Utilities.Extensions;
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using Ais.Office.Components
+@using Ais.Infrastructure.Localization
+@inject IStringLocalizer Localizer;
+@model IEnumerable<Ais.Office.ViewModels.Menu.MenuItem>
+<header>
+    <div class="header-bottom">
+        <div class="center">
+            <label id="respbtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <nav id="mainMenu">
+                <ul>
+                    <li class="home">
+                        <a href="@Url.Content($"~/{System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName}")">
+                            <svg class="icon">
+                                <use xlink:href="#icon-categories"></use>
+                            </svg>
+                            <span>@Localizer["Home"]</span>
+                        </a>
+                    </li>
+                    @if (Model.IsNotNullOrEmpty())
+                    {
+                        foreach (var item in Model)
+                        {
+                            RenderMenuItem(item);
+                        }
+                    }
+                    <li class="threedots dropdown hidden">
+                        <a></a>
+                        <ul id="threedots"></ul>
+                    </li>
+                </ul>
+                <div class="right user-container">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="right">
+                            <a class="user">
+                                <svg class="icon">
+                                    <use xlink:href="#icon-profile"></use>
+                                </svg>
+                                <span>
+                                    @{
+                                        var employee = User.AsEmployee();
+                                    }
+                                    @(employee.Fullname)
+                                </span>
+                                <svg class="icon arrow">
+                                    <use xlink:href="#icon-arrowdown"></use>
+                                </svg>
+                            </a>
+                            <ul>
+                                <li class="personal-data">
+                                    <p class="restriction">
+                                        @{
+                                            var office = employee.GetOffice()?.Name;
+                                        }
+                                        @($"{employee.Fullname}{(office.IsNotNullOrEmpty() ? $"({office})" : string.Empty)}".Trim())
+                                    </p>
+                                    <div class="fonts-wrap k-mr-3">
+                                        <a id="resetFont" title="@Localizer["DefaultTextSize"]" data="normal">A</a>
+                                        <a id="upFont" title="@Localizer["IncreaseTextSize"]" class="js-trigger-text">A+</a>
+                                    </div>
+                                </li>
+                                @{
+                                    var link = Url.DynamicActionWithRightsCheck(nameof(AccountController.DashOffice), typeof(AccountController));
+                                    if (link.IsNotNullOrEmpty())
+                                    {
+                                        <li>
+                                            <a href="@link" title="@Localizer["DashOffice"]"><span>@Localizer["DashOffice"]</span></a>
+                                        </li>
+                                    }
+
+                                    link = Url.DynamicActionWithRightsCheck("DashCentral", typeof(AccountController));
+                                    if (link.IsNotNullOrEmpty())
+                                    {
+                                        <li>
+                                            <a href="@link" title="@Localizer["DashCentral"]"><span>@Localizer["DashCentral"]</span></a>
+                                        </li>
+                                    }
+
+                                    link = Url.DynamicActionWithRightsCheck(nameof(AuthenticationController.QRCode), typeof(AuthenticationController));
+                                    if (link.IsNotNullOrEmpty())
+                                    {
+                                        <li>
+                                            <a href="@link" class="js-trigger-popup" title="@Localizer["QRCode"]"><span>@Localizer["QRCode"]</span></a>
+                                        </li>
+                                    }
+
+                                    link = Url.DynamicActionWithRightsCheck(nameof(AccountController.ChangePassword), typeof(AccountController));
+                                    if (link.IsNotNullOrEmpty())
+                                    {
+                                        <li>
+                                            <a href="@link" class="js-trigger-popup" title="@Localizer["ChangePassword"]"><span>@Localizer["ChangePassword"]</span></a>
+                                        </li>
+                                    }
+
+                                    link = Url.DynamicActionWithRightsCheck(nameof(AuthenticationController.Logout), typeof(AuthenticationController));
+                                    if (link.IsNotNullOrEmpty())
+                                    {
+                                        <li>
+                                            <a href="@link" title="@Localizer["Exit"]"><span>@Localizer["Exit"]</span></a>
+                                        </li>
+                                    }
+
+                                    var isDebug = Context.Request.Cookies.ContainsKey(DbStringLocalizerFactory.DebugKey);
+                                    link = Url.DynamicActionWithRightsCheck(nameof(ResourcesController.Debug), typeof(ResourcesController), new { enable = !isDebug });
+                                    var label = isDebug ? Localizer["DisableDebugResource"] : Localizer["EnableDebugResource"];
+                                    if (link.IsNotNullOrEmpty())
+                                    {
+                                        <li>
+                                            <a href="@link" data-ajax="true" data-ajax-method="POST" data-ajax-success="core.clearCache" title="@label">
+                                                <span>@label</span>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    link = Url.DynamicActionWithRightsCheck(nameof(HomeController.ClearCache), typeof(HomeController));
+                                    if (link.IsNotNullOrEmpty())
+                                    {
+                                        <li>
+                                            <a href="@link" data-ajax="true" data-ajax-method="POST" data-ajax-success="core.clearCache" title="@Localizer["ClearCache"]">
+                                                <span> @Localizer["ClearCache"]</span>
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </nav>
+            <div class="clear"></div>
+        </div>
+    </div>
+    <div class="header-bottom-submenu">
+        @{
+            var active = Model?.FirstOrDefault(x => x.IsActive);
+            if (active?.Children.IsNotNullOrEmpty() == true)
+            {
+                <div class="center">
+                    <nav id="submenu">
+                        <ul>
+                            @foreach (var item in active.Children)
+                            {
+                                RenderMenuItem(item);
+                            }
+                        </ul>
+                        <div class="clear"></div>
+                    </nav>
+                </div>
+            }
+        }
+    </div>
+</header>
+<div class="responsivenav">
+    <label id="respclose"><div><span></span><span></span></div></label>
+    <nav class="ps">
+        <ul>
+            <li class="home">
+                <a href="">
+                    <svg class="icon"><use xlink:href="#icon-categories"></use></svg>
+                    <span>@Localizer["Home"]</span>
+                </a>
+            </li>
+            @if (Model.IsNotNullOrEmpty())
+            {
+                foreach (var item in Model!)
+                {
+                    RenderMenuItem(item);
+                }
+            }
+        </ul>
+        <div class="ps__rail-x" style="left: 0px; bottom: 0px;"><div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div></div><div class="ps__rail-y" style="top: 0px; right: 0px;"><div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 0px;"></div></div>
+    </nav>
+</div>
+
+@functions {
+    private void RenderMenuItem(Ais.Office.ViewModels.Menu.MenuItem item)
+    {
+        if (item.Url.IsNotNullOrEmpty() && item.Title.IsNotNullOrEmpty())
+        {
+            if (item.Children!.IsNotNullOrEmpty())
+            {
+                <li class="@(item.IsActive ? "active" : string.Empty)">
+                    <a href="@item.Url" title="@item.Title">
+                        <span>
+                            @item.Title
+                        </span>
+                    </a>
+                    <ul>
+                        @foreach (var subItem in item.Children!)
+                        {
+                            RenderMenuItem(subItem);
+                        }
+                    </ul>
+                </li>
+            }
+            else
+            {
+                <li class="@(item.IsActive ? "active" : string.Empty)">
+                    @if (item.IsAjax)
+                    {
+                        <a href="@item.Url"
+                           data-ajax="true"
+                           data-mode="@(item.HttpMethod!.IsNotNullOrEmpty() ? item.HttpMethod : "GET")"
+                           class="@item.Class @(item.IsActive ? "active" : string.Empty)">
+                            <span>
+                                @item.Title
+                            </span>
+                        </a>
+                    }
+                    else
+                    {
+                        var attributes = item.InNewWindow ? "target='_blank'" : string.Empty;
+                        <a href="@item.Url" title="@item.Title" class="@item.Class" @Html.Raw(attributes)>
+                            <span>
+                                @item.Title
+                            </span>
+                        </a>
+                    }
+                </li>
+            }
+        }
+    }
+}

@@ -1,0 +1,40 @@
+﻿@using Ais.Data.Models.Account;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer
+@{
+    var officeId = this.ViewBag.OfficeId as Guid?;
+}
+<div class="three">
+    <div class="step-box ">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["ListByEmployeees"]:</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="tasks-list-wrap">
+                <div class="step-box-body">
+                    <div class="tasks-list-wrap">
+                        @(
+                            Html.Kendo().Grid<DashboardGridDataOffice>()
+                            .Name("tasks-data")
+                            .HtmlAttributes(new { @class = "stat-list" })
+                            .Pageable(x => x.Enabled(true).PageSizes(new int[] { 20, 30, 50 }))
+                            .Scrollable(x => x.Enabled(true))
+                            .Columns(columns =>
+                            {
+                                columns.Bound(col => col.EmployeeName).Title(Localizer["Employee"]);
+                                columns.Bound(col => col.DistributedTasks).ClientTemplateId("distributed-tasks-template").Title(Localizer["DistributedTasks"]);
+                                columns.Bound(col => col.TasksInExecution).ClientTemplateId("tasks-execution-template").Title(Localizer["TasksInExecution"]);
+                                columns.Bound(col => col.CompletedTasks).ClientTemplateId("completed-tasks-template").Title(Localizer["CompletedTasks"]);
+                            })
+                            .DataSource(ds => ds.Ajax().Read("GetDashBoardGridDataOffice", "Account", new { officeId = officeId }).PageSize(50)).Deferred(true)
+                            )
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("_GridTemplates");
+}

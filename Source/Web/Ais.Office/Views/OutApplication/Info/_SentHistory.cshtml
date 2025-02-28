@@ -1,0 +1,79 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Recipients
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.OutDocument
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+<div class="step-box">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["SendHistory"]
+        </h3>
+    </div>
+    <div class="step-box-body">
+        <div class="form-row fullwidth">
+            @(Html.Kendo().Grid<DeliveryData>()
+                    .Name(Guid.NewGuid().ToString())
+                    .HtmlAttributes(new { @class = "fullwidth" })
+                    .Pageable(p => p.Enabled(true).PageSizes(new List<object> { 5, 10, 20, 50, "All" }).PreviousNext(true))
+                    .ClientDetailTemplateId("dates-template")
+                    .Columns(
+                    col =>
+                    {
+                        col.Bound(x => x.Recipient.Name).Title(Localizer["Recipient"]).ClientTemplate("#:Recipient && Recipient.Name ? Recipient.Name : ''#");
+                        col.Bound(x => x.Agent.Name).Title(Localizer["Agent"]).ClientTemplate("#:Agent && Agent.Name ? Agent.Name : ''#");
+                        col.Bound(x => x.Address.FullDescriptionWithMail).Title(Localizer["Address"]);
+                        col.Bound(x => x.Channel.Name).Title(Localizer["Chanel"]);
+                        col.Bound(x => x.DeliveryDate).Format("{0:G}").Title(Localizer["DeliveryDate"]);
+                        col.Bound(x => x.Status.Name).Title(Localizer["Status"]).ClientTemplate("<span class='outdoc #: DeliveryDate != null ?  ( WaitToDate != null && DeliveryDate > WaitToDate ? 'delay' :'delivered' )  : '' #'>#: Status.Name != null ? Status.Name : '' #</span>");
+                        col.Bound(x => x.BarCode).Title(Localizer["BarCode"]);
+                        col.Bound(x => x.Comment).Title(Localizer["Comment"]);
+                        col.Bound(x => x.ProofDocument).Title(Localizer["ProofDoc"]).ClientTemplate("#: ProofDocument.RegNumber ? ProofDocument.RegNumber : '' # #: ProofDocument.Type.Name ? ProofDocument.Type.Name : '' #");
+                        col.Bound(x => x.File).Title(Localizer["File"]).ClientTemplate("<a href='#:core.getBaseUrl()#Attachment/Download?ids=#:File.Id #' target='_blank'>#: File.Id != null ? resources.getResource('Download') : '' #</a>");
+                })
+                .DataSource(
+                x =>
+                x.Ajax()
+                .Read(operationBuilder => operationBuilder.Action("GetOutDocXRecipientHistory", "OutDocuments", new { id = Model.Id })).PageSize(20))
+                .Deferred(deferred))
+        </div>
+    </div>
+</div>
+<script id="dates-template" type="text/kendo-tmpl">
+    <div class="timeline k-my-3">
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                <div class='swiper-slide #:RegDate != null  ? "done" : "" #'>
+                    <div class="timestamp">@Localizer["StepRegDate"]</div>
+                    <div class="date"><span>#: kendo.toString(RegDate, 'g') #</span></div>
+                </div>
+                <div class='swiper-slide #:SendDate != null ? "done" : "" #'>
+                    <div class="timestamp">@Localizer["StepSendDate"]</div>
+                    <div class="date"><span>#: SendDate != null ? kendo.toString(SendDate, 'g') : "" #</span></div>
+                </div>
+                <div class='swiper-slide #:CourierPickUpDate != null ? "done" : "" #'>
+                    <div class='timestamp #: CourierPickUpDate != null  ? "done" : "" #'>@Localizer["StepCourierPickUpDate"]</div>
+                    <div class="date"><span>#: CourierPickUpDate != null  ? kendo.toString(CourierPickUpDate, 'g') : "" #</span></div>
+                </div>
+                <div class='swiper-slide #:DeliveryDate != null ?  (WaitToDate != null && DeliveryDate > WaitToDate ? "delay" :"delivered" )  : "" #'>
+                    <div class="timestamp">@Localizer["StepDeliveryDate"]</div>
+                    <div class="date"><span>#:DeliveryDate != null ?  kendo.toString(DeliveryDate, 'g') : "" #</span></div>
+                </div>
+                <div class='swiper-slide #:WaitToDate != null ? (WaitToDate < new Date() ? "undelivered": "done") : "" #'>
+                    <div class="timestamp">@Localizer["StepWaitToDate"]</div>
+                    <div class="date"><span>#: WaitToDate != null ?  kendo.toString(WaitToDate, 'd') : ""  # </span></div>
+                </div>
+                <div class='swiper-slide #:ReceiveMessageDate != null ? "done" : "" #' >
+                    <div class="timestamp">@Localizer["StepReceiveMessageDate"]</div>
+                    <div class="date"><span>#:ReceiveMessageDate!= null ? kendo.toString(ReceiveMessageDate, 'g') : "" #</span> <span> #:Message? Message: "" #  </span> </div>
+                </div>
+                <div class='swiper-slide #:WaitResponseToDate != null ? ( WaitResponseToDate < new Date() ? "undelivered": "done") : "" #'>
+                    <div class="timestamp">@Localizer["StepWaitResponseToDate"]</div>
+                    <div class="date"><span>#: WaitResponseToDate != null ?  kendo.toString(WaitResponseToDate, 'd') : ""  # </span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>

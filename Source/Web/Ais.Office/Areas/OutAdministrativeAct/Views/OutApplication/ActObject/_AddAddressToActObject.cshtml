@@ -1,0 +1,122 @@
+﻿@using Ais.Office.Areas.OutAdministrativeAct.Controllers
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.OutAdmAct.OutAdmActObject.ActAddress
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+
+    var successCallback = "core.onKendoWindowSuccessCallback";
+    var id = Guid.NewGuid().ToString();
+    var url = Url.DynamicAction("AddObjectAddress", typeof(OutApplicationController));
+}
+<form method="post" action="@url"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="@successCallback"
+      id="@id">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.Hidden("applicationUniqueId", ViewBag.ApplicationUniqueId as string)
+    @Html.Hidden("admObjectUniqueId", ViewBag.AdmObjectUniqueId as string)
+    @Html.Hidden("objectAddressUniqueId", ViewBag.AdmObjectAddressUniqueId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.UniqueId)
+    @Html.HiddenFor(m => m.ObjectId)
+
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["Address"]
+            </h3>
+        </div>
+        <div class="step-box-body">            
+            <div class="form-row">
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["AddrPlaceName"], "AddrPlaceName")
+                    @Html.EditorFor(m => m.AddrPlaceName, null, "AddrPlaceName")
+                    @Html.ValidationMessage("AddrPlaceName")
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["Street"], "Street")
+                    @Html.EditorFor(m => m.Street, null, "Street")
+                    @Html.ValidationMessage("Street")
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["StreetNumber"], "StreetNumber")
+                    @Html.EditorFor(m => m.StreetNumber, null, "StreetNumber")
+                    @Html.ValidationMessage("StreetNumber")
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["Square"], "Square")
+                    @Html.EditorFor(m => m.Square, null, "Square")
+                    @Html.ValidationMessage("Square")
+                </div>                             
+            </div>
+            <div class="form-row">
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["SquareNumber"], "SquareNumber")
+                    @Html.EditorFor(m => m.SquareNumber, null, "SquareNumber")
+                    @Html.ValidationMessage("SquareNumber")
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["Quarter"], "Quarter")
+                    @Html.EditorFor(m => m.Quarter, null, "Quarter")
+                    @Html.ValidationMessage("Quarter")
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["AppComplex"], "AppComplex")
+                    @Html.EditorFor(m => m.AppComplex, null, "AppComplex")
+                    @Html.ValidationMessage("AppComplex")
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["AppComplexNumber"], "AppComplexNumber")
+                    @Html.EditorFor(m => m.AppComplexNumber, null, "AppComplexNumber")
+                    @Html.ValidationMessage("AppComplexNumber")
+                </div>                               
+            </div>
+            <div class="form-row">   
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["BuildingNumber"], "BuildingNumber")
+                    @Html.EditorFor(m => m.BuildingNumber, null, "BuildingNumber")
+                    @Html.ValidationMessage("BuildingNumber")
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["Entrance"], "Entrance")
+                    @Html.EditorFor(m => m.Entrance, null, "Entrance")
+                    @Html.ValidationMessage("Entrance")
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["FloorNumber"], "FloorNumber")
+                    @Html.EditorFor(m => m.FloorNumber, null, "FloorNumber")
+                    @Html.ValidationMessage("FloorNumber")
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["ApartmentNumber"], "ApartmentNumber")
+                    @Html.EditorFor(m => m.ApartmentNumber, null, "ApartmentNumber")
+                    @Html.ValidationMessage("ApartmentNumber")
+                </div> 
+                
+            </div>
+            <div class="form-row">
+                <div class="form-input fullwidth h50">
+                    @Html.InfoLabel(Localizer["AddrIdentifier"], "AddrIdentifier")
+                    @Html.EditorFor(m => m.FullDescription, null, "AddrIdentifier")
+                    @Html.ValidationMessage("AddrIdentifier")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

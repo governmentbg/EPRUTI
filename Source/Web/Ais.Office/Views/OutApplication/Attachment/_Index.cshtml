@@ -1,0 +1,42 @@
+﻿@using Ais.Data.Models.Attachment;
+@using Ais.Utilities.Extensions;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.OutDocument
+@functions
+{
+    async Task RenderAttachmentAsync(AttachmentType type, ICollection<Attachment> attachments = null)
+    {
+        if (attachments.IsNullOrEmpty())
+        {
+            attachments = new Attachment[] { null };
+        }
+
+        foreach (var attachment in attachments!)
+        {
+            ViewBag.Attachment = attachment;
+            ViewBag.DontShowRelateObject = true;
+            await Html.RenderPartialAsync("~/Views/Application/Attachment/_Attachment.cshtml", type);
+        }
+    }
+}
+@{
+    var type = ViewBag.AttachmentType as AttachmentType;
+    <div class="steps-body">
+        @{
+            <div class="step-box fullwidth">
+                <div class="step-box-head">
+                    <h3 class="step-box-title fullwidth">
+                        @(type?.Title?.ToString())
+                    </h3>
+                    <button type="button" class="bttn main small right add-outdoc-attachment-js" data-unique-id="@ViewBag.OutApplicationUniqueId" value="@(type?.Id)">
+                        @Localizer["Add"]
+                    </button>
+                </div>
+                @{
+                    await RenderAttachmentAsync(type, Model.Attachments);
+                }
+            </div>
+        }
+    </div>
+}

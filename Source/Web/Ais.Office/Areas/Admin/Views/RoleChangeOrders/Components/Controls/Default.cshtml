@@ -1,0 +1,17 @@
+﻿@using Ais.Infrastructure.Roles
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer localizer
+
+@if (User.IsInRole(UserRolesConstants.EmployeesRolesOrdersUpsert))
+{
+    <a class="k-small k-button edit-role-order-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@localizer["Edit"]">
+        <i class="k-i-edit k-icon k-font-icon"></i>
+    </a>
+}
+
+@if (User.IsInRole(UserRolesConstants.EmployeesRolesOrdersDelete))
+{
+    <a class="k-small k-button delete-role-order-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@localizer["Delete"]">
+        <i class="k-i-delete k-icon k-font-icon"></i>
+    </a>
+}

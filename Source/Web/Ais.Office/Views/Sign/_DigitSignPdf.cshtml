@@ -1,0 +1,112 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@model Ais.Office.ViewModels.Sign.SignPdfViewModel
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+
+    async Task RenderFormFieldAsync()
+    {
+        @Html.ValidationSummary()
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.EntryType)
+        @Html.HiddenFor(m => m.AttachmentType)
+        @Html.HiddenFor(m => m.Url)
+        @Html.HiddenFor(m => m.FileId)
+        @Html.HiddenFor(m => m.Check)
+        @Html.HiddenFor(model => model.Signature)
+        @Html.HiddenFor(model => model.TempPdfId)
+        @Html.HiddenFor(model => model.Reason)
+        @Html.HiddenFor(model => model.Operation)
+        @Html.HiddenFor(model => model.Status)
+        @Html.HiddenFor(model => model.OriginPath)
+        @Html.HiddenFor(model => model.HideSendToSignButton)
+        <div class="k-dialog-buttongroup">
+            @if (!Model.HideSendToSignButton)
+            {
+                <button class="bttn right main" name="refresh" value="true">
+                    @Localizer["SendToSign"]
+                </button>
+            }
+            <button class="bttn right main sign-js">
+                @Localizer["Sign"]
+            </button>
+        </div>
+    }
+
+    async Task RenderFormAsync()
+    {
+        if (Model?.ForSign() == true)
+        {
+            if (deferred)
+            {
+                <form method="post" action="@Url.DynamicAction(nameof(SignController.DigitSignPdfPost), typeof(SignController))">
+                    @{
+                        await RenderFormFieldAsync();
+                    }
+                </form>
+            }
+            else
+            {
+                <form method="post" action="@Url.DynamicAction(nameof(SignController.DigitSignPdfPost), typeof(SignController))" data-ajax='true' data-ajax-success='core.onKendoWindowSuccessCallback'>
+                    @{
+                        await RenderFormFieldAsync();
+                    }
+                </form>
+            }
+        }
+        else
+        {
+            @($"{Localizer["Signing"]}...")
+        }
+    }
+
+    async Task RenderScriptsAsync()
+    {
+        <script src="~/bundles/sign.min.js" asp-append-version="true"></script>
+    }
+
+    if (Model?.ForSign() == true)
+    {
+        <div class="steps-body">
+            <div class="step-box fullwidth">
+                <div class="step-box-body">
+                    <div class="form-row">
+                        <div class="form-input fullwidth">
+                            @(Html.Kendo().PDFViewer()
+                                .Name(Guid.NewGuid().ToString())
+                                .PdfjsProcessing(pdf => pdf.File(Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), new { urls = Model.Url, ids = Model.FileId })))
+                                .Toolbar(false)
+                                .Deferred(deferred))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    if (deferred)
+    {
+        await RenderFormAsync();
+        @section Scripts
+        {
+            @{
+                await RenderScriptsAsync();
+            }
+        }
+
+        @section Breadcrumbs
+        {
+            @{
+                await Html.RenderPartialAsync("_Breadcrums");
+            }
+        }
+    }
+    else
+    {
+        await RenderFormAsync();
+        await RenderScriptsAsync();
+    }
+}

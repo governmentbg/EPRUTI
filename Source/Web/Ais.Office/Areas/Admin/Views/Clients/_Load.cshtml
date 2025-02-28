@@ -1,0 +1,186 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.Data.Models.Client
+@using Ais.Office.ViewModels.Clients
+@using Ais.Utilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@model Ais.Office.ViewModels.Clients.LoadClientViewModel
+@{
+    if (Model?.Client == null)
+    {
+        <div class="steps-body">
+            <div class="step-box fullwidth k-mt-2">
+                <div class="step-box-head">
+                    <h3 class="step-box-title">
+                        @Localizer["Result"]
+                    </h3>
+                </div>
+                <div class="step-box-body">
+                    <div class="form-row">
+                        <h6>@Localizer["NoDataFound"]</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="steps-body">
+            <form method="post" action="@Url.ActionLink("Load", "Clients")"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-success="core.onKendoWindowSuccessCallback">
+                @Html.ValidationSummary(true)
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.UniqueId)
+                <div class="step-box fullwidth k-mt-2">
+                    <div class="step-box-head">
+                        <h3 class="step-box-title">
+                            @Localizer["Result"]
+                        </h3>
+                    </div>
+                    <div class="step-box-body">
+                        <div class="form-row">
+                            <div class="fullwidth">
+                                <div class="ib">
+                                    @Html.EditorFor(m => m.UsePersonalData, new { label = Localizer[Model.Client.ClientType == ClientType.Physical ? "GRAO" : "RegisterAgency"] })
+                                    @Html.ValidationMessageFor(m => m.UsePersonalData)
+                                </div>
+                                <div class="ib">
+                                    @Localizer["ClientType"]: <strong>@Model?.Client?.Type?.Name</strong>
+                                </div>
+                                <div class="ib">
+                                    @Localizer["FullName"]: <strong>@Model?.Client?.FullName</strong>
+                                </div>
+                                <div class="ib">
+                                    @Localizer["EgnBulstat"]: <strong>@Model?.Client?.EgnBulstat</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @{
+                    switch (Model?.Client?.ClientType)
+                    {
+                        case ClientType.Physical:
+                        {
+                            if (Model.Companies.IsNotNullOrEmpty())
+                            {
+                                <div class="step-box fullwidth">
+
+                                    <div class="step-box-head">
+                                        <h3 class="step-box-title">
+                                            @Localizer["Companies"]
+                                        </h3>
+                                    </div>
+                                    <div class="step-box-body">
+                                        <div class="form-row">
+                                            <ul>
+                                                @foreach (var company in Model.Companies)
+                                                {
+                                                    <li>
+                                                        @company
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            break;
+                        }
+
+                        case ClientType.Legal:
+                        {
+                            if (Model.Client.Representatives.IsNotNullOrEmpty())
+                            {
+                                <div class="step-box fullwidth">
+                                    <div class="step-box-head">
+                                        <h3 class="step-box-title">
+                                            @Localizer["Representatives"]
+                                        </h3>
+                                    </div>
+                                    <div class="step-box-body">
+                                        @(Html.Kendo().Grid<OtherSystemAgentViewModel>()
+                                            .Name(Guid.NewGuid().ToString())
+                                            .HtmlAttributes(new { @class = "withoutpager", data_hide_empty = true })
+                                            .Pageable()
+                                            .Sortable()
+                                            .Columns(
+                                                column =>
+                                                {
+                                                    column.Template("<input type='checkbox' class='check-other-system-js' data-type='representative' #if(IsChecked==true){#checked=true#}#/>")
+                                                          .ClientHeaderTemplate("<input type='checkbox' class='check-other-system-js all-js' data-type='representative'/>");
+                                                    column.Bound(c => c.EgnBulstat)
+                                                          .Title(Localizer["EgnBulstat"])
+                                                          .ClientTemplate("#:EgnBulstat ? EgnBulstat : ''#");
+                                                    column.Bound(c => c.FullName)
+                                                          .Title(Localizer["Name"]);
+                                                })
+                                            .Events(e => e.DataBound("searchTable.onGridDataBound"))
+                                            .DataSource(
+                                                d =>
+                                                    d.Ajax()
+                                                     .Read(
+                                                         r =>
+                                                             r.Action("ReadOtherSystemRepresentatives", "Clients", new { key = Model.UniqueId }))
+                                                     .PageSize(10)))
+                                    </div>
+                                </div>
+                            }
+
+                            break;
+                        }
+                    }
+
+                    if (Model?.Client?.Addresses.IsNotNullOrEmpty() == true)
+                    {
+                        <div class="step-box fullwidth">
+                            <div class="step-box-head">
+                                <h3 class="step-box-title">
+                                    @Localizer["Addresses"]
+                                </h3>
+                            </div>
+                            <div class="step-box-body">
+                                @(Html.Kendo().Grid<OtherSystemAddressViewModel>()
+                                    .Name(Guid.NewGuid().ToString())
+                                    .HtmlAttributes(new { @class = "withoutpager", data_hide_empty = true })
+                                    .Pageable()
+                                    .Sortable()
+                                    .Columns(
+                                        column =>
+                                        {
+                                            column.Template("<input type='checkbox' class='check-other-system-js' data-type='address' #if(IsChecked==true){#checked=true#}#/>")
+                                                  .ClientHeaderTemplate("<input type='checkbox' class='check-other-system-js all-js' data-type='address'/>");
+                                            column.Bound(c => c.FullDescription)
+                                                  .Title(Localizer["Address"]);
+                                            column.Bound(c => c.Email)
+                                                  .Title(Localizer["Email"]);
+                                            column.Bound(c => c.Phone)
+                                                  .Title(Localizer["Phone"]);
+                                            column.Bound(c => c.Origin.Name)
+                                                  .Title(Localizer["Type"]);
+                                        })
+                                    .DataSource(
+                                        d =>
+                                            d.Ajax()
+                                             .Read(r => r.Action("ReadOtherSystemAddresses", "Clients", new { key = Model.UniqueId }))
+                                             .PageSize(10))
+                                    .Events(e => e.DataBound("searchTable.onGridDataBound")))
+                            </div>
+                        </div>
+                    }
+                }
+                <div class="k-dialog-buttongroup">
+                    <button class="bttn right third closeKendoWindow-js">
+                        @Localizer["Close"]
+                    </button>
+                    <button class="bttn right main">
+                        @Localizer["Add"]
+                    </button>
+                </div>
+            </form>
+        </div>
+    }
+}

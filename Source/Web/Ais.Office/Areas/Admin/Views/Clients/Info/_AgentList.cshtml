@@ -1,0 +1,63 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@model ICollection<Ais.Office.ViewModels.Clients.AgentViewModel>
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    if (Model.IsNotNullOrEmpty())
+    {
+        <div class="step-box-body">
+            <div class="form-row">
+                @(
+                Html.Kendo().Grid(Model)
+                .Name(Guid.NewGuid().ToString())
+                .HtmlAttributes(new { @class = "fullwidth" })
+                .Pageable()
+                .Events(e => e.DataBound("admin_clients.onRepresentativesDataBound"))
+                .Columns(
+                column =>
+                {
+                    column.Bound(c => c.FullName)
+                    .Title(Localizer["Name"]);
+                    column.Bound(c => c.EgnBulstat)
+                    .Title(Localizer["EgnBulstat"])
+                    .ClientTemplate("#:EgnBulstat ? EgnBulstat : ''#");
+                    column.Bound(c => c.StatusName)
+                    .Title(Localizer["Status"]);
+                    column.Bound(c => c.RightsString)
+                    .Title(Localizer["Rights"]);
+                    column.Bound(c => c.QualityType)
+                    .Title(Localizer["Quality"]);
+                    column.Bound(c => c.QualityPowerOfAttorneyComment)
+                    .Title(Localizer["Comment"])
+                    .ClientTemplate($"#:{nameof(Ais.Office.ViewModels.Clients.AgentViewModel.QualityPowerOfAttorneyComment)} ? {nameof(Ais.Office.ViewModels.Clients.AgentViewModel.QualityPowerOfAttorneyComment)} : ''#");
+                    column.Bound(c => c.QualityPowerOfAttorneyFile)
+                    .Title(Localizer["PowerOfAttorney"])
+                    .ClientTemplate(
+                    "#var url = core.GetFileUrl(data[\"QualityPowerOfAttorneyFile\"]);#" +
+                    $"#if(url){{# <a href='#:url#'>#:QualityPowerOfAttorneyFile.Name ? QualityPowerOfAttorneyFile.Name : '{Localizer["Download"]}'#</a> #}}#");
+                    column.Bound(c => c.QualityPowerOfAttorneyDenialFile)
+                    .Title(Localizer["DenialPowerOfAttorney"])
+                    .ClientTemplate(
+                    "#var url = core.GetFileUrl(data[\"QualityPowerOfAttorneyDenialFile\"]);#" +
+                    $"#if(url){{# <a href='#:url#'>#:QualityPowerOfAttorneyDenialFile.Name ? QualityPowerOfAttorneyDenialFile.Name : '{Localizer["Download"]}'#</a> #}}#");
+                    column.Bound(c => c.QualityPowerOfAttorneyRegNumber)
+                    .Title(Localizer["RegisterNumber"]);
+                    column.Bound(c => c.QualityPowerOfAttorneyNotaryNumber)
+                    .Title(Localizer["NotaryNumber"]);
+                    column.Bound(c => c.QualityPowerOfAttorneyRegDate)
+                    .Title(Localizer["RegDate"]);
+                    column.Bound(c => c.QualityPowerOfAttorneyEndDate)
+                    .Title(Localizer["ValidToDate"])
+                    .ClientTemplate(
+                    "#if(data.QualityPowerOfAttorneyIsExpired){#" +
+                    "<span class='expired'>#: data.QualityPowerOfAttorneyEndDate #</span> " +
+                    "#}else{# <span>#: data.QualityPowerOfAttorneyEndDate ? data.QualityPowerOfAttorneyEndDate : '' #</span> #}#");
+                })
+                .Deferred(deferred)
+                    )
+            </div>
+        </div>
+    }
+}

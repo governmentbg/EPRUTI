@@ -1,0 +1,106 @@
+﻿@using Ais.Common.Localization
+@using Ais.Data.Models.Nomenclature
+@using Ais.Office.ViewModels.Nomenclatures
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model NomenclatureEditViewModel
+@{
+    var languages = ViewBag.Languages as Culture[];
+}
+<form method="post" class="dirty-check" action="@Url.ActionLink("Edit", "Nomenclatures")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.HiddenFor(x => x.Id)
+    @Html.HiddenFor(x => x.FlagCanAdd)
+    <div class="form-row">
+        <div class="form-input fullwidth flex flex-gap-10 k-align-items-end">
+            <div class="fullwidth">
+                @Html.LabelFor(x => x.Resource, new { @class = "required" })
+                @(Html.Kendo()
+                    .DropDownListFor(x => x.Resource.Id)
+                    .HtmlAttributes(new { @class = "fullwidth" })
+                    .OptionLabel(new Nomenclature { Id = null, Name = Localizer["Choose"].ToString() })
+                    .Filter(FilterType.Contains)
+                    .Value(Model?.Resource?.Id.ToString())
+                    .DataValueField("Id")
+                    .DataTextField("Name")
+                    .DataSource(ds => ds.Read(read => read.Action("ReadResourceForDropdown", "Resources", new { Area = string.Empty }))))
+                @Html.ValidationMessage("Resource")
+            </div>
+            @if (Model?.FlagCanAdd == true)
+            {
+                <a class="bttn bttn-icon right add-value-js" title="@Localizer["Add"]">
+                    <i class="k-i-plus k-icon k-font-icon"></i>
+                </a>
+            }
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-input fullwidth">
+            @Html.LabelFor(x => x.Values)
+            @(Html.Kendo()
+                .ListView<List<MultiLanguageNomenclature>>()
+                .Name("values-listview")
+                .TagName("div")
+                .ClientTemplateId("nomenclature-values")
+                .BindTo(Model?.Values))
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-input fullwidth hidden" id="values-editor">
+            <a class="k-small k-button remove-current-value-js" data-id="#: Id #" title="@Localizer["Edit"]">
+                <i class="k-i-delete k-icon k-font-icon"></i>
+            </a>
+            @Html.Editor("editor", "InternationalizationTextBox", new { label = Localizer["Value"], requiredForAllCultures = true })
+            <input type="hidden" id="value-id" />
+            <button class="bttn main right k-mt-2 upsert-current-value-js" style="width: 10%;" type="button" title="@Localizer["Save"]">@Localizer["Update"]</button>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+
+<script id="nomenclature-values" type="text/x-kendo-tmpl">
+    <div class="wrapper">
+        <div>
+            <a class="k-small k-button edit-value-js" title="@Localizer["Edit"]">
+                <i class="k-i-edit k-icon k-font-icon"></i>
+            </a>
+            #if(data.IsVisible) {#
+            <a class="k-small k-button visibility-value-js " title="@Localizer["Hide"]">
+                <i class="k-i-eye-slash k-icon k-font-icon"></i>
+            </a>
+            #}else{#
+            <a class="k-small k-button visibility-value-js" title="@Localizer["Show"]">
+                <i class="k-i-eye k-icon k-font-icon"></i>
+            </a>
+            #}#
+        </div>
+        #var index = kendo.guid();#
+        <input type='hidden' name='Values.Index' value='#: index #' />
+        #if(data.Id != null) {#
+        <input type='hidden' name='Values[#:index#].Id' value='#: data.Id != null ? data.Id : null #' />
+        #}#
+        <input type='hidden' name='Values[#:index#].IsVisible' value='#: data.IsVisible #' />
+        @foreach (var lang in languages!)
+        {
+            <input type='hidden' name='Values[#:index#].Name' value='@lang.Id' />
+            <input type='hidden' name='Values[#:index#].Name[@lang.Id]' value='#: Name["@lang.Id"]#' />
+            <div class="fullwidth">
+                <p>#:resources.getResource("Value") # (@lang.Name):  #: Name["@lang.Id"] # </p>
+            </div>
+        }
+        <div>
+            <p>#:resources.getResource("IsVisible")# :  #: data.IsVisible ? resources.getResource("Yes") : resources.getResource("No") #</p>
+        </div>
+    </div>
+</script>
+

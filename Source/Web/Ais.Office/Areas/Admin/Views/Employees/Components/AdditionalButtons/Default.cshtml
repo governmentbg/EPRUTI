@@ -1,0 +1,29 @@
+﻿@using Ais.Office.Areas.Admin.Controllers.Employees;
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var createUrl = Url.DynamicActionWithRightsCheck(nameof(EmployeesController.Create), typeof(EmployeesController));
+    if (createUrl.IsNotNullOrEmpty())
+    {
+        <div class="form-input autosize additional-buttons">
+            <label class="empty"></label>
+            <a href="@createUrl" class="bttn bttn-icon add-employee-js" title="@Localizer["AddEmployee"]" data-searchqueryid="@ViewBag.SearchQueryId">
+                <i class="k-i-plus k-icon k-font-icon"></i>
+            </a>
+        </div>
+    }
+
+    var creteRoleUrl = Url.DynamicActionWithRightsCheck(nameof(EmployeesController.ChangeRoles), typeof(EmployeesController));
+    if (creteRoleUrl.IsNotNullOrEmpty())
+    {
+        <div class="form-input autosize additional-buttons">
+            <label class="empty"></label>
+            <a href="@creteRoleUrl" class="bttn bttn-icon set-roles-js" title="@Localizer["SetRoles"]" data-searchqueryid="@ViewBag.SearchQueryId">
+                <i class="k-i-user k-icon k-font-icon"></i>
+            </a>
+        </div>
+    }
+}

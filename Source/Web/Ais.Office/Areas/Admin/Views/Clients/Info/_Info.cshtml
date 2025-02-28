@@ -1,0 +1,116 @@
+﻿@inject IStringLocalizer Localizer;
+@inject IMapper Mapper;
+@using AutoMapper
+@using Ais.Office.ViewModels.Clients
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Client.Client
+@{
+    <script src="~/bundles/admin_clients.min.js" asp-append-version="true"></script>
+
+    void RenderText(string value, string title)
+    {
+        if (value.IsNotNullOrEmpty())
+        {
+            <div class="ib">
+                <div>@title: <strong>@value</strong></div>
+            </div>
+        }
+    }
+
+    if (Model != null)
+    {
+        var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+        <div class="steps-body">
+            @(await Html.PartialAsync("~/Areas/Admin/Views/Clients/Info/_PersonalData.cshtml"))
+            <div class="step-box fullwidth">
+                <div class="step-box-head">
+                    <h3 class="step-box-title">@Localizer["User"]</h3>
+                </div>
+                <div class="step-box-body">
+                    <div class="form-row">
+                        @{
+                            RenderText(Model.Knik, Localizer["Knik"]);
+                            RenderText(Model.User?.UserName, Localizer["UserName"]);
+                            RenderText(Model.User?.Email, Localizer["Email"]);
+                            RenderText(Model.User?.Status?.Name, Localizer["Status"]);
+                            if (Model.DenialOfElectronicServices)
+                            {
+                                <div class="ib">
+                                    <div>
+                                        <strong>@Localizer["DenialOfElectronicServices"]</strong>
+                                    </div>
+                                </div>
+                            }
+
+                            RenderText(Model.User?.Roles.IsNotNullOrEmpty() == true ? string.Join(", ", Model.User.Roles.Select(item => item.Name)) : null, Localizer["Roles"]);
+                        }
+                    </div>
+                </div>
+            </div>
+            @if (Model?.Addresses.IsNotNullOrEmpty() == true)
+            {
+                <div class="step-box fullwidth">
+                    <div class="step-box-head">
+                        <h3 class="step-box-title">
+                            @Localizer["Addresses"]
+                        </h3>
+                    </div>
+                    <div class="step-box-body">
+                        @(Html.Kendo().Grid(Model?.Addresses)
+                        .Name(Guid.NewGuid().ToString())
+                        .HtmlAttributes(new { data_clientid = Model?.UniqueId, @class = "withoutpager" })
+                        .Pageable()
+                        .Columns(
+                        column =>
+                        {
+                            column.Bound(c => c.FullDescription)
+                            .Title(Localizer["Address"])
+                            .ClientTemplate("#=kendo.format(data.Default == true ? \"<strong>{0}</strong>\" : \"{0}\", FullDescription)#");
+                            column.Bound(c => c.Email)
+                            .Title(Localizer["Email"]);
+                            column.Bound(c => c.Phone)
+                            .Title(Localizer["Phone"]);
+                            column.Bound(c => c.Origin.Name)
+                            .Title(Localizer["Type"]);
+                        })
+                        .Events(e => e.DataBound("searchTable.onGridDataBound"))
+                        .Deferred(deferred))
+                    </div>
+                </div>
+            }
+            @if (Model?.Representatives.IsNotNullOrEmpty() == true)
+            {
+                var agents = Mapper.Map<List<AgentViewModel>>(Model.Representatives);
+                <div class="step-box fullwidth">
+                    <div class="step-box-head">
+                        <h3 class="step-box-title">
+                            @Localizer["Representatives"]
+                        </h3>
+                    </div>
+                    @(await Html.PartialAsync("Info/_AgentList", agents))
+                </div>
+            }
+            @if (Model?.RepresentingEntities.IsNotNullOrEmpty() == true)
+            {
+                var agents = Mapper.Map<List<AgentViewModel>>(Model.RepresentingEntities);
+                <div class="step-box fullwidth">
+                    <div class="step-box-head">
+                        <h3 class="step-box-title">
+                            @Localizer["RepresentingEntities"]
+                        </h3>
+                    </div>
+                    @(await Html.PartialAsync("Info/_AgentList", agents))
+                </div>
+            }
+        </div>
+    }
+    @if (Model.Id.HasValue)
+    {
+        <div class="uuid-wrap">
+            @Localizer["UniqueId"]: <strong class="uuid">@(Model.Id)</strong>
+            <span title="@Localizer["Copy"]" class="k-icon k-font-icon k-i-copy pointer copy-uuid-js"></span>
+        </div>
+    }
+}

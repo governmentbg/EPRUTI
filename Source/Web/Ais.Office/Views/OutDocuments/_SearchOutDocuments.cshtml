@@ -1,0 +1,52 @@
+﻿@using Microsoft.Extensions.Localization
+@using Ais.Office.Controllers.Documents
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@inject IStringLocalizer Localizer;
+@model Ais.Office.ViewModels.Documents.DocShortQueryViewModel
+@{
+    var wrapperId = Guid.NewGuid().ToString();
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+<div action="@Url.DynamicAction(nameof(OutDocumentsController.SearchShort), typeof(OutDocumentsController))"
+     data-ajax="true"
+     data-ajax-method="POST"
+     data-ajax-update="#@wrapperId">
+    @Html.HiddenFor(x => x.DoesntHaveTask)
+    @Html.HiddenFor(x => x.EntryTypeId)
+    <div class="form-row">
+        <div class="form-input">
+            @Html.LabelFor(x => x.Name)
+            @(Html.Kendo().TextBoxFor(x => x.Name)
+                .HtmlAttributes(new { @class = "click-on-enter-js", data_wrapper = ".form-row", data_element = "svg", id = Guid.NewGuid().ToString() })
+                .Deferred(deferred))
+        </div>
+        <div class="form-input">
+            @Html.LabelFor(x => x.From)
+            @(Html.Kendo().DatePickerFor(x => x.From)
+                .HtmlAttributes(new { @class = "click-on-enter-js", data_wrapper = ".form-row", data_element = "svg", id = Guid.NewGuid().ToString() })
+                .Deferred(deferred))
+        </div>
+        <div class="form-input">
+            @Html.LabelFor(x => x.To)
+            @(Html.Kendo().DatePickerFor(x => x.To)
+                  .HtmlAttributes(new { @class = "click-on-enter-js", data_wrapper = ".form-row", data_element = "svg", id = Guid.NewGuid().ToString() })
+                  .Deferred(deferred))
+        </div>
+        <div class="form-input auto w100">
+            @Html.LabelFor(m => m.Limit)
+            @Html.EditorFor(m => m.Limit, "ResultLimit", new { htmlAttributes = new { @class = "click-on-enter-js", data_wrapper = ".form-row", data_element = "svg" } })
+        </div>
+        <div class="form-input auto">
+            <label class="empty"></label>
+            <button class="bttn bttn-icon blue" title="@Localizer["Search"]" ajax-button-submit>
+                <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+            </button>
+            <button class="bttn blue small third autosize bttn-icon create-outdoc-js" title="@Localizer["Create"]" type="button">
+                <i class="k-i-plus k-icon k-font-icon"></i>
+            </button>
+        </div>
+    </div>
+</div>
+<div id="@wrapperId">
+</div>

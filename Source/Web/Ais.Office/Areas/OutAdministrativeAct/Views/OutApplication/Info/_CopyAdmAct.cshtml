@@ -1,0 +1,30 @@
+﻿@using Ais.Office.Controllers
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using Ais.Data.Models.Document
+@using System.Text.RegularExpressions
+@using Ais.WebUtilities.Extensions
+@using System.Linq
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.OutAdmAct
+@{
+    if (Model.Attachments.IsNotNullOrEmpty())
+    {
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["CopyAdmAct"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                @foreach (var group in Model.AttachmentGroups)
+                {
+                    ViewBag.Group = group;
+                    <div class="mainGroup">
+                        @await Html.PartialAsync("Info/_AttachmentGroup", Model)
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}

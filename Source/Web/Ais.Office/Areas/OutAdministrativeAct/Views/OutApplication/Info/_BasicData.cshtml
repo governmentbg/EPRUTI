@@ -1,0 +1,130 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Data.Models.OutAdmAct.OutAdmActState
+@using Ais.Office.Controllers
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Service.Object
+@using Ais.WebUtilities.Extensions
+@model Ais.Data.Models.Document.OutAdmAct
+@{
+    var isOverview = ViewBag.IsOverview is bool && (bool)ViewBag.IsOverview;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+<div class="step-box">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["AdministrativeAct"]
+        </h3>
+    </div>
+    <div class="step-box-body">
+
+        <div class="doctitle flex align-center">
+            <div class="regnumber" title="@Localizer["OutDocumentStatusTitle"]">
+                @Model.RegNumber
+                <span title="@Localizer["Copy"]" class="k-icon k-font-icon k-i-copy copy-regNumber-js"></span>
+            </div>
+            <h5 title="@Model.Type.Name">@Model.Type.Name</h5>
+        </div>
+        @{
+            if (Model.RegDate.HasValue)
+            {
+                <div>@Localizer["RegDate"]: <strong>@(Model.RegDate.Value.ToString("d"))</strong></div>
+            }
+            if (!string.IsNullOrEmpty(Model?.Issuer?.AdministrativeBody?.Name))
+            {
+                <div>@Localizer["Publisher"]: <strong>@(Model?.Issuer?.AdministrativeBody?.Name)</strong></div>
+            }
+
+            if (Model.RegUser?.FullName.IsNotNullOrEmpty() == true)
+            {
+                <div>@Localizer["RegisteredByEmployeee"]: <strong>@(Model.RegUser.FullName)</strong></div>
+            }
+
+            if (Model?.RegOffice?.Id.HasValue == true)
+            {
+                <div>@Localizer["Office"]: <strong>@(Model.RegOffice.Name)</strong></div>
+            }
+
+            if (Model.ConfirmUser.IsNotNullOrEmpty())
+            {
+                <div>@Localizer["ConfirmUser"]: <strong>@(Model.ConfirmUser)</strong></div>
+            }
+
+            if (Model.Note.IsNotNullOrEmpty())
+            {
+                <div>@Localizer["FactGrounds"]: <strong>@(Model.Note)</strong></div>
+            }
+
+            if (Model.LegalGrounds.IsNotNullOrEmpty())
+            {
+                <div>@Localizer["LegalGrounds"]: <strong>@(Model.LegalGrounds)</strong></div>
+            }
+
+            if (Model.StateUpsertModel.ValidByDate is not null)
+            {
+                <div>@Localizer["ValidByDate"]: <strong>@(Model.StateUpsertModel.ValidByDate.Value.ToString("d"))</strong></div>
+            }
+
+            if (Model.StateUpsertModel.AnnouncementDate is not null)
+            {
+                <div>@Localizer["AnnouncementDate"]: <strong>@(Model.StateUpsertModel.AnnouncementDate.Value.ToString("d"))</strong></div>
+            }
+
+            if (Model.StateUpsertModel.EffectiveDate is not null)
+            {
+                <div>@Localizer["EffectiveDate"]: <strong>@(Model.StateUpsertModel.EffectiveDate.Value.ToString("d"))</strong></div>
+            }
+
+            if (!string.IsNullOrEmpty(Model?.StateUpsertModel?.AnnouncementType?.Name))
+            {
+                <div>@Localizer["AnnouncementType"]: <strong>@(Model.StateUpsertModel.AnnouncementType.Name)</strong></div>
+            }
+
+            if (!string.IsNullOrEmpty(Model?.StateUpsertModel?.State?.Name))
+            {
+                <div>@Localizer["State"]: <strong>@(Model.StateUpsertModel.State.Name)</strong></div>
+            }
+
+            if (Model.StateUpsertModel.ChangeDate is not null)
+            {
+                <div>@Localizer["ChangeDate"]: <strong>@(Model.StateUpsertModel.ChangeDate)</strong></div>
+            }
+
+            if (!string.IsNullOrEmpty(Model?.StateUpsertModel?.Dispute?.Description))
+            {
+                <div>@Localizer["Description"]: <strong>@(Model.StateUpsertModel.Dispute.Description)</strong></div>
+            }
+
+            @if (Model?.StateUpsertModel?.StateHistory != null)
+            {
+                @(
+                Html.Kendo().Grid<AdmActStateHistoryModel>(Model.StateUpsertModel.StateHistory)
+                .Name("grid")
+                .Columns(columns =>
+                {
+                    columns.Bound(m => m.State.Name).Title(Localizer["State"]).Filterable(filter => filter.Multi(true).Search(true)).Sortable(true).Width("20%");
+                    columns.Bound(m => m.Date).ClientTemplate("#= Date ? kendo.toString(Date, 'dd.MM.yyyy') : '' #").Title(Localizer["Date"]).Filterable(filter => filter.Operators(ops => ops.ForDate(d => d.IsEqualTo("Equals").IsGreaterThan("After").IsLessThan("Before")))).Sortable(true).Width("20%");
+                    columns.Bound(m => m.Dispute).ClientTemplate(
+                    "# if (Dispute) { #" +
+                    "    # if (Dispute.Attachment) { #" +
+                    "        # if (Dispute.Attachment.Url) { #" +
+                    $"            <div><a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?urls=#= Dispute.Attachment.Url #'>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : \"Download\" #</a></div>" +
+                    "        # } else if (Dispute.Attachment.Id) { #" +
+                    $"            <div><a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?ids=#= Dispute.Attachment.Id #'>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : \"Download\" #</a></div>" +
+                    "        # } #" +
+                    "    # } #" +
+                    "    # if (Dispute.Description) { #" +
+                    "        <div>#= Dispute.Description #</div>" +
+                    "    # } #" +
+                    "# } #"
+                    ).Title(Localizer["Details"]).Filterable(false).Sortable(false).Title(" ").Width("50px");
+                })
+                .Sortable(false)
+                .HtmlAttributes(new { @class = "k-mt-2" })
+                .DataSource(ds => ds.Ajax().PageSize(10).Read("AdmActStateHistoryGetData", "OutApplication", new { area = "OutAdministrativeAct" }))
+                .Deferred(deferred)
+                    )
+            }
+        }
+    </div>
+</div>

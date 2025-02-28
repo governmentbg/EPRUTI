@@ -1,0 +1,97 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Ais.WebUtilities.Extensions
+@using Ais.Office.Controllers.Documents
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.OutDocument
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var skipScripts = ViewBag.SkipScripts is bool && (bool)ViewBag.SkipScripts;
+    var isOverview = ViewBag.IsOverview is bool && (bool)ViewBag.IsOverview;
+
+    async Task RenderDataAsync()
+    {
+        if (!isOverview)
+        {
+            await Html.RenderPartialAsync("_Errors");
+            await Html.RenderPartialAsync("_MissingDocuments", Model.MissingDocumentsData);
+
+            <div class="sticky-container">
+                <div class="k-dialog-buttongroup floading-buttons">
+                    @{
+                        var outDocumentsControllerType = typeof(OutDocumentsController);
+                        <div class="info-button-group edit-group">
+                            @{
+                                if (Model.HasCustomerSign == true)
+                                {
+                                    var signLink = Url.DynamicActionWithRightsCheck(nameof(OutDocumentsController.Sign), outDocumentsControllerType, new { id = Model.Id });
+                                    if (signLink.IsNotNullOrEmpty())
+                                    {
+                                        <a href="@signLink" class="left bttn third js-trigger-popup" title="@Localizer["Sign"]">
+                                            <i class="k-i-signature k-font-icon k-icon"></i>
+                                        </a>
+                                    }
+                                    var scanDocumentLink = Url.DynamicActionWithRightsCheck(nameof(OutDocumentsController.Scan), outDocumentsControllerType, new { id = Model.Id });
+                                    if (scanDocumentLink.IsNotNullOrEmpty())
+                                    {
+                                        <a href="@scanDocumentLink" class="left bttn third js-trigger-popup" title="@Localizer["Scan"]">
+                                            <i class="k-i-upload k-font-icon k-icon"></i>
+                                        </a>
+                                    }
+                                }
+                            }
+                        </div>
+                        <div class="info-button-group other-group">
+                            @{
+                                var printLink = Url.DynamicActionWithRightsCheck(nameof(OutDocumentsController.Print), outDocumentsControllerType, new { id = Model.Id });
+                                if (printLink.IsNotNullOrEmpty())
+                                {
+                                    <a href="@printLink" class="left bttn third" title="@Localizer["Print"]">
+                                        <i class="k-i-print k-font-icon k-icon"></i>
+                                    </a>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        await Html.RenderPartialAsync("Info/_BasicData");
+        await Html.RenderPartialAsync("Info/_Applicants");
+        await Html.RenderPartialAsync("Info/_Attachments");
+        await Html.RenderPartialAsync("Folder/Info/_Folders");
+        if (!isOverview)
+        {
+            await Html.RenderPartialAsync("~/Views/Shared/Document/_AttachedDocuments.cshtml", Model);
+            await Html.RenderPartialAsync("Info/_SentHistory");
+        }
+    }
+    <div class="docinfo">
+        @{
+            await RenderDataAsync();
+        }
+    </div>
+    if (Model.Id.HasValue)
+    {
+        <div class="uuid-wrap">
+            @Localizer["UniqueId"]: <strong class="uuid">@(Model.Id)</strong>
+            <span title="@Localizer["Copy"]" class="k-icon k-font-icon k-i-copy pointer copy-uuid-js"></span>
+        </div>
+    }
+}
+@if (!skipScripts)
+{
+    if (deferred)
+    {
+        @section Scripts
+        {
+    <script src="~/bundles/applicationInfo.min.js" asp-append-version="true"></script>
+        }
+    }
+    else
+    {
+        <script src="~/bundles/applicationInfo.min.js" asp-append-version="true"></script>
+    }
+}

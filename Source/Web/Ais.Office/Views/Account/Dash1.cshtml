@@ -1,0 +1,288 @@
+﻿<div class="content login-after">
+    <section class="center">
+        <div class="steps-body">
+            <div class="column-wrap charts-wrap flex-gap-20">
+                <div class="three left">
+                    <div class="step-box ">
+                        <div class="step-box-head">
+                            <h3 class="step-box-title">Общо задачи за периода:</h3>
+                            <a href="login-after.php.html#popup-ref-1" class="right k-button k-small" title="Title Dialog">
+                                <!--                                <svg class="icon info"><use xlink:href="#icon-info"></use></svg>-->
+                                виж всички задачи
+                            </a>
+                        </div>
+                        <div class="step-box-body">
+                            <div class="form-row">
+                                <div class="flex k-flex-nowrap">
+                                    <div class="form-input column">
+                                        <input type="text" class="k-datepicker" value="2023-02-20" />
+                                    </div>
+                                    <div class="form-input-dash"></div>
+                                    <div class="form-input column">
+                                        <input type="text" class="k-datepicker" value="2023-02-28" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div id="chart1"></div>
+                                <div class="inner-chart-content">186<hr><span>143</span></div>
+                            </div>
+
+
+
+                            <div class="column-wrap">
+                                <div class="column left  text-center">
+                                    <div class="circle bg-green">
+                                        186
+                                    </div>
+                                    <div><small>Брой разпределени задачи за периода</small></div>
+                                </div>
+                                <div class="column right  text-center">
+                                    <div class="circle bg-lime">
+                                        143
+                                    </div>
+                                    <div><small>Брой общо приключени задачи за периода</small></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div action="#" class="three ">
+                    <div class="step-box ">
+                        <div class="step-box-head">
+                            <h3 class="step-box-title">Текущи задачи за 11.12.2022:</h3>
+                            <a href="login-after.php.html#popup-ref-1" class="right k-button k-small" title="Title Dialog">задачи за деня</a>
+                        </div>
+                        <div class="step-box-body">
+                            <div class="relative">
+                                <div id="chart2"></div>
+                                <div class="inner-chart-content">
+                                    <small>задачи за<br>11.12.2022</small>
+                                    186
+                                    <small>разпределени задачи</small>
+                                </div>
+                            </div>
+
+
+                            <div class="column-wrap k-flex-wrap flex-gap-20 k-justify-content-center">
+                                <div class="three  text-center">
+                                    <div class="circle bg-green2">
+                                        42
+                                    </div>
+                                    <div><small>Брой разпределени задачи</small></div>
+                                </div>
+                                <div class="three text-center">
+                                    <div class="circle bg-lime">
+                                        6
+                                    </div>
+                                    <div><small>Брой общо приключени задачи</small></div>
+                                </div>
+                                <div class="three text-center">
+                                    <div class="circle bg-green3">
+                                        4
+                                    </div>
+                                    <div><small>Брой задачи - Бърза поръчка</small></div>
+                                </div>
+                                <div class="three text-center">
+                                    <div class="circle bg-yellow">
+                                        26
+                                    </div>
+                                    <div><small>Брой задачи - Обикновена поръчка</small></div>
+                                </div>
+                                <div class="three text-center">
+                                    <div class="circle bg-orange">
+                                        4
+                                    </div>
+                                    <div><small>Брой задачи - Изтичащи днес</small></div>
+                                </div>
+                                <div class="three text-center">
+                                    <div class="circle bg-red">
+                                        2
+                                    </div>
+                                    <div><small>Брой задачи - С изтекъл срок</small></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="three">
+                    <div class="step-box ">
+                        <div class="step-box-head">
+                            <h3 class="step-box-title">Списък със задачи:</h3>
+                            <a href="login-after.php.html#popup-ref-1" class="right k-button k-small" title="Title Dialog">
+                                <!-- <svg class="icon info"><use xlink:href="#icon-info"></use></svg>-->
+                                виж всички задачи
+                            </a>
+                        </div>
+                        <div class="step-box-body">
+                            <div class="tasks-list-wrap">
+                                <div id="tasks-list"></div>
+                                <script id="status-template" type="text/x-kendo-template">
+                                    <span class="status #= statusClass #">#= category #</span>
+                                </script>
+                                <script id="button-template" type="text/x-kendo-template">
+                                    <button type="button" onClick='' value='foo' class="bttn bttn-icon third small autosize"><i class="k-icon k-font-icon k-i-caret-alt-right"></i></button>
+                                    <button type="button" onClick='' value='foo' class="bttn bttn-icon third small autosize"><i class="k-icon k-font-icon k-i-info-circle"></i></button>
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts{
+    <script>
+        $("#chart1").kendoChart({
+            title: false,
+            legend: {
+                visible: false
+            },
+            chartArea: {
+                background: ""
+            },
+            seriesDefaults: {
+                overlay: {
+                    gradient: "none"
+                },
+            },
+            series: [{
+                holeSize: 85,
+                type: "donut",
+                startAngle: 90,
+                visual: function (e) {
+                    center = e.center;
+                    radius = e.radius;
+                    // Create default visual
+                    return e.createVisual();
+                },
+                data: [{
+                    value: 186,
+                    color: "#009060"
+                }, {
+                    value: 143,
+                    color: "#CEE00B"
+                }]
+            }],
+            tooltip: {
+                visible: true,
+                format: "{0} бр."
+            }
+
+        });
+
+        $("#chart2").kendoChart({
+            title: false,
+            legend: {
+                visible: false
+            },
+            chartArea: {
+                background: ""
+            },
+            seriesDefaults: {
+                overlay: {
+                    gradient: "none"
+                },
+            },
+            series: [{
+                holeSize: 85,
+                type: "donut",
+                startAngle: 90,
+                visual: function (e) {
+                    center = e.center;
+                    radius = e.radius;
+                    // Create default visual
+                    return e.createVisual();
+                },
+                data: [{
+                    value: 42,
+                    color: "#009060"
+                }, {
+                    value: 6,
+                    color: "#CEE00B"
+                }, {
+                    value: 4,
+                    color: "#03EF8D"
+                }, {
+                    value: 26,
+                    color: "#FFDC02"
+                }, {
+                    value: 4,
+                    color: "#FFDC02"
+                }, {
+                    value: 2,
+                    color: "#900000"
+                }]
+            }],
+            tooltip: {
+                visible: true,
+                format: "{0} бр."
+            }
+
+        });
+
+        $("#tasks-list").kendoGrid({
+            columns: [
+                { field: "productName", title: "Задачи" },
+                { field: "category", title: "Статус", template: kendo.template($('#status-template').html()) },
+                { field: "", title: "", template: kendo.template($("#button-template").html()), width: '82px' }
+            ],
+            filterable: true,
+            dataSource: [
+                { productName: "Яна Димитрова Райчева", category: "Прключена", statusClass: "bg-lime" },
+                { productName: "Иванка Стойчева Петрова", category: "Разпределена", statusClass: "bg-green4" },
+                { productName: "Христо Петков Иванов", category: "Бърза поръчка", statusClass: "bg-green5" },
+                { productName: "Христо Петков Иванов", category: "Прключена", statusClass: "bg-lime" },
+                { productName: "Христо Петков Иванов", category: "green4", statusClass: "bg-green4" },
+                { productName: "Яна Димитрова Райчева", category: "Изтичащa", statusClass: "bg-yellow2" },
+                { productName: "Иванка Стойчева Петрова", category: "Изтекъл срок", statusClass: "bg-red" },
+                { productName: "Христо Петков Иванов", category: "success", statusClass: "success" },
+                { productName: "Яна Димитрова Райчева", category: "error", statusClass: "error" },
+                { productName: "Иванка Стойчева Петрова", category: "note", statusClass: "note" },
+                { productName: "Иванка Стойчева Петрова", category: "warning", statusClass: "warning" },
+                { productName: "Христо Петков Иванов", category: "bg-green", statusClass: "bg-green" },
+                { productName: "Христо Петков Иванов", category: "bg-green2", statusClass: "bg-green2" },
+                { productName: "Анатоли Иванов Иванов", category: "bg-red", statusClass: "bg-red" },
+                { productName: "Анатоли Иванов Иванов", category: "bg-orange", statusClass: "bg-orange" },
+                { productName: "Анатоли Иванов Иванов", category: "bg-blue", statusClass: "bg-blue" },
+                { productName: "Анатоли Иванов Иванов", category: "bg-purple", statusClass: "bg-purple" },
+                { productName: "Анатоли Иванов Иванов", category: "bg-red2", statusClass: "bg-red2" },
+                { productName: "Анатоли Иванов Иванов", category: "bg-darkblue", statusClass: "bg-darkblue" },
+                { productName: "Анатоли Иванов Иванов", category: "bg-none", statusClass: "bg-none" },
+                { productName: "Анатоли Иванов Иванов", category: "bg-grey", statusClass: "bg-grey" },
+            ],
+            pageable: {
+                pageSize: 10
+            }
+        });
+
+        $(function () {
+
+            $(".date, .k-datepicker").kendoDatePicker();
+            $(".datehour").kendoTimePicker();
+            $("[type='number']").kendoNumericTextBox();
+            $(".k-textarea").kendoTextArea({
+                rows: 5
+            });
+            $('.form-input > [type="text"]').kendoTextBox();
+
+
+
+            //expand object
+            $('.object-list-wrap').on('click', '.object .toggle-info', function (e) {
+                e.preventDefault();
+                $(this)//.siblings('.object-properties').slideToggle(200).end()
+                    .parents('.object').toggleClass('active')
+                    .siblings('.active').children('.object-properties').slideToggle(100).end().removeClass('active');
+            });
+
+            $(".k-dropdown-js").kendoDropDownList({
+                dataSource: ["Example", "Lorem Ipsum", "Third option"]
+            });
+
+        })
+    </script>
+}

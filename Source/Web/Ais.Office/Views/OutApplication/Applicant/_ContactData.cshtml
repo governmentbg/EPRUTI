@@ -1,0 +1,56 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.Applicant
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var defaultAddressId = ViewBag.DefaultAddressId as Guid?;
+    var recipient = Model?.Recipient;
+}
+<div class="flex contact-data-js">
+    @if (recipient != null)
+    {
+        <div class="left">
+            @Html.InfoLabel($"{Localizer["ChooseAddress"]}:", "ChooseAddress")
+            @(Html.Kendo().DropDownList()
+                .Name(Guid.NewGuid().ToString())
+                .HtmlAttributes(new { name = string.Empty })
+                .DataValueField("Id")
+                .DataTextField("Name")
+                .Value(defaultAddressId?.ToString() ?? recipient.ContactData?.Id?.ToString())
+                .Filter(FilterType.Contains)
+                .DataSource(
+                    d =>
+                        d.Custom()
+                         .Transport(
+                             transport => transport
+                                 .Read(read => { read.Action("ReadAddress", "OutApplication", new { applicationUniqueId = ViewBag.ApplicationUniqueId, recipientId = recipient.Id, authorId = Model.Author?.Id }); }))
+                         .Group(g => { g.Add("Code", typeof(string)); })
+                         .ServerFiltering(false))
+                .Deferred(deferred))
+            @Html.ValidationMessage("ContactData")
+            <div class="form-row">
+                @{
+                    if (recipient.ContactData is { Id: not null })
+                    {
+                        <div class="adresses">
+                            @{
+                                await Html.RenderPartialAsync("~/Views/OutApplication/Applicant/_Address.cshtml", recipient.ContactData);
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <div class="right w-auto">
+            <div class="button-wrap w-auto">
+                <label></label>
+                <button class="bttn bttn-icon autosize small third choose-contact-js" title="@Localizer["Choose"]" data-recipient="@recipient.Id" data-quality=@(Model.AuthorQuality?.Id) type="button">
+                    <i class="k-icon k-font-icon k-i-check"></i>
+                </button>
+            </div>
+        </div>
+    }
+</div>

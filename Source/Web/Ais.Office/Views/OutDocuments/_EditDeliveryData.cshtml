@@ -1,0 +1,212 @@
+﻿@using Ais.Data.Models.Document
+@using Ais.Data.Models.Helpers
+@using Ais.Data.Models.Role
+@using Ais.Infrastructure.KendoExt
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile
+@inject IStringLocalizer Localizer;
+@model Ais.Office.ViewModels.DeliveryData.DeliveryDataViewModel
+@{
+    var now = DateTime.Now;
+    if (Model != null)
+    {
+        Model.WaitToDate ??= now.AddDays(Model.TypeDefaultWaitDays ?? default);
+        Model.SendDate ??= now;
+    }
+
+    var channelType = EnumHelper.GetServiceReceiveMethodTypeById(Model?.Channel?.Id ?? default);
+    var isCustomStatus = new HashSet<ServiceReceiveMethods> { ServiceReceiveMethods.CourierService, ServiceReceiveMethods.Mail, ServiceReceiveMethods.Table, ServiceReceiveMethods.Seos }.Contains(channelType);
+}
+<form action="@Url.ActionLink("EditDeliveryData", "OutDocuments")"
+      data-ajax="true"
+      data-ajax-success="outdocuments.onEditDeliverySucccess"
+      data-ajax-method="POST">
+    @Html.HiddenFor(x => x.Id)
+    @Html.HiddenFor(x => x.Channel.Id)
+    @Html.HiddenFor(x => x.UniqueId)
+    @if (!isCustomStatus)
+    {
+        @Html.HiddenFor(x => x.Status.Id)
+    }
+    <div class="delivery-data">
+        <div class="step-box">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">
+                    @Localizer["OutDocumentBasicData"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    @if (channelType == ServiceReceiveMethods.DeskAtAgcc)
+                    {
+                        Model.DeliveryDate ??= now;
+                        Model.WaitResponseToDate ??= now.AddDays(Model.TypeDefaultWaitResponseDays ?? default);
+                        <div class="form-input w-50">
+                            @Html.LabelFor(x => x.DeliveryDate, Localizer["DeliveryToClientDate"])
+                            @(Html.Kendo().DateTimePickerFor(x => x.DeliveryDate).Enable(false))
+                            @Html.ValidationMessageFor(x => x.DeliveryDate)
+                        </div>
+                    }
+                    else if (channelType != ServiceReceiveMethods.BgPosts)
+                    {
+                        @if (isCustomStatus)
+                        {
+                            <div class="form-input w-50">
+                                @Html.LabelFor(x => x.Status, Localizer["Status"].ToString(), new { @class = "required" })
+                                @(Html.Kendo().DropDownListFor(x => x.Status.Id)
+                                      .DataTextField("Name")
+                                      .DataValueField("Id")
+                                      .HtmlAttributes(new { id = Guid.NewGuid().ToString(), data_deliveredtoclientid = EnumHelper.GetDocStatusIdByEnum(Status.DeliveredToClient), data_waitresponsedays = Model.TypeDefaultWaitResponseDays })
+                                      .Events(e => e.Change("outdocuments.onDeliveryStatusChange"))
+                                    .DataSource(x => x.Read(x => x.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nstatus", flag = "4" })))))
+                                @Html.ValidationMessageFor(m => m.Status)
+                            </div>
+                        }
+                        <div class="form-input w-50">
+                            @Html.LabelFor(x => x.SendDate, Localizer["SendDate"])
+                            @(Html.EditorFor(x => x.SendDate))
+                            @Html.ValidationMessageFor(x => x.SendDate)
+                        </div>
+                        <div class="form-input w-50">
+                            @Html.LabelFor(x => x.DeliveryDate, Localizer["DeliveryDate"])
+                            @(Html.EditorFor(x => x.DeliveryDate))
+                            @Html.ValidationMessageFor(x => x.DeliveryDate)
+                        </div>
+                        <div class="form-input w-50">
+                            @Html.LabelFor(x => x.ReceiveMessageDate, Localizer["ReceiveMessageDate"])
+                            @(Html.EditorFor(x => x.ReceiveMessageDate))
+                            @Html.ValidationMessageFor(x => x.ReceiveMessageDate)
+                        </div>
+                    }
+                    <div class="form-input fullwidth">
+                        @Html.LabelFor(x => x.Comment, Localizer["Comment"])
+                        @Html.Kendo().TextAreaFor(x => x.Comment).Rows(2)
+                        @Html.ValidationMessageFor(x => x.Comment)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head collapsible bg-red">
+                <h3 class="step-box-title">
+                    @Localizer["OutDocumentTerms"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input w-50">
+                        <div class="deadline">
+                            @Html.LabelFor(x => x.WaitToDate, Localizer["WaitToDate"])
+                            @if (Model?.TypeDefaultWaitDays > 0)
+                            {
+                                <span class="default-wait-days days" title="@(Localizer["DefaultWaitToDate"])">@($"{Model?.TypeDefaultWaitDays} {Localizer[Model?.TypeDefaultWaitDays == 1 ? "Day" : "Days"].Value.ToLower()}")</span>
+                            }
+                        </div>
+                        @(Html.EditorFor(x => x.WaitToDate))
+                        @Html.ValidationMessageFor(x => x.WaitToDate)
+                    </div>
+                    <div class="form-input w-50">
+                        <div class="deadline">
+                            @Html.LabelFor(x => x.WaitResponseToDate, Localizer["WaitResponseToDate"])
+                            @if (Model?.TypeDefaultWaitResponseDays > 0)
+                            {
+                                <span class="default-wait-days days" title="@(Localizer["DefaultWaitResponseToDate"])">@($"{Model?.TypeDefaultWaitResponseDays} {Localizer[Model?.TypeDefaultWaitResponseDays == 1 ? "Day" : "Days"].Value.ToLower()}")</span>
+                            }
+                        </div>
+                        @(Html.EditorFor(x => x.WaitResponseToDate))
+                        @Html.ValidationMessageFor(x => x.WaitResponseToDate)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">
+                    @Localizer["OutDocumentDelivery"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth m-0">
+                        @{
+                            var prefix = "File.";
+                            var asyncUploadChunkSize = 307200;
+                        }
+                        @Html.LabelFor(x => x.File, Localizer["File"].ToString())
+                        @(Html.Kendo().Upload()
+                              .Name($"{prefix}Url")
+                              .HtmlAttributes(new { accept = "doc, docx, pdf, jpg, jpeg", id = Guid.NewGuid().ToString(), data_prefix = prefix, name = string.Empty })
+                              .Messages(
+                                  x => x.Select(Localizer["SelectFiles"])
+                                        .DropFilesHere(Localizer["DropFilesHere"])
+                                        .InvalidFileExtension(Localizer["InvalidFileExtension"])
+                                        .Cancel(Localizer["Cancel"]))
+                              .Async(
+                                  a => a
+                                       .Save("Upload", "Attachment", new { area = string.Empty })
+                                       .Remove("Remove", "Attachment", new { area = string.Empty })
+                                       .AutoUpload(true)
+                                       .ChunkSize(asyncUploadChunkSize)
+                                       .Concurrent(false))
+                              .ShowFileList(true)
+                              .Multiple(false)
+                              .TemplateId("fileTemplate")
+                              .Validation(validation => { validation.AllowedExtensions("doc", "docx", "pdf", "jpg", "jpeg"); })
+                              .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+                              .Files(
+                                  files =>
+                                  {
+                                      if (Model?.File?.Name.IsNotNullOrEmpty() == true)
+                                      {
+                                          var attachment = Model?.File;
+                                          files.AddCustomFile(
+                                              new UploadFile
+                                              {
+                                                  Id = attachment!.Id,
+                                                  Name = attachment.Name,
+                                                  Url = attachment.Url,
+                                                  Size = attachment.Size,
+                                                  Extension = attachment.Extension,
+                                                  Data = new Dictionary<string, object> { { "prefix", prefix } }
+                                              });
+                                      }
+                                  }))
+                        <small class="extensions">
+                            @($"{Localizer["AllowExtensions"]}: \".doc, .docx, .pdf, .jpg, .jpeg\"")
+                        </small>
+                        @Html.ValidationMessageFor(x => x.File)
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        <div class="doc-upload">
+                            <div class="doc-upload-header">
+                                <label class="k-mt-1">@Localizer["DocumentForProof"]</label>
+                                <a class="k-button k-small edit-proof-doc-js" data-title="@Localizer["ChangeProofDocument"]">
+                                    <span class="k-i-pencil k-icon k-font-icon"></span>
+                                </a>
+                            </div>
+                            <div class="doc-upload-body proof-doc-js">
+                                @($"{Model?.ProofDocument?.RegNumber} {Model?.ProofDocument?.Type?.Name}".Trim())
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="dialog-button-wrap">
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+    </div>
+</form>
+@{
+    await Html.RenderPartialAsync("_FileTemplate");
+}

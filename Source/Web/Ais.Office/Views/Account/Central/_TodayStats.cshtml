@@ -1,0 +1,59 @@
+﻿@using Ais.Data.Models.Account;
+@using Microsoft.Extensions.Localization;
+@model DashboardTodayStatsCentral
+@inject IStringLocalizer Localizer
+<div class="three">
+    <div class="step-box ">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["Queue"] @DateTime.Now.ToShortDateString():
+            </h3>
+        </div>
+        <div class="step-box-body big-blocks-wrap flex-gap-20">
+            <div class="big-blocks-wrap flex flex-gap-20 first-queue">
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-red">
+                            <strong>@Localizer["TaskPriorityCount"]</strong>
+                            <h3>@Model.TaskPriorityCount</h3>
+                        </div>
+                    </a>
+                </div>
+                <div class="three">
+                    <a class="bigblock">
+                        <div class=" bg-orange">
+                            <strong>@Localizer["TaskDeadlineTodayCount"]</strong>
+                            <h3>@Model.TaskDeadlineTodayCount</h3>
+                        </div>
+                    </a>
+                </div>
+                <div class="three">
+                    <div class="bigblock">
+                        <div class=" bg-yellow">
+                            <strong>@Localizer["TaskFastCount"]</strong>
+                            <h3>@Model.TaskFastCount</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="big-blocks-wrap flex flex-gap-20 second-queue">
+                <div class="three">
+                    <div class="bigblock">
+                        <div class=" bg-blue">
+                            <strong>@Localizer["TaskRegularCount"]</strong>
+                            <h3>@Model.TaskRegularCount</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="three">
+                    <div class="bigblock">
+                        <div class=" bg-lime">
+                            <strong>@Localizer["TaskUnpaidCount"]</strong>
+                            <h3>@Model.TaskUnpaidCount</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@model bool?
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+
+    var isChecked = ViewData.ContainsKey("isChecked") ? ViewData["isChecked"] is bool && (bool)ViewData["isChecked"] : Model ?? false;
+}
+
+@(Html.Kendo().CheckBoxFor(m => m)
+      .HtmlAttributes(attributes)
+      .Checked(isChecked)
+      .Label(ViewData["label"]?.ToString())
+      .Deferred(!Context.Request.IsAjaxRequest()))

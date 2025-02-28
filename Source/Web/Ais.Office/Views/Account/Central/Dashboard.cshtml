@@ -1,0 +1,23 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@(await Component.InvokeAsync(typeof(Ais.Office.Components.HomeMessageViewComponent)))
+<div class="content login-after">
+    <section class="center">
+        <div class="steps-body">
+            <div class="column-wrap charts-wrap flex-gap-20">
+                @{
+                    await Html.RenderPartialAsync("_CommonStats.cshtml");
+                    await Html.RenderPartialAsync("_TodayStats.cshtml");
+                    await Html.RenderPartialAsync("_GridData.cshtml");
+                }
+        </div>
+        </div>
+    </section>
+</div>
+@section Scripts{
+    <script src="@Url.Content($"~/bundles/account.min.js")" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function() {
+            $("#TaskByPeriodFrom").data("kendoDatePicker").trigger("change")}
+         )
+    </script>
+}

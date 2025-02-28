@@ -1,0 +1,32 @@
+﻿@using Ais.Office.ViewModels.Faq;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+
+@model FaqCategoryViewModel
+
+<div class="content-pre-wrap">
+    <div class="center">
+        <form method="post" class="dirty-check" action="@Url.ActionLink("UpsertCategory", "Faq")"
+      data-ajax="true"
+      data-ajax-method="POST"
+              data-ajax-success="admin_faq.onFaqCategoryUpsertSuccessfully">
+
+                @Html.ValidationSummary(true)
+
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+
+                <div class="form-input fullwidth nest">
+                    @Html.EditorFor(model => model.Names, "InternationalizationTextBox")
+                    @Html.ValidationMessageFor(m => m.Names)
+                </div>
+
+                <div class="clear"></div>
+                <div class="button-wrap fullwidth nest">
+                    <button type="submit" class="bttn main caps right">@Localizer["Save"]</button>
+                <button class="bttn secondary caps right closeKendoWindow-js" name="preview" value="true">@Localizer["Cancel"]</button>
+                </div>
+                <div class="clear"></div>
+            </form>
+        </div>
+</div>

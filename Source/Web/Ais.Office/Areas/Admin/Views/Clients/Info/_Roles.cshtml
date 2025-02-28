@@ -1,0 +1,102 @@
+﻿@using Ais.Data.Models.Nomenclature;
+@using Ais.Data.Models.Role;
+@using Ais.Office.Areas.Admin.Controllers;
+@using Ais.Office.ViewModels.TariffTemplates;
+@using Ais.Utilities.Extensions;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+@model List<ClientRole>
+@{
+    var serviceReceiveMethods = ViewBag.ServiceRecieveMethods as List<Nomenclature>;
+}
+@if (Model.IsNullOrEmpty())
+{
+    <div class='no-data'>@Localizer["NoData"]</div>
+}
+else
+{
+    <div class="steps-body">
+        @foreach (var role in Model)
+        {
+            <div class="step-box fullwidth">
+                <div class="step-box-head">
+                    @role.Name - @string.Join("; ", role.Scopes.Select(x => x.Description))
+                </div>
+                <div class="step-box-body">
+                    <div class="form-row">
+                        <div class="form-input fullwidth">
+                            @Html.Label(Localizer["Rights"])
+                            @(Html.Kendo().Grid<CheckableNomenclature>()
+                                .Name(Guid.NewGuid().ToString())
+                                .Filterable(f => f.Enabled(true).Mode(GridFilterMode.Row))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(c => c.Name)
+                                    .Title(Localizer["Name"])
+                                    .Filterable(f => { f.Search(true).IgnoreCase(true).Cell(cell => cell.ShowOperators(false).Operator("contains").SuggestionOperator(FilterType.Contains)); });
+                                })
+                                .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .Read(r => r.Action(nameof(ClientsController.GetRoleRights), "Clients", new { roleId = role.Id }))
+                                .ServerOperation(false)))
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-input fullwidth">
+                            @Html.Label(Localizer["Services"])
+                            @(Html.Kendo().Grid<Service>()
+                                .Name(Guid.NewGuid().ToString())
+                                .Filterable(f => f.Enabled(true).Mode(GridFilterMode.Row))
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(c => c.Name)
+                                    .Title(Localizer["Name"])
+                                    .Filterable(f => { f.Search(true).IgnoreCase(true).Cell(cell => cell.ShowOperators(false).Operator("contains").SuggestionOperator(FilterType.Contains)); });
+
+                                    if (serviceReceiveMethods.IsNotNullOrEmpty())
+                                    {
+                                        foreach (var item in serviceReceiveMethods)
+                                        {
+                                            columns.Bound(c => c.ReceiveMethods)
+                                            .Filterable(false)
+                                            .Title(item.Name)
+                                            .ClientTemplate(
+                                            "#if (IsChecked === true) {#" +
+                                            $"# var receiveMethod = ReceiveMethods.find(x => x.Id == '{item.Id}') #" +
+                                            $"#if (receiveMethod != undefined && receiveMethod.IsChecked) {{#" +
+                                            $"<input type='checkbox' class='k-checkbox' data-service-id='#:Id#' checked='checked' disabled='disabled' data-id='{item.Id}' />" +
+                                            "#} else {#" +
+                                            $"<input type='checkbox' class='k-checkbox select-receive-method-js' data-service-id='#:Id#' disabled='disabled'rem data-id='{item.Id}' />" +
+                                            "#} #" +
+                                            "#} else {#" +
+                                            $"<input type='checkbox' class='k-checkbox select-receive-method-js' data-service-id='#:Id#' disabled='disabled' data-id='{item.Id}' />" +
+                                            "#} #"
+                                            );
+                                        }
+                                    }
+                                })
+                                .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .Read(r => r.Action(nameof(ClientsController.GetRoleServices), "Clients", new { roleId = role.Id }))
+                                .ServerOperation(false)))
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="fullwidth">
+                            @Html.Label(Localizer["ReasonForPriceChanging"])
+                            @(Html.Kendo().Grid<TariffTemplateTableViewModel>()
+                                .Name(Guid.NewGuid().ToString())
+                                .Columns(column =>
+                                {
+                                    column.Bound(c => c.Title).Title(Localizer["Title"]).Width("50%");
+                                    column.Bound(c => c.RegUserName).Title(Localizer["RegUserName"]).Width("25%");
+                                    column.Bound(c => c.RegDate).Title(Localizer["RegDate"]).Format("{0:G}").Width("25%");
+                                })
+                                .DataSource(d => d.Ajax().Read(x => x.Action("SearchTariffTemplates", "ClientRoles", new { ClientRoleId = role.Id }))))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

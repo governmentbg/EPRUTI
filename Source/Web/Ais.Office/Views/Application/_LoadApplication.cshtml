@@ -1,0 +1,43 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Options
+@using Ais.Infrastructure.Options
+@inject IOptions<AttachmentOptions> ApplicationOption
+@inject IStringLocalizer Localizer
+@{
+    var extension = ".xml";
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+<div class="indicator-content bg-grey">
+
+    <div class="form-input fullwidth file">
+        @Html.InfoLabel(Localizer["LoadApplication"], key: "LoadApplication")
+        @(Html.Kendo().Upload()
+            .Name(Guid.NewGuid().ToString())
+            .Messages(x => x.Select(Localizer["SelectFiles"])
+            .DropFilesHere(Localizer["DropFilesHere"])
+            .InvalidFileExtension(Localizer["InvalidFileExtension"])
+            .Cancel(Localizer["Cancel"]))
+            .HtmlAttributes(new { accept = extension })
+            .Async(a => a
+            .Save("Upload", "Attachment", new { area = string.Empty })
+            .AutoUpload(true)
+            .ChunkSize(ApplicationOption.Value.AsyncUploadChunkSize)
+            .Concurrent(false))
+            .Multiple(false)
+            .Validation(validation =>
+            {
+                validation.AllowedExtensions(extension);
+                validation.MaxFileSize(ApplicationOption.Value.MaxFileSize * 1000000);
+                validation.MinFileSize(1);
+            })
+            .Events(e => e.Upload("core.onUpload").Success("core.applicationXmlUploadSuccess"))
+            .Deferred(deferred))
+        <small>
+            @($"{Localizer["AllowExtensions"]}: {extension}, {Localizer["MaxFileSize"]}: {ApplicationOption.Value.MaxFileSize} MB.")
+        </small>
+    </div>
+</div>
+
+

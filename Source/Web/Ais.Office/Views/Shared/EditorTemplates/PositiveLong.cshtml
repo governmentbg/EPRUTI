@@ -1,0 +1,25 @@
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@model long?
+@{
+    var format = ViewData["format"]?.ToString() ?? "n0";
+
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+                {
+            { "id", Guid.NewGuid().ToString() },
+                });
+}
+
+@(Html.Kendo().IntegerTextBoxFor(m => m)
+      .HtmlAttributes(attributes)
+      .Min(0)
+      .Format(format)
+      .Decimals(0)
+      .Max(long.MaxValue)
+      .Deferred(!Context.Request.IsAjaxRequest()))

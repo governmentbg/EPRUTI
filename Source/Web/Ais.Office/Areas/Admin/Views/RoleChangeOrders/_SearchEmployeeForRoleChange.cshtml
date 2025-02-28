@@ -1,0 +1,113 @@
+﻿@inject IStringLocalizer Localizer;
+@using Microsoft.Extensions.Localization
+@using Ais.Office.ViewModels.Employees
+@model Ais.Office.ViewModels.Employees.EmployeeQueryViewModel
+<div class="steps-body">
+    <div class="step-box fullwidth">
+        <div class="step-box-head collapsible">
+            @Localizer["Search"]
+        </div>
+        <div class="step-box-body">
+            <form action="@Url.ActionLink("SearchEmployees", "RoleChangeOrders")"
+                  class="dirty-check"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-success="admin_rolechangeorders.onSearchSuccess">
+                <div class="form-row">
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.UserName)
+                        @Html.Kendo().TextBoxFor(x => x.UserName)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.FullName)
+                        @Html.Kendo().TextBoxFor(x => x.FullName)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.Position)
+                        @Html.Kendo().TextBoxFor(x => x.Position)
+                    </div>
+                    <div class="form-input autosize k-ml-auto nest">
+                        <label class="empty"></label>
+                        <button class="bttn bttn-icon blue" title="@Localizer["Search"]" id="searchTablebutton">
+                            <svg class="icon">
+                                <use xlink:href="#icon-search"></use>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="step-box fullwidth">
+        <div class="step-box-head collapsible">
+            @Localizer["SearchResult"]
+        </div>
+        <div class="step-box-body">
+            <div class="form-row fullwidth">
+                @(Html.Kendo().Grid(Array.Empty<EmployeeTableViewModel>())
+                      .Name("searchEmployeesGrid")
+                      .HtmlAttributes(new { @class = "fullwidth" })
+                      .Columns(column =>
+                      {
+                          column.Bound(c => c.UserName).Title(Localizer["UserName"]);
+                          column.Bound(c => c.FullName).Title(Localizer["Name"]);
+                          column.Bound(c => c.Position).Title(Localizer["Position"]);
+                          column.Bound(c => c.RolesTxt).Title(Localizer["CurrentRoles"]);
+                          column.Bound(c => c.UniqueId).Title(Localizer["Actions"])
+                                .ClientTemplate("<a href='\\#' class='k-button k-small dirtyignore add-employee-to-role-change-js'><span class='k-i-add k-icon k-font-icon k-button-icon'></span></a>");
+                      }))
+            </div>
+        </div>
+    </div>
+    <div class="step-box fullwidth">
+        <div class="step-box-head collapsible">
+            @Localizer["SearchResult"]
+        </div>
+        <div class="step-box-body">
+            <form action="@Url.ActionLink("AddEmployeesToRoleChange", "RoleChangeOrders")"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-success="admin_rolechangeorders.onAddedEmployeesSuccess">
+                @Html.Hidden("uniqueSessionId", ViewBag.UniqueSessionId as Guid?)
+                <div class="step-box-body">
+                    <h6>@Localizer["ToBeAdded"]</h6>
+                    <div class="form-row fullwidth">
+                        @(Html.Kendo().Grid(Array.Empty<EmployeeTableViewModel>())
+                              .Name("employeesToAddGrid")
+                              .HtmlAttributes(new { @class = "fullwidth" })
+                              .Columns(column =>
+                              {
+                                  column.Bound(c => c.FullName).Title(Localizer["FullName"]);
+                                  column.Bound(c => c.UserName).Title(Localizer["UserName"]);
+                                  column.Bound(c => c.RolesTxt).Title(Localizer["CurrentRoles"]);
+                                  column.Bound(c => c.UniqueId).Title(Localizer["Actions"])
+                                        .ClientTemplate("<a href='\\#' class='k-button k-small dirtyignore remove-employee-to-role-change-js'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a>");
+                                  column.Bound(c => c.Id).Hidden().ClientTemplateId("employeesToAddClientTemplateId");
+                              }))
+                    </div>
+                </div>
+                <div class="k-dialog-buttongroup">
+                    <button class="bttn right main">
+                        @Localizer["Add"]
+                    </button>
+                    <button class="bttn right third closeKendoWindow-js">
+                        @Localizer["Close"]
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script id="employeesToAddClientTemplateId" type="text/x-kendo-template">
+    # var index = kendo.guid(); #
+    <input type="hidden" name="Employees.Index" value="#:index#" />
+    <input type="hidden" name="Employees[#:index#].Employee.Id" value="#:Id#" />
+    <input type="hidden" name="Employees[#:index#].Employee.FullName" value="#:FullName#" />
+    <input type="hidden" name="Employees[#:index#].Employee.User.UserName" value="#:UserName#" />
+    #if(data.Roles){#
+        #for (var i = 0; i < data.Roles.length; i++){#
+            <input type="hidden" name="Employees[#:index#].CurrentRoles[#:i#].Id" value="#:Roles[i].Id#" />
+            <input type="hidden" name="Employees[#:index#].CurrentRoles[#:i#].Name" value="#:Roles[i].Name#" />
+       #}#
+    #}#
+</script>

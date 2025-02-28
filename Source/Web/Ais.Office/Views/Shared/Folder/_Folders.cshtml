@@ -1,0 +1,23 @@
+﻿@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.Document
+<div class="step-box">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["Folders"]
+        </h3>
+    </div>
+    <div class="step-box-body folders-js">
+        @if (Model?.Folders.IsNotNullOrEmpty() == true)
+        {
+            var index = 1;
+            foreach (var folder in Model.Folders)
+            {
+                ViewBag.ItemIndex = index++;
+                ViewBag.SkipDelete = !Model.IsNew && Model.RegNumber == folder.Number;
+                await Html.RenderPartialAsync("Folder/_Folder", folder);
+            }
+        }
+    </div>
+</div>

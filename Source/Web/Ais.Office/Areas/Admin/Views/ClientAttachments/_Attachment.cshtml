@@ -1,0 +1,86 @@
+﻿@using Ais.Data.Models.Attachment
+@using Ais.Infrastructure.KendoExt
+@using Ais.Office.ViewModels.Clients
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile;
+@inject IStringLocalizer Localizer;
+@inject IConfiguration Configuration
+@model Ais.Data.Models.Attachment.AttachmentType
+@{
+    if (Model != null)
+    {
+        var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+        var asyncUploadChunkSize = Configuration.GetValue<double>("Attachment:AsyncUploadChunkSize");
+        var prefix = $"{nameof(ClientAttachmentViewModel.Attachment)}.";
+        await Html.RenderPartialAsync("_FileTemplate");
+        void RenderFileUpload(Attachment attachment)
+        {
+            @Html.InfoLabel(Model!.Title.ToString())
+            @(Html.Kendo().Upload()
+                .Name($"{prefix}Url")
+                .HtmlAttributes(new { accept = Model.Extensions, id = Guid.NewGuid().ToString(), data_prefix = prefix, name = string.Empty })
+                .Messages(
+                    x => x.Select(Localizer["SelectFiles"])
+                          .DropFilesHere(Localizer["DropFilesHere"])
+                          .InvalidFileExtension(Localizer["InvalidFileExtension"])
+                          .Cancel(Localizer["Cancel"]))
+                .Async(
+                    a => a
+                         .Save("Upload", "Attachment", new { area = string.Empty })
+                         .Remove("Remove", "Attachment", new { area = string.Empty })
+                         .AutoUpload(true)
+                         .ChunkSize(asyncUploadChunkSize)
+                         .Concurrent(false))
+                .ShowFileList(true)
+                .Multiple(false)
+                .TemplateId("fileTemplate")
+                .Validation(
+                    validation =>
+                    {
+                        validation.AllowedExtensions(Model.ExtensionsCollection);
+                        validation.MaxFileSize(Model.MaxSizeInBytes);
+                        validation.MinFileSize(1);
+                    })
+                .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+                .Files(
+                    files =>
+                    {
+                        if (attachment?.Url.IsNotNullOrEmpty() == true || attachment?.Id.HasValue == true)
+                        {
+                            files.AddCustomFile(
+                                new UploadFile
+                                {
+                                    Id = attachment.Id,
+                                    Name = attachment.Name,
+                                    Url = attachment.Url,
+                                    Size = attachment.Size,
+                                    Extension = attachment.Extension,
+                                    Data = new Dictionary<string, object> { { "prefix", prefix } }
+                                });
+                        }
+                    }))
+                <small>
+                    @($"{Localizer["AllowExtensions"]}: {Model?.Extensions}, {Localizer["MaxFileSize"]}: {Model?.MaxSize} MB.")
+                </small>
+        }
+        var clientAttachment = ViewBag.ClientAttachment as ClientAttachmentViewModel;
+        <div class="form-input column">
+            @{
+                RenderFileUpload(clientAttachment?.Attachment);
+            }
+            @Html.ValidationMessage(nameof(ClientAttachmentViewModel.Attachment))
+        </div>
+        <div class="form-input column">
+            @Html.InfoLabel(Localizer["Description"], key: "UploadFile")
+            @(Html.Kendo().TextBox()
+                  .Name($"{prefix}Description")
+                  .HtmlAttributes(new { id = Guid.NewGuid().ToString() })
+                  .Value(clientAttachment?.Attachment?.Description)
+                  .Deferred(deferred))
+        </div>
+    }
+}

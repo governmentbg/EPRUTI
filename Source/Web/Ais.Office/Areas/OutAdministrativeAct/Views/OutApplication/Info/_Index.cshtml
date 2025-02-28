@@ -1,0 +1,46 @@
+﻿@using Ais.Office.Controllers
+@using Ais.Office.Areas.OutAdministrativeAct.Controllers
+@using Ais.Office.Controllers.Documents
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.AspNetCore.Mvc.Controllers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model Ais.Data.Models.Document.OutAdmAct
+
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var skipScripts = ViewBag.SkipScripts is bool && (bool)ViewBag.SkipScripts;
+    var isOverview = ViewBag.IsOverview is bool && (bool)ViewBag.IsOverview;
+
+    async Task RenderDataAsync()
+    {
+        await Html.RenderPartialAsync("Info/_BasicData");
+        await Html.RenderPartialAsync("Info/_Applicants");
+        await Html.RenderPartialAsync("Info/_ActObject");
+        await Html.RenderPartialAsync("Info/_CopyAdmAct");
+        if (!isOverview)
+        {
+            await Html.RenderPartialAsync("~/Views/Shared/Document/_AttachedDocuments.cshtml", Model);
+        }
+    }
+    <div class="docinfo">
+        @{
+            await RenderDataAsync();
+        }
+    </div>
+}
+@if (!skipScripts)
+{
+    if (deferred)
+    {
+        @section Scripts
+        {
+    <script src="~/bundles/applicationInfo.min.js" asp-append-version="true"></script>
+        }
+    }
+    else
+    {
+        <script src="~/bundles/applicationInfo.min.js" asp-append-version="true"></script>
+    }
+}

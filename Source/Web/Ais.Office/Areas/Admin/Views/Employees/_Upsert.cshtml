@@ -1,0 +1,149 @@
+﻿@using Ais.Office.Controllers
+@using Ais.Office.ViewModels.Employees;
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization;
+@model EmployeeUpsertViewModel
+@inject IStringLocalizer Localizer
+
+<form method="post" action="@Url.ActionLink(Model.IsNew ? "Create": "Edit", "Employees")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.User.Id)
+    @Html.HiddenFor(m => m.UniqueId)
+
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["BasicData"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input half third">
+                        @Html.LabelFor(m => m.FirstName, new { @class  = "required" })
+                        @Html.EditorFor(m => m.FirstName)
+                        @Html.ValidationMessageFor(m => m.FirstName)
+                    </div>
+                    <div class="form-input half third">
+                        @Html.LabelFor(m => m.SurName)
+                        @Html.EditorFor(m => m.SurName)
+                        @Html.ValidationMessageFor(m => m.SurName)
+                    </div>
+                    <div class="form-input half third">
+                        @Html.LabelFor(m => m.LastName, new { @class = "required" })
+                        @Html.EditorFor(m => m.LastName)
+                        @Html.ValidationMessageFor(m => m.LastName)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["AdministrativeData"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input half privacy">
+                        @Html.LabelFor(m => m.Office, new { @class = "required" })
+                        @(Html.Kendo()
+                            .DropDownListFor(x => x.Office.Id)
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .Filter(FilterType.Contains)
+                            .MinLength(3)
+                            .DataSource(ds => ds.Read("GetOffices", "Employees")))
+                        @Html.ValidationMessageFor(m => m.Office)
+                    </div>
+                    <div class="form-input half">
+                        @Html.LabelFor(m => m.Administration)
+                        @Html.EditorFor(m => m.Administration)
+                        @Html.ValidationMessageFor(m => m.Administration)
+                    </div>
+                    <div class="form-input half">
+                        @Html.LabelFor(m => m.Position, new { @class = "required" })
+                        @Html.EditorFor(m => m.Position)
+                        @Html.ValidationMessageFor(m => m.Position)
+                    </div>
+                    <div class="form-input half privacy">
+                        <label class="empty"></label>
+                        @Html.EditorFor(m => m.IsSlowQueue)
+                        @Html.ValidationMessageFor(m => m.IsSlowQueue)
+                    </div>
+                    <div class="form-input half privacy">
+                        <label class="empty"></label>
+                        @Html.EditorFor(m => m.IsFastQueue)
+                        @Html.ValidationMessageFor(m => m.IsFastQueue)
+                    </div>
+                    <div class="form-input half privacy">
+                        <label class="empty"></label>
+                        @Html.EditorFor(m => m.IsOfficeManager, Model.IsOfficeManager ? new { htmlAttributes = new { @readonly = "readonly" } } : null)
+                        @Html.ValidationMessageFor(m => m.IsOfficeManager)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["SystemData"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input half pint">
+                        @Html.LabelFor(m => m.User.Email, Localizer["Email"])
+                        @Html.EditorFor(m => m.User.Email)
+                        @Html.ValidationMessageFor(m =>m.User.Email)
+                    </div>
+                    <div class="form-input half pint">
+                        @Html.LabelFor(m => m.User.UserName, Localizer["Username"], new { @class = "required" })
+                        @Html.EditorFor(m => m.User.UserName)
+                        @Html.ValidationMessageFor(m =>m.User.UserName)
+                    </div>
+                    <div class="form-input half pint">
+                        @Html.LabelFor(m => m.User.Status)
+                        @(
+                            Html.Kendo().DropDownListFor(m => m.User.Status.Id)
+                                          .DataTextField("Name")
+                                          .DataValueField("Id")
+                            .DataSource(x => x.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nuserstatus", flag = 1 }))))
+                            )
+                        @Html.ValidationMessageFor(m => m.User.Status.Id)
+                    </div>
+                    <div class="form-input half pint">
+                        @Html.LabelFor(m => m.ValidTo)
+                        @Html.Kendo().DateTimePickerFor(m => m.ValidTo)
+                        @Html.ValidationMessageFor(m => m.ValidTo)
+                    </div>
+                    <div class="form-input half pint">
+                        @Html.LabelFor(m => m.StartPage)
+                        @Html.EditorFor(m => m.StartPage)
+                        @Html.ValidationMessageFor(m => m.StartPage)
+                    </div>
+                    <div class="form-input half pint privacy">
+                        <label class="empty"></label>
+                        @Html.Kendo().CheckBoxFor(m => m.UseNewPassword).Events(x => x.Change("admin_employees.onUseNewPasswordClick"))
+                        @Html.ValidationMessageFor(m => m.UseNewPassword)
+                    </div>
+                    <div class="form-input half pint hidden" id="pass-input">
+                        @Html.LabelFor(m => m.User.Password, new { @class = "required" })
+                        @Html.EditorFor(m => m.User.Password, "Password")
+                        @Html.ValidationMessageFor(m => m.User.Password)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

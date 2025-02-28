@@ -1,0 +1,36 @@
+﻿@using Ais.Data.Models.Address;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+@model Address
+<form method="post" action="@Url.ActionLink("UpsertAddress", "Clients" )"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.UniqueId)
+    @Html.Hidden("clientId", ViewBag.ClientId as string)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["Address"]</h3>
+            </div>
+            <div class="step-box-body">
+                @{
+                    ViewBag.ShowDefaultCheckBox = true;
+                    ViewBag.RequiredFields = Address.GetAllRequiredFields(new[] { nameof(Address.Origin) });
+                }
+                <partial name="_Address" , model="@(Model ?? new Address())" />
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

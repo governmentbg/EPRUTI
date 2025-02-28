@@ -1,0 +1,49 @@
+﻿@inject IStringLocalizer Localizer
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@model Ais.Office.ViewModels.Application.ClientQueryViewModel
+@{
+    var applicationUniqueId = this.ViewBag.ApplicationUniqueId as string;
+}
+<div class="step-box fg-1 search-client-wrapper-js">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["SearchRecipients"]
+        </h3>
+    </div>
+    <div class="step-box-body">
+        <div id="searchClientForm" action="@Url.Action("SearchClients", "OutApplication", new { applicationUniqueId = applicationUniqueId })" data-ajax-method="get" data-ajax-update="#searchResultWrapper" class="form-row">
+            <div class="form-input half">
+                @Html.LabelFor(m => m.EgnBulstat)
+                @Html.TextBoxFor(m => m.EgnBulstat, new { id = string.Empty })
+            </div>
+            <div class="form-input half privacy">
+                @Html.LabelFor(m => m.Knik)
+                @Html.TextBoxFor(m => m.Knik, new { id = string.Empty })
+            </div>
+            <div class="form-input quad">
+                @Html.LabelFor(m => m.FullName)
+                @Html.TextBoxFor(m => m.FullName, new { id = string.Empty })
+            </div>
+            <div class="form-input quad privacy">
+                @Html.LabelFor(m => m.ForeignPersonData)
+                @Html.TextBoxFor(m => m.ForeignPersonData, new { id = string.Empty })
+            </div>
+            <div class="form-input auto w100">
+                @Html.LabelFor(m => m.Limit)
+                @Html.EditorFor(m => m.Limit, "ResultLimit")
+            </div>
+            <div class="form-input w-auto">
+                <label></label>
+                <button class="bttn blue small bttn-icon autosize" type="submit" title="@Localizer["Search"]" ajax-button-submit>
+                    <i class="k-i-search k-icon k-font-icon"></i>
+                </button>
+                <button class="bttn blue small third autosize bttn-icon add-applicant-js" title="@Localizer["Add"]" type="button">
+                    <i class="k-i-plus k-icon k-font-icon"></i>
+                </button>
+            </div>
+        </div>
+        <div id="searchResultWrapper">
+        </div>
+    </div>
+</div>

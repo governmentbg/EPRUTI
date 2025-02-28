@@ -1,0 +1,37 @@
+﻿@using Ais.Office.ViewModels.Application
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Document.OutAdmAct
+@inject IStringLocalizer Localizer;
+
+<div class="steps-body k-flex-column">
+    @{
+        ViewBag.ApplicationUniqueId = Model.UniqueId;
+    }
+    <div class="step-box fg-1">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["ObjectsDescription"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input fullwidth">
+                    @Html.InfoLabel(Localizer["ObjectsDescription"], "ObjectsDescription")
+                    @Html.TextAreaFor(x => x.Object.NameDesc, new { @class = "mb-0" })
+                    @Html.ValidationMessage("ObjectsDescription")
+                </div>
+            </div>
+            <div class="button-wrap fullwidth">
+                <button class="bttn blue k-mb-2 right add-admact-object-js" title="@Localizer["AddAdmActObject"]" type="button">
+                    <i class="k-i-plus k-icon k-font-icon"></i> Добави обект
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @{
+        await Html.RenderPartialAsync("_AdmActObjects.cshtml");
+    }
+</div>

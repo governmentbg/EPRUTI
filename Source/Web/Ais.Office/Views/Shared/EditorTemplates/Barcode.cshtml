@@ -1,0 +1,24 @@
+﻿@using Ais.WebUtilities.Helpers;
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Localization
+@inject IConfiguration Configuration
+@inject IStringLocalizer Localizer
+@model object
+@{
+    var regex = $"{Configuration.GetValue<string>("BGPost:RegexBG")}|{Configuration.GetValue<string>("BGPost:RegexNonBG")}";
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+            { "data-val", true},
+            { "data-val-regex-pattern", regex },
+            { "data-val-regex", string.Format(Localizer["InvalidBarCode"]) },
+        });
+}
+
+@Html.TextBoxFor(model => model, attributes)

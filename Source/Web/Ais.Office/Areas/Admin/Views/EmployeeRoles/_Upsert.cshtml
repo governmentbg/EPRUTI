@@ -1,0 +1,130 @@
+﻿@using Ais.Data.Models.Employee
+@using Ais.Data.Models.NTask
+@using Ais.Data.Models.Nomenclature
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model Ais.Office.ViewModels.Employees.EmployeeRoleUpsertModel
+@{
+    var activityGroupCodes = ViewBag.ActivitiesGroups as IEnumerable<Tuple<long, string>>;
+}
+<form method="post" class="dirty-check" action="@Url.ActionLink("Upsert", "EmployeeRoles")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.UniqueId)
+    @Html.HiddenFor(m => m.Id)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">
+                    @Localizer["BaseData"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @Html.Label(Localizer["Name"], Localizer["Name"], new { @class = "required" })
+                        @Html.Kendo().TextBoxFor(x => x.Name)
+                        @Html.ValidationMessageFor(m => m.Name)
+                    </div>
+                    <div class="form-input fullwidth">
+                        @Html.Label(Localizer["Description"])
+                        @Html.Kendo().TextAreaFor(x => x.Description).Value(Model?.Description)
+                    </div>
+                </div>
+            </div>
+        </div>
+        @foreach (var group in activityGroupCodes!)
+        {
+            <input type="hidden" name="Activities.Index" value="@group.Item1"/>
+            <input type="hidden" name="Activities[@group.Item1].GroupCode" value="@group.Item1"/>
+            <div class="step-box fullwidth">
+                <div class="step-box-head collapsible">
+                    <h3 class="step-box-title">@group.Item2</h3>
+                </div>
+                <div class="step-box-body">
+                    <div class="form-row">
+                        <div class="form-input fullwidth">
+                            @(Html.Kendo().Grid<EmployeeActivity>()
+                                .Name($"activity_{group.Item1}")
+                                .Filterable(f => f.Enabled(true).Mode(GridFilterMode.Row))
+                                .Columns(
+                                    columns =>
+                                    {
+                                        columns.Bound(c => c.IsChecked)
+                                               .Filterable(false)
+                                               .ClientHeaderTemplate($"<input type='checkbox' class='k-checkbox select-all select-all-js' title='{Localizer["SelectAll"]}' data-group-code='{group.Item1}' />")
+                                               .ClientTemplate(
+                                                   "#if (IsChecked === true) {#" +
+                                                   $"<input type='checkbox' class='k-checkbox select-activity-js'  checked='checked'  data-group-code='{group.Item1}' />" +
+                                                   "#} else {#" +
+                                                   $"<input type='checkbox' class='k-checkbox select-activity-js' data-group-code='{group.Item1}' />" +
+                                                   "#} #");
+                                        columns.Bound(c => c.Name)
+                                               .Title(Localizer["Name"])
+                                               .Filterable(f => { f.Search(true).IgnoreCase(true).Cell(cell => cell.ShowOperators(false).Operator("contains").SuggestionOperator(FilterType.Contains)); });
+                                    })
+                                .DataSource(
+                                    x => 
+                                        x.Ajax()
+                                         .Read("GetActivitiesByGroup", "EmployeeRoles", new { uniqueId = Model.UniqueId, groupCode = group.Item1 })))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="step-box fullwidth">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">
+                    @Localizer["Tasks"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @(Html.Kendo().Grid<NTaskForRole>()
+                            .Name("task-activities")
+                            .Filterable(f => f.Enabled(true).Mode(GridFilterMode.Row))
+                            .Columns(
+                                columns =>
+                                {
+                                    columns.Bound(c => c.IsChecked)
+                                           .Filterable(false)
+                                           .ClientHeaderTemplate($"<input type='checkbox' class='k-checkbox select-all select-all-js' title='{Localizer["SelectAll"]}'/>")
+                                           .ClientTemplate(
+                                               "#if (IsChecked === true) {#" +
+                                               "<input type='checkbox' class='k-checkbox select-activity-js' checked='checked' />" +
+                                               "#} else {#" +
+                                               "<input type='checkbox' class='k-checkbox select-activity-js'  />" +
+                                               "#} #");
+                                columns.Bound(c => c.SoftName)
+                                .Title(Localizer["Module"])
+                                .Filterable(f => { f.Search(true).IgnoreCase(true).Cell(cell => cell.ShowOperators(false).Operator("contains").SuggestionOperator(FilterType.Contains)); });
+                                columns.Bound(c => c.DocType)
+                                .Title(Localizer["DocTypeName"])
+                                .Filterable(f => { f.Search(true).IgnoreCase(true).Cell(cell => cell.ShowOperators(false).Operator("contains").SuggestionOperator(FilterType.Contains)); });
+                                    columns.Bound(c => c.Name)
+                                           .Title(Localizer["Name"])
+                                           .Filterable(f => { f.Search(true).IgnoreCase(true).Cell(cell => cell.ShowOperators(false).Operator("contains").SuggestionOperator(FilterType.Contains)); });
+                                })
+                            .DataSource(
+                                x => 
+                                    x.Ajax()
+                                     .Read("GetAllTasks", "EmployeeRoles", new { uniqueId = Model.UniqueId })))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

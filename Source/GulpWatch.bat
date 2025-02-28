@@ -1,0 +1,1 @@
+cmd.exe /c npm i && gulp --color watch

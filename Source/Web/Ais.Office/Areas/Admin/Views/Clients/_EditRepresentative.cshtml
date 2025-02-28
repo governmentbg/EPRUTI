@@ -1,0 +1,173 @@
+﻿@using Ais.Data.Models.Attachment
+@using Ais.Data.Models.Client
+@using Ais.Data.Models.Helpers
+@using Ais.Infrastructure.KendoExt
+@using Ais.Office.Controllers
+@using Ais.Office.Utilities.Helpers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile;
+@inject IStringLocalizer Localizer;
+@inject IConfiguration Configuration
+@model Ais.Office.ViewModels.Clients.AgentEditModel
+@{
+    var asyncUploadChunkSize = Configuration.GetValue<double>("Attachment:AsyncUploadChunkSize");
+    var powerOfAttorneyType = ViewBag.PowerOfAttorneyType as AttachmentType ?? new AttachmentType();
+    var powerOfAttorneyFilePrefix = "Quality.PowerOfAttorney.File.";
+    var denialPowerOfAttorneyType = ViewBag.DenialPowerOfAttorneyType as AttachmentType ?? new AttachmentType();
+    var denialPowerOfAttorneyFilePrefix = "Quality.PowerOfAttorney.DenialFile.";
+}
+<form method="post" action="@Url.ActionLink("EditRepresentative", "Clients")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.UniqueId)
+    @Html.HiddenFor(m => m.EgnBulstat)
+    @Html.HiddenFor(m => m.FullName)
+    @Html.HiddenFor(m => m.Quality.Id)
+    @Html.Hidden("clientUniqueId", ViewBag.ClientUniqueId as string)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title required">@Localizer["Quality"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input quad">
+                        @(Html.Kendo().DropDownListFor(m => m.Quality.Type.Id)
+                              .HtmlAttributes(new { data_notaryqualityid = EnumHelper.GetQualityTypeIdByType(QualityType.Notary) })
+                              .DataValueField("Id")
+                              .DataTextField("Name")
+                              .ValueTemplate(
+                                  "<input type='hidden' name='Quality.Type.Name' value='#:Name#'/>" +
+                                  "<span>#:Name#</span>")
+                              .Events(e => e.Change("admin_clients.onQualityTypeChanged").DataBound("admin_clients.onQualityTypeDataBound"))
+                              .DataSource(d => d.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nquality", flag = 1 })))))
+                        @Html.ValidationMessageFor(m => m.Quality.Type)
+                    </div>
+                    <div class="form-input fullwidth">
+                        @Html.LabelFor(m => m.Quality.PowerOfAttorney.Comment, Localizer["Comment"])
+                        @Html.EditorFor(m => m.Quality.PowerOfAttorney.Comment)
+                    </div>
+                    <div class="form-input fullwidth powerofattorney-js">
+                        @{
+                            RenderFileUpload(Model?.Quality?.PowerOfAttorney?.File, powerOfAttorneyType, powerOfAttorneyFilePrefix, asyncUploadChunkSize);
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head powerofattorney-js">
+                <h3 class="step-box-title">@Localizer["RegisterUnity2QualityData"]</h3>
+                @Html.InstructionLink("RegisterUnity2QualityData")
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input pint powerofattorney-js">
+                        @Html.LabelFor(m => m.Quality.PowerOfAttorney.RegNumber, Localizer["PowerOfAttorneyRegNumber"])
+                        @Html.EditorFor(m => m.Quality.PowerOfAttorney.RegNumber)
+                        @Html.ValidationMessageFor(m => m.Quality.PowerOfAttorney.RegNumber)
+                    </div>
+                    <div class="form-input pint powerofattorney-js">
+                        @Html.LabelFor(m => m.Quality.PowerOfAttorney.NotaryNumber, Localizer["NotaryNumber"])
+                        @Html.EditorFor(m => m.Quality.PowerOfAttorney.NotaryNumber)
+                        @Html.ValidationMessageFor(m => m.Quality.PowerOfAttorney.NotaryNumber)
+                    </div>
+                    <div class="form-input pint powerofattorney-js">
+                        @Html.LabelFor(m => m.Quality.PowerOfAttorney.RegDate, Localizer["DateOfRegNumber"])
+                        @Html.EditorFor(m => m.Quality.PowerOfAttorney.RegDate, "Date")
+                        @Html.ValidationMessageFor(m => m.Quality.PowerOfAttorney.RegDate)
+                    </div>
+                    <div class="form-input pint powerofattorney-js powerofattorney-enddate-js">
+                        @Html.LabelFor(m => m.Quality.PowerOfAttorney.EndDate, Localizer["PowerOfAttorneyEndDate"])
+                        @Html.EditorFor(m => m.Quality.PowerOfAttorney.EndDate, "Date")
+                        @Html.ValidationMessageFor(m => m.Quality.PowerOfAttorney.EndDate)
+                    </div>
+                    <div class="form-input pint powerofattorney-js">
+                        <label class="empty"></label>
+                        @Html.Kendo().CheckBox().Name("powerOfAttorneyFlag").Label(Localizer["Indefinitely"]).Checked(Model?.Quality?.PowerOfAttorney?.EndDate.HasValue != true && Model?.Quality?.PowerOfAttorney?.DenialFile?.Id.HasValue != true)
+                    </div>
+                    <div class="form-input fullwidth powerofattorney-js powerofattorney-denial-js">
+                        @{
+                            RenderFileUpload(Model?.Quality?.PowerOfAttorney?.DenialFile, denialPowerOfAttorneyType, denialPowerOfAttorneyFilePrefix, asyncUploadChunkSize);
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third  closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+@{
+    await Html.RenderPartialAsync("_FileTemplate");
+
+    void RenderFileUpload(Attachment attachment, AttachmentType type, string prefix, double asyncUploadChunkSize)
+    {
+        @Html.InfoLabel(type.Title.ToString())
+        @(Html.Kendo().Upload()
+                            .Name($"{prefix}Url")
+                            .HtmlAttributes(new { accept = type.Extensions, id = Guid.NewGuid().ToString(), data_prefix = prefix, name = string.Empty })
+                            .Messages(
+                                x => x.Select(Localizer["SelectFiles"])
+                                      .DropFilesHere(Localizer["DropFilesHere"])
+                                      .InvalidFileExtension(Localizer["InvalidFileExtension"])
+                                      .Cancel(Localizer["Cancel"]))
+                            .Async(
+                                a => a
+                                     .Save("Upload", "Attachment", new { area = string.Empty })
+                                     .Remove("Remove", "Attachment", new { area = string.Empty })
+                                     .AutoUpload(true)
+                                     .ChunkSize(asyncUploadChunkSize)
+                                     .Concurrent(false))
+                            .ShowFileList(true)
+                            .Multiple(false)
+                            .TemplateId("fileTemplate")
+                            .Validation(
+                                validation =>
+                                {
+                                    validation.AllowedExtensions(type.ExtensionsCollection);
+                                    validation.MaxFileSize(type.MaxSizeInBytes);
+                                    validation.MinFileSize(1);
+                                })
+                            .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+                            .Files(
+                                files =>
+                                {
+                                    if (attachment?.Url.IsNotNullOrEmpty() == true || attachment?.Id.HasValue == true)
+                                    {
+                                        files.AddCustomFile(
+                                            new UploadFile
+                                    {
+                                        Id = attachment.Id,
+                                        Name = attachment.Name,
+                                        Url = attachment.Url,
+                                        Size = attachment.Size,
+                                        Extension = attachment.Extension,
+                                        Data = new Dictionary<string, object> { { "prefix", prefix } }
+                                    });
+                                    }
+                                }))
+        var description = type.Description?.ToString();
+        if (description.IsNotNullOrEmpty())
+        {
+            <small>
+                @Html.Raw(description)
+            </small>
+        }
+    }
+}

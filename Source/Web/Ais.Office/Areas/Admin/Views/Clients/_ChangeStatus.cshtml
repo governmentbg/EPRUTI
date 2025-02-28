@@ -1,0 +1,39 @@
+﻿@using Ais.Data.Models.Client;
+@using Ais.Office.Controllers
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+@model ClientStatus
+<form method="post" action="@Url.ActionLink("ChangeStatus", "Clients")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.UserId)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["Status"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input half double">
+                        @(Html.Kendo().DropDownListFor(m => m.StatusId)
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .DataSource(x => x.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nuserstatus", flag = 2 })))))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third  closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

@@ -1,0 +1,66 @@
+﻿@inject IStringLocalizer Localizer
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Signature.SignatureOptions
+@{
+    if (ViewBag.Prefix is string prefix)
+    {
+        ViewData.TemplateInfo.HtmlFieldPrefix = prefix;
+    }
+
+    float minValue = 1;
+    var format = "n0";
+}
+<div class="step-box fullwidth">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["SignatureData"]
+        </h3>
+    </div>
+    <div class="step-box-body">
+        <div class="form-row">
+            <div class="form-input">
+                <label>@Localizer["ClientSignatureX"]</label>
+                @Html.Kendo().NumericTextBoxFor(x => x.Client.OffsetX).Min(minValue).Format(format)
+                @Html.ValidationMessageFor(m => m.Client.OffsetX)
+            </div>
+            <div class="form-input">
+                <label>@Localizer["ClientSignatureY"]</label>
+                @Html.Kendo().NumericTextBoxFor(x => x.Client.OffsetY).Min(minValue).Format(format)
+                @Html.ValidationMessageFor(m => m.Client.OffsetY)
+            </div>
+            <div class="form-input">
+                <label>@Localizer["ClientSignatureWidth"]</label>
+                @Html.Kendo().NumericTextBoxFor(x => x.Client.Width).Min(minValue).Format(format)
+                @Html.ValidationMessageFor(m => m.Client.Width)
+            </div>
+            <div class="form-input">
+                <label>@Localizer["ClientSignatureHeight"]</label>
+                @Html.Kendo().NumericTextBoxFor(x => x.Client.Height).Min(minValue).Format(format)
+                @Html.ValidationMessageFor(m => m.Client.Height)
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-input">
+                <label>@Localizer["EmployeeSignatureX"]</label>
+                @Html.Kendo().NumericTextBoxFor(x => x.Employee.OffsetX).Min(minValue).Format(format)
+                @Html.ValidationMessageFor(m => m.Employee.OffsetX)
+            </div>
+            <div class="form-input">
+                <label>@Localizer["EmployeeSignatureY"]</label>
+                @Html.Kendo().NumericTextBoxFor(x => x.Employee.OffsetY).Min(minValue).Format(format)
+                @Html.ValidationMessageFor(m => m.Employee.OffsetY)
+            </div>
+            <div class="form-input">
+                <label>@Localizer["EmployeeSignatureWidth"]</label>
+                @Html.Kendo().NumericTextBoxFor(x => x.Employee.Width).Min(minValue).Format(format)
+                @Html.ValidationMessageFor(m => m.Employee.Width)
+            </div>
+            <div class="form-input">
+                <label>@Localizer["EmployeeSignatureHeight"]</label>
+                @Html.Kendo().NumericTextBoxFor(x => x.Employee.Height).Min(minValue).Format(format)
+                @Html.ValidationMessageFor(m => m.Employee.Height)
+            </div>
+        </div>
+    </div>
+</div>

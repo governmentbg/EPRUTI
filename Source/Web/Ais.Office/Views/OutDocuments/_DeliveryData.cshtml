@@ -1,0 +1,190 @@
+﻿@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Helpers
+@using Ais.Data.Models.Recipients
+@using Ais.Data.Models.Role
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@inject IStringLocalizer Localizer;
+@model Guid
+<div class="steps-body">
+    <div class="step-box fullwidth">
+        <div class="step-box-head collapsible">
+            @Localizer["MarkForSending"]
+        </div>
+        <div class="step-box-body">
+            <form action="@Url.ActionLink("MarkForSending", "OutDocuments")"
+                  data-ajax="true"
+                  data-ajax-success="outdocuments.onMarkingSuccess"
+                  data-ajax-method="POST">
+                @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+                @Html.Hidden("outDocId", Model)
+                <div class="form-row fullwidth sednertables">
+                    @(Html.Kendo().Grid<DeliveryDataShort>()
+                        .Name("recipients")
+                        .HtmlAttributes(new { @class = "fullwidth" })
+                        .Events(ev => ev.Edit("outdocuments.onRecipientCellEdit"))
+                        .Editable(x => x.Mode(GridEditMode.InCell))
+                        .ToolBar(x => x.ClientTemplateId("recipients-toolbar"))
+                        .Pageable(p => p.Enabled(true).PageSizes(new List<object> { 5, 10, 20, 50, "All" }).PreviousNext(true))
+                        .Columns(
+                            col =>
+                            {
+                                col.Bound(x => x.UniqueId)
+                                   .Title(Localizer["Choose"])
+                                   .ClientTemplateId("recipientsClientTemplate")
+                                   .ClientHeaderTemplate(" <input type='checkbox'' class='checkboxAll-js' />").Width(20);
+                                col.Bound(x => x.Applicant.Recipient)
+                                   .Title(Localizer["Recipient"])
+                                   .ClientTemplate(
+                                       "#:Applicant && Applicant.Recipient && Applicant.Recipient.FullName ? Applicant.Recipient.FullName : ''#" +
+                                       $"#if(Applicant && Applicant.Recipient && Applicant.Recipient && Applicant.Recipient.Id){{#<button type='button' class='bttn bttn-icon third small autosize edit-applicant-js' title='{Localizer["Edit"]}' value='#:Applicant.Recipient.Id#' data-name='#:Applicant.Recipient.FullName#'><i class='k-icon k-font-icon k-i-pencil'></i></button>#}}#");
+                                col.Bound(x => x.Applicant.Author)
+                                   .Title(Localizer["Agent"])
+                                   .ClientTemplate(
+                                       "#:Applicant && Applicant.Author && Applicant.Author.FullName ? Applicant.Author.FullName : ''#" +
+                                       $"#if(Applicant && Applicant.Author && Applicant.Author && Applicant.Author.Id){{#<button type='button' class='bttn bttn-icon third small autosize edit-applicant-js' title='{Localizer["Edit"]}' value='#:Applicant.Author.Id#' data-name='#:Applicant.Author.FullName#'><i class='k-icon k-font-icon k-i-pencil'></i></button>#}}#");
+                                col.Bound(x => x.Address.FullDescriptionWithMail)
+                                   .Title(Localizer["Address"])
+                                   .EditorTemplateName("_RecipientAddress")
+                                   .ClientTemplate("#:Address != null && Address.FullDescriptionWithMail != null ? Address.FullDescriptionWithMail : resources.getResource('Choose')#");
+                                col.Bound(x => x.Channel.Name)
+                                   .Title(Localizer["Chanel"])
+                                   .Width(400)
+                                   .EditorTemplateName("_DeliveryChannel")
+                                   .ClientTemplate("#:Channel != null && Channel.Name != null ? Channel.Name : resources.getResource('ChooseChanel')#");
+                            })
+                        .DataSource(
+                            x =>
+                                x.Ajax()
+                                 .Read(builder => builder.Action("GetRecipients", "OutDocuments", new { id = Model }))
+                                 .PageSize(5)
+                                 .Model(
+                                     m =>
+                                     {
+                                         m.Id("Id");
+                                         m.Field(f => f.Id).Editable(false);
+                                         m.Field(f => f.UniqueId).Editable(false);
+                                         m.Field(f => f.Applicant.Recipient).Editable(false);
+                                         m.Field(f => f.Applicant.Author).Editable(false);
+                                         m.Field(f => f.Applicant.Recipient.FullName).Editable(false);
+                                         m.Field(f => f.Applicant.Author.FullName).Editable(false);
+                                         m.Field(f => f.Address.FullDescriptionWithMail).Editable(true);
+                                         m.Field(f => f.Channel.Name).Editable(true);
+                                         m.Field(f => f.RegDate).Editable(false);
+                                     })))
+                </div>
+                <div class="k-dialog-buttongroup">
+                    <button class="bttn right main">
+                        @Localizer["Send"]
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="step-box fullwidth">
+        <div class="step-box-head collapsible">
+            @Localizer["History"]
+        </div>
+        <div class="step-box-body">
+            <div class="form-row fullwidth">
+                @(Html.Kendo().Grid<DeliveryData>()
+                      .Name("recipient-history")
+                      .Pageable(p => p.Enabled(true).PageSizes(new List<object> { 5, 10, 20, 50, "All" }).PreviousNext(true))
+                      .HtmlAttributes(new { @class = "fullwidth" })
+                      .Sortable()
+                      .Groupable()
+                      .Columns(
+                          col =>
+                          {
+                              col.Bound(x => x.Recipient.Name)
+                                 .Title(Localizer["Recipient"])
+                                 .ClientTemplate("#:Recipient && Recipient.Name ? Recipient.Name : ''#");
+                              col.Bound(x => x.Agent.Name)
+                                 .Title(Localizer["Agent"])
+                                 .ClientTemplate("#:Agent && Agent.Name ? Agent.Name : ''#");
+                              col.Bound(x => x.Address.FullDescriptionWithMail)
+                                 .Title(Localizer["Address"]);
+                              col.Bound(x => x.Channel.Name)
+                                 .Title(Localizer["Chanel"]);
+                              col.Bound(x => x.CourierPickUpDate)
+                                 .Format("{0:G}")
+                                 .Title(Localizer["CourierPickUpDate"]);
+                              col.Bound(x => x.SendDate)
+                                 .Format("{0:G}")
+                                 .Title(Localizer["SendDate"]);
+                              col.Bound(x => x.DeliveryDate)
+                                 .Format("{0:G}")
+                                 .Title(Localizer["DeliveryDate"]);
+                              col.Bound(x => x.ReceiveMessageDate)
+                                 .Format("{0:G}")
+                                 .Title(Localizer["ReceiveMessageDate"]);
+                              col.Bound(x => x.WaitToDate)
+                                 .Format("{0:d}")
+                                 .Title(Localizer["WaitToDate"]);
+                              col.Bound(x => x.WaitResponseToDate)
+                                 .Format("{0:d}")
+                                 .Title(Localizer["WaitResponseToDate"]);
+                              col.Bound(x => x.Status.Name)
+                                 .Title(Localizer["Status"]);
+                              col.Bound(x => x.BarCode)
+                                 .Title(Localizer["BarCode"]);
+                              col.Bound(x => x.Comment)
+                                 .Title(Localizer["Comment"]);
+                              col.Bound(x => x.ProofDocument)
+                                 .Title(Localizer["ProofDoc"])
+                                 .ClientTemplate("#:ProofDocument.RegNumber ? ProofDocument.RegNumber : '' # #:ProofDocument.Type.Name ? ProofDocument.Type.Name : ''#");
+                              col.Bound(x => x.File)
+                                 .Title(Localizer["File"])
+                                 .ClientTemplate("<a href='#:core.getBaseUrl()#Attachment/Download?ids=#:File.Id #' target='_blank'>#:File.Id != null ? resources.getResource('Download') : '' #</a>");
+                              col.Bound(x => x.Status)
+                                 .Sticky(true)
+                                 .Title(Localizer["Actions"])
+                                 .ClientTemplateId("info-button");
+                          })
+                      .DataSource(
+                          x => x.Ajax()
+                                .Read(operationBuilder => operationBuilder.Action("GetOutDocXRecipientHistory", "OutDocuments", new { id = Model }))
+                                .PageSize(20)))
+            </div>
+        </div>
+    </div>
+</div>
+<script id="recipientsClientTemplate" type="text/x-kendo-template">
+    #var index = kendo.guid();#
+    <input type="hidden" name="Recipients.Index" value="#:index#" />
+    <input type="hidden" name="Recipients[#:index#].Id" value="#:Id#" />
+    <input type="hidden" name="Recipients[#:index#].Applicant.Recipient.Id" value="#:Applicant.Recipient.Id#" />
+    <input type="hidden" name="Recipients[#:index#].Applicant.Recipient.FullName" value="#:Applicant.Recipient.FullName#" />
+    <input type="hidden" name="Recipients[#:index#].Applicant.Author.Id" value="#:Applicant.Author && Applicant.Author.Id ? Applicant.Author.Id : ''#" />
+    <input type="hidden" name="Recipients[#:index#].Applicant.Author.FullName" value="#:Applicant.Author && Applicant.Author.FullName ? Applicant.Author.FullName : ''#" />
+    <input type="hidden" name="Recipients[#:index#].Channel.Id" value="#:Channel.Id#" />
+    <input type="hidden" name="Recipients[#:index#].Channel.Name" value="#:Channel.Name#" />
+    <input type="hidden" name="Recipients[#:index#].Address.Id" value="#:Address.Id#" />
+    <input type="hidden" name="Recipients[#:index#].Address.Email" value="#:Address.Email != null ? Address.Email : ''#" />
+    #if(data.IsChecked){#
+       <input type="checkbox" class='checkbox-js' data-uid="#:data.UniqueId#" name="Recipients[#:index #].IsChecked" value="#:data.IsChecked#"  checked="checked"  />
+    #}else{#
+       <input type="checkbox" class='checkbox-js' data-uid="#:data.UniqueId#" name="Recipients[#:index #].IsChecked" value="#:data.IsChecked#"  />
+    #}#
+</script>
+<script id="info-button" type="text/x-kendo-template">
+    #if(data.Channel.Id == '@EnumHelper.GetServiceReceiveMethodTypeIdByType(ServiceReceiveMethods.BgPosts)?.ToString()' || data.Channel.Id == '@EnumHelper.GetServiceReceiveMethodTypeIdByType(ServiceReceiveMethods.Edelivery)?.ToString()'){#
+        #if(data.SendDate) {#
+            <a class='k-button k-small info-delivery-js' ><span class='k-i-info k-icon k-font-icon k-button-icon'></span></a>
+        #}#
+    #}#
+    #if(data.Channel.Id != '@EnumHelper.GetServiceReceiveMethodTypeIdByType(ServiceReceiveMethods.Edelivery)?.ToString()'){#
+        <a class='k-button k-small edit-delivery-js' title ="#:resources.getResource("EditDeliveryButton")#"><span class='k-i-pencil k-icon k-font-icon k-button-icon'></span></a>
+    #}#
+</script>
+<script id="recipients-toolbar" type="text/x-kendo-template">
+    @(Html.Kendo().DropDownList()
+          .Name(Guid.NewGuid().ToString())
+          .HtmlAttributes(new { style="width: 400px;" })
+          .DataTextField("Name")
+          .DataValueField("Id")
+          .OptionLabel(Localizer["ChooseChanel"].ToString())
+          .Events(ev => ev.Select("outdocuments.onChannelSelectForAll"))
+          .DataSource(r => r.Read(x => x.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nreceivemethod", flag = 1 })))).ToClientTemplate())
+</script>
+<script src="~/bundles/admin_clients.min.js" asp-append-version="true"></script>

@@ -1,0 +1,8 @@
+﻿@model Ais.Data.Models.Document.OutDocument
+<div class="steps-body">
+    @{
+        ViewBag.SkipScripts = true;
+        ViewBag.IsOverview = true;
+        await Html.RenderPartialAsync("Info/Index");
+    }
+</div>

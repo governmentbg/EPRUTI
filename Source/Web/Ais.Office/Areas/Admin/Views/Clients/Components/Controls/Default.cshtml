@@ -1,0 +1,60 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var controllerType = typeof(ClientsController);
+    if (Url.HasRightsToAction("Edit", controllerType))
+    {
+        <a href="\\#" class="k-small k-button edit-client-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Edit"]">
+            <i class="k-i-edit k-icon k-font-icon"></i>
+        </a>
+    }
+
+    if (Url.HasRightsToAction("ChangeStatus", controllerType))
+    {
+        <a href="\\#" class="k-small k-button change-status-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["ChangeStatus"]">
+            <i class="k-i-lock k-icon k-font-icon"></i>
+        </a>
+    }
+
+    if (Url.HasRightsToAction("ChangeClientRoles", controllerType))
+    {
+        <a href="\\#" class="k-small k-button set-roles-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["SetRoles"]">
+            <i class="k-i-user k-icon k-font-icon"></i>
+        </a>
+    }
+
+    var addCartUrl = Url.DynamicAction(nameof(ClientsController.AddToCart), typeof(ClientsController), new { searchQueryId = ViewBag.SearchQueryId });
+    if (addCartUrl.IsNotNullOrEmpty())
+    {
+        <a href="@addCartUrl" data-ajax="true" data-ajax-method="post" class="k-small k-button" title="@Localizer["AddToClientsCart"]">
+            <i class="k-i-plus-outline k-icon k-font-icon"></i>
+        </a>
+    }
+
+    var removeCartUrl = Url.DynamicAction(nameof(ClientsController.RemoveFromCart), typeof(ClientsController), new { searchQueryId = ViewBag.SearchQueryId });
+    if (removeCartUrl.IsNotNullOrEmpty())
+    {
+        <a href="@removeCartUrl" data-ajax="true" data-ajax-method="post" class="k-small k-button" title="@Localizer["RemoveFromClientsCart"]">
+            <i class="k-i-minus-outline k-icon k-font-icon"></i>
+        </a>
+    }
+
+    var clearCartUrl = Url.DynamicAction(nameof(ClientsController.ClearCart), typeof(ClientsController));
+    if (clearCartUrl.IsNotNullOrEmpty())
+    {
+        <a href="@clearCartUrl" data-ajax="true" data-ajax-method="post" class="k-small k-button" title="@Localizer["ClearClientsCart"]">
+            <i class="k-i-minus-circle k-icon k-font-icon"></i>
+        </a>
+    }
+
+    var cartUrl = Url.DynamicAction(nameof(ClientsController.Cart), typeof(ClientsController));
+    if (clearCartUrl.IsNotNullOrEmpty())
+    {
+        <a href="@cartUrl" class="k-small k-button js-trigger-popup" title="@Localizer["ClientsCart"]">
+            <i class="k-i-cart k-icon k-font-icon"></i>
+        </a>
+    }
+}

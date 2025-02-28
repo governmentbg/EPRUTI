@@ -1,0 +1,11 @@
+﻿@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Localization
+@model string
+@if (Model != null)
+{
+    <div class="fullwidth">
+        <div class="ib">
+            @Localizer["Section"]: <strong>@(Model)</strong>
+        </div>
+    </div>
+}

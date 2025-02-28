@@ -1,0 +1,75 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Office.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Client
+@using Kendo.Mvc.TagHelpers
+@model Ais.Data.Models.Document.Applicant
+@if (Model != null)
+{
+    var recipient = Model.Recipient;
+    <div class="flex info-row">
+        <div class="number">@(ViewBag.ItemIndex).</div>
+        <div class="left">
+            @{
+                await RenderClientAsync(recipient);
+                if (Model.Author != null)
+                {
+                    <div>@Localizer["ByRepresentative"]</div>
+                    await RenderClientAsync(Model.Author);
+                }
+
+                if (Model.AuthorQuality != null)
+                {
+                    <div>@Localizer["AuthorQuality"]: <strong>@(Model.AuthorQuality.Type?.Name)</strong></div>
+                    var powerOfAttorney = Model.AuthorQuality.PowerOfAttorney;
+                    if (powerOfAttorney != null)
+                    {
+                        var file = powerOfAttorney.File;
+                        var downloadData = file?.GetDownloadData();
+                        var downloadLink = downloadData != null
+                            ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                            : null;
+                        if (downloadLink.IsNotNullOrEmpty())
+                        {
+                            <div class="ib">
+                                @Localizer["PowerOfAttorney"]:
+                                <a href="@downloadLink" target="_blank">
+                                    @(file?.Name ?? Localizer["Download"])
+                                </a>
+                            </div>
+                        }
+                        <div class="ib">
+                            @($"{Localizer["DateOfRegNumber"]}: {powerOfAttorney!.RegDate:d} {Localizer["PowerOfAttorneyRegNumber"]}: {powerOfAttorney!.RegNumber}, {Localizer["NotaryNumber"]} {powerOfAttorney!.NotaryNumber}, {Localizer["PowerOfAttorneyEndDate"]}: {powerOfAttorney!.EndDate:d}")
+                        </div>
+                    }
+                }
+
+                await Html.RenderPartialAsync("~/Views/OutApplication/Applicant/_ContactData.cshtml", Model);
+            }
+        </div>
+        <div class="bttn-wrap w-auto">
+            <button type="button" class="bttn bttn-icon third small remove-applicant-js autosize" data-uniqueid="@(Model.UniqueId)" title="@Localizer["Remove"]">
+                <i class="k-i-x k-icon k-font-icon"></i>
+            </button>
+        </div>
+    </div>
+}
+@{
+    async Task RenderClientAsync(Client client)
+    {
+        <div class="flex">
+            <div class="ib">
+                <strong>@(client.FullName)</strong>
+            </div>
+            @if (client.EgnBulstat.IsNotNullOrEmpty())
+            {
+                <div class="ib">@Localizer["EgnBulstat"]: <strong class="@(client.IsDead ? "statusDead" : null)">@client.EgnBulstat</strong></div>
+            }
+            <button type="button" class="bttn bttn-icon small autosize k-ml-auto edit-applicant-js" title="@Localizer["Edit"]" value="@client.Id" data-name="@client.FullName">
+                <i class="k-icon k-font-icon k-i-pencil"></i>
+            </button>
+        </div>
+    }
+}

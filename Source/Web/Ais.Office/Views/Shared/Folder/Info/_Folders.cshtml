@@ -1,0 +1,63 @@
+﻿@using Ais.Data.Models.Document
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using Ais.Data.Models.Helpers
+@using Ais.Data.Models.Task
+@using Ais.Data.Models.Folder
+@using Ais.WebUtilities.Extensions
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.Document
+@{
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["Folders"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            @if (Model.IsNew && Model.CreateFolder)
+            {
+                <div class="ib"><strong>@Localizer["CreateFolder"]</strong></div>
+            }
+            @if (Model.Folders.IsNotNullOrEmpty())
+            {
+                foreach (var folder in Model.Folders)
+                {
+                    <div class='ib @(folder.Section.Id == EnumHelper.GetSectionTypeIdBySectionType(SectionType.Control) ? "return" : "") '>
+                        <i class="k-i-folder k-font-icon k-icon"></i>
+                        @{
+                            var data = new List<string>
+                                       {
+                                           $"<strong>{folder.Number}:</strong> {folder.Section.Name}"
+                                       };
+                            if (folder.IncludeAllFolders)
+                            {
+                                data.Add($"<strong>{Localizer["IncludedAllFolders"]}</strong>");
+                            }
+
+                            if (folder.Note.IsNotNullOrEmpty())
+                            {
+                                data.Add($"{Localizer["Note"]}: {folder.Note}");
+                            }
+
+                            @Html.Raw(string.Join(", ", data))
+
+                            var isOverview = ViewBag.IsOverview is bool && (bool)ViewBag.IsOverview;
+                            if (!isOverview && folder.Id.HasValue)
+                            {
+                                var historyUrl = Url.DynamicActionWithRightsCheck(nameof(FoldersController.History), typeof(FoldersController), new { id = folder.Id, type = EntryType.Folder });
+                                if (historyUrl.IsNotNullOrEmpty())
+                                {
+                                    <a class="k-small k-button js-trigger-popup" href="@historyUrl" title="@Localizer["History"]">
+                                        <i class="k-i-track-changes k-font-icon k-icon"></i>
+                                    </a>
+                                }    
+                            }
+                        }
+                    </div>
+                }
+            }
+           
+        </div>
+    </div>
+}

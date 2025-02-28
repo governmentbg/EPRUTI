@@ -1,0 +1,29 @@
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model long?
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+                        { 
+                            { "id", Guid.NewGuid().ToString() },
+                            { "required", true },
+                        });
+
+    var defaultLimit = Configuration.GetValue<long>("Search:DefaultLimit");
+    var maxLimit = Configuration.GetValue<long>("Search:MaxLimit");
+}
+@(Html.Kendo().NumericTextBox<long>()
+      .Name(string.Empty)
+      .HtmlAttributes(attributes)
+      .Format("n0")
+      .Min(1)
+      .Max(maxLimit)
+      .Value(!Model.HasValue || Model < 1 ? defaultLimit : Model!.Value)
+      .Deferred(!Context.Request.IsAjaxRequest()))

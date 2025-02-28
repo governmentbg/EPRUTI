@@ -1,0 +1,31 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.OutAdmAct.OutAdmActObject
+@model Ais.Data.Models.OutAdmAct.OutAdmActObject.ActAddress
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var admObjectUniqueId = ViewBag.AdmObjectUniqueId;
+}
+
+@if (Model != null)
+{
+    <div class="flex info-row align-center">
+        <div class="number">@(ViewBag.ItemIndex).</div>
+         <div class="left">
+            @{
+                @Html.Raw(Model.FullDescriptionHtml)
+            }
+        </div>
+        <div class="bttn-wrap w-auto flex gap-5">
+            <button type="button" class="bttn bttn-icon third small autosize k-ml-auto add-admact-object-address-js edit-admact-object-address-js" title="@Localizer["Edit"]" data-admobjectuniqueid="@admObjectUniqueId" data-uniqueid="@(Model.UniqueId)">
+                <i class="k-icon k-font-icon k-i-pencil"></i>
+            </button>
+            <button type="button" class="bttn bttn-icon red small remove-objectAddress-js autosize" data-uniqueid="@(Model.UniqueId)" title="@Localizer["Remove"]">
+                <i class="k-i-x k-icon k-font-icon"></i>
+            </button>
+        </div>       
+    </div>
+}
+
+

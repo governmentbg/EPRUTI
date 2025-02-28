@@ -1,0 +1,114 @@
+<html>
+<head>
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script>
+        (window.jQuery || document.write('<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"><\/script>'));
+    </script>
+    <script>
+        function getRN(){return c[Math.round(Math.random()*10)-1];}
+        $(function(){
+            $("#includedContent").load("_sprite.svg", function(){
+                $('#includedContent svg symbol').each(function(){
+                    var id = $(this).attr('id')
+                    $('#includedContent').before('<div id="icon_'+id+'"><svg class="icon"><use xlink:href="#'+id+'"></use></svg><strong>#'+id+'</strong></div>');
+                });
+                $('#clearcache').append(' ('+$('#includedContent svg symbol').length+')');
+                var c = ['#000', '#255778', '#1eae82', '#5d336b', '#9c6d52',
+                    '#ffc030', '#ea6302', '#023edb', '#fff'];
+                $('#cc').on('click',function(e){
+                    e.preventDefault();
+                    var cc = getRN();
+                    $('body').css({color:cc});
+                    $('#cc span').html(cc);
+                });
+                $('#cc2').on('click',function(e){
+                    e.preventDefault();
+                    var cc = getRN();
+                    if (cc == $('#cc span').html()) {
+                        cc = getRN();
+                    }
+                    $('body').css({backgroundColor:cc});
+                    $('#cc2 span').html(cc);
+                });
+                $('#clearcache').on('click',function(e){
+                    e.preventDefault();
+                    localStorage.clear();
+                });
+            });
+        });
+    </script>
+</head>
+
+
+<body>
+      <a href="#" id="clearcache">Clear local storage for this website</a>
+      <a href="#" id="cc">Change color<br><span>#000</span></a>
+      <a href="#" id="cc2">Change bgr color<br><span>#f2f2f2</span></a>
+      <span class="clear">
+      <img src="/i/logo.png" alt="Тук трябва да се вижда логото на текущия сайт"/>
+      </span>
+      <span id="includedContent"></span>
+  </body> 
+<style >
+    #cc2,
+    #clearcache,
+    #cc {
+        font: normal 14px/22px Arial;
+        display: block;
+        margin: 10px;
+        text-align: center;
+        float: left;
+    }
+    .clear {
+        clear: both;
+        display: block;
+        text-align: center;
+    }
+    img {
+        max-width: 100%;
+        max-height: 200px;
+    }
+    #clearcache {
+        float: right;
+    }
+    #cc2 span,
+    #cc span {
+        font-size: 10px;
+    }
+    body {
+        color: #000;
+        background: #d2d2d2;
+        padding: 15px;
+    }
+    * {
+        margin: 0;
+        padding: 0;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        font-size: 0;
+        font-family: Arial;
+    }
+    div {
+        width: 16%;
+        max-height: 200px;
+        float: left;
+        margin: 2% 2% 20px;
+    }
+    div strong {
+        display: block;
+        text-align: center;
+        text-transform: lowercase;
+        margin-top: 10px;
+        font-size: 16px;
+    }
+    svg {
+        display: block !important;
+        width: 100%;
+        box-shadow: 0 0 3px #000;
+        padding: 10px;
+    }
+    #includedContent svg {display: none !important;}
+    @media screen and (max-width:768px) {div {width: 44%;}}
+</style>
+</html>

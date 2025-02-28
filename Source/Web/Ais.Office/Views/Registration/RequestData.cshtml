@@ -1,0 +1,230 @@
+﻿@using Ais.Data.Models.Employee
+@using Ais.Data.Models.Helpers
+@using Ais.Utilities.Extensions
+@using Ais.Infrastructure.KendoExt
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile
+@model Ais.Office.Models.RegisterEmployeeViewModel
+@{
+    // var isEAuthentication = Model.RegistrationType == RegistrationType.EAuthentication;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var isModelStateValid = ViewBag.IsModelStateValid is not bool || (bool)ViewBag.IsModelStateValid;
+    var provinceElementId = Guid.NewGuid().ToString();
+    var municipalityElementId = Guid.NewGuid().ToString();
+    var settlementElementId = Guid.NewGuid().ToString();
+    var regionElementId = Guid.NewGuid().ToString();
+    var asyncUploadChunkSize = Configuration.GetValue<double>("Attachment:AsyncUploadChunkSize");
+    var filePrefix = "File.";
+}
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+<div class="steps-body" id="RegistrationDataWrapper">
+    <div class="registrationWrapper-js">
+        <form method="post" action="@Url.ActionLink("RegisterRequest", "Registration")"
+              data-ajax="true"
+              data-ajax-method="POST"
+              data-ajax-update="#RegistrationWrapper">
+            @Html.ValidationSummary(true)
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.UniqueId)
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.FirstName)
+            @Html.HiddenFor(m => m.SurName)
+            @Html.HiddenFor(m => m.LastName)
+            @Html.HiddenFor(m => m.Role.Id)
+
+            <div class="step-box fullwidth">
+                <div class="step-box-head">
+                    <h3 class="step-box-title">
+                        @Localizer["EnterInformationForRegistration"]
+                    </h3>
+                </div>
+                <div class="step-box-body">
+                    <div class="form-row">
+                        @Model.FirstName @Model.SurName @Model.LastName @Model.Role.Name
+                    </div>
+                    @if (EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalAdministrator ||
+                    EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalOperator)
+                    {
+                        <div class="form-row">
+                            <div class="form-input fullwidth">
+                                @Html.InfoLabel(Localizer["Administration"], "Administration")
+                                @(Html.Kendo().DropDownList()
+                                    .Name("Administration.Id")
+                                    .OptionLabel(Localizer["Choose"].ToString())
+                                    .Value(Model?.Administration?.Id.HasValue == true ? Model.Administration.Id.ToString() : string.Empty)
+                                    .DataValueField("Id")
+                                    .DataTextField("Name")
+                                    .ValueTemplate(
+                                    $"<input type='hidden' name='Administration.Name' value='#:Name#'/>" +
+                                    "<span>#:Name#</span>")
+                                    .Filter(FilterType.Contains)
+                                    .DataSource(d => d.Read(r => r.Action("GetAdministrations", "Registration", new { area = string.Empty })))
+                                    .Deferred(deferred))
+                                @Html.ValidationMessage("Administration")
+                            </div>
+                        </div>
+
+                        <div class="form-row">                            
+                            <fieldset class="fullwidth">
+                                <legend>@Html.InfoLabel(Localizer["CompetencyTerritory"], "CompetencyTerritory")</legend>
+                            <div class="form-input quad">
+                                @(Html.Kendo().DropDownList()
+                                    .Name("Province.Id")
+                                    .HtmlAttributes(new { id = provinceElementId })
+                                    .OptionLabel(Localizer["Choose"].ToString())
+                                    .Value(Model?.Province?.Id.HasValue == true ? Model.Province.Id.ToString() : string.Empty)
+                                    .DataValueField("Id")
+                                    .DataTextField("Name")
+                                    .ValueTemplate(
+                                    $"<input type='hidden' name='Province.Name' value='#:Name#'/>" +
+                                    "<span>#:Name#</span>")
+                                    .Filter(FilterType.Contains)
+                                    .DataSource(d => d.Read(r => r.Action("GetProvinces", "Registration", new { area = string.Empty })))
+                                    .Deferred(deferred))
+                            </div>
+                            <div class="form-input quad">
+                                @(Html.Kendo().DropDownList()
+                                    .Name("Municipality.Id")
+                                    .HtmlAttributes(new { id = municipalityElementId })
+                                    .OptionLabel(Localizer["Choose"].ToString())
+                                    .Value(Model?.Municipality?.Id.HasValue == true ? Model.Municipality.Id.ToString() : string.Empty)
+                                    .DataValueField("Id")
+                                    .DataTextField("Name")
+                                    .ValueTemplate(
+                                    $"<input type='hidden' name='Municipality.Name' value='#:Name#'/>" +
+                                    "<span>#:Name#</span>")
+                                    .Filter(FilterType.Contains)
+                                    .CascadeFrom(provinceElementId)
+                                    .CascadeFromField("provinceId")
+                                    .DataSource(d => d.Read(r => r.Action("GetMunicipalities", "Registration", new { area = string.Empty }).Data("core.filterData"))
+                                    .ServerFiltering(true))
+                                    .Deferred(deferred))
+                            </div>
+                            <div class="form-input quad">
+                                @(Html.Kendo().DropDownList()
+                                    .Name("Settlement.Id")
+                                    .HtmlAttributes(new { id = settlementElementId })
+                                    .OptionLabel(Localizer["Choose"].ToString())
+                                    .Value(Model?.Settlement?.Id.HasValue == true ? Model.Settlement.Id.ToString() : string.Empty)
+                                    .DataValueField("Id")
+                                    .DataTextField("Name")
+                                    .ValueTemplate(
+                                    $"<input type='hidden' name='Settlement.Name' value='#:Name#'/>" +
+                                    "<span>#:Name#</span>")
+                                    .Filter(FilterType.Contains)
+                                    .CascadeFrom(municipalityElementId)
+                                    .CascadeFromField("municipalityId")
+                                    .DataSource(d => d.Read(r => r.Action("GetEkattes", "Registration", new { area = string.Empty }).Data("core.filterData"))
+                                    .ServerFiltering(true))
+                                    .Deferred(deferred))
+                            </div>
+                            </fieldset>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-row">
+                            <div class="form-input quad">
+                                @Html.InfoLabel(Localizer["Organization"], "Organization")
+                                @Html.EditorFor(m => m.Organization)
+                                @Html.ValidationMessage("Organization")
+                            </div>
+                        </div>
+                    }
+                    <div class="form-row">
+                        <div class="form-input quad">
+                            @Html.InfoLabel(Localizer["Department"], "Department")
+                            @Html.EditorFor(m => m.Department)
+                            @Html.ValidationMessage("Department")
+                        </div>
+                        <div class="form-input quad">
+                            @Html.InfoLabel(Localizer["Position"], "Position")
+                            @Html.EditorFor(m => m.Position)
+                            @Html.ValidationMessage("Position")
+                        </div>
+                        <div class="form-input quad">
+                            @Html.InfoLabel(Localizer["ContactEmail"], "ContactEmail")
+                            @Html.EditorFor(m => m.ContactEmail)
+                            @Html.ValidationMessage("ContactEmail")
+                        </div>
+                        <div class="form-input quad">
+                            @Html.InfoLabel(Localizer["ContactPhone"], "ContactPhone")
+                            @Html.EditorFor(m => m.ContactPhone)
+                            @Html.ValidationMessage("ContactPhone")
+                        </div>
+                    </div>
+                    @if (EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalAdministrator ||
+                    EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.ExternalUserSpecializedAccess)
+                    {
+                        <div class="form-row">
+                            <div class="form-input quad">
+                                @Html.LabelFor(x => x.File)
+                                @(Html.Kendo().Upload()
+                                    .Name($"{filePrefix}Url")
+                                    .HtmlAttributes(new { id = Guid.NewGuid().ToString(), data_prefix = filePrefix, name = string.Empty })
+                                    .Messages(x => x.Select(Localizer["SelectFiles"])
+                                    .DropFilesHere(Localizer["DropFilesHere"])
+                                    .InvalidFileExtension(Localizer["InvalidFileExtension"])
+                                    .Cancel(Localizer["Cancel"]))
+                                    .Async(a => a
+                                    .Save("Upload", "Attachment", new { area = string.Empty })
+                                    .Remove("Remove", "Attachment", new { area = string.Empty })
+                                    .AutoUpload(true)
+                                    .ChunkSize(asyncUploadChunkSize)
+                                    .Concurrent(false))
+                                    .ShowFileList(true)
+                                    .Multiple(false)
+                                    .TemplateId("fileTemplate")
+                                    .Validation(validation =>
+                                    {
+                                        validation.AllowedExtensions("doc", "docx", "pdf");
+                                    })
+                                    .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+                                    .Files(files =>
+                                    {
+                                        if (Model?.File?.Name.IsNotNullOrEmpty() == true)
+                                        {
+                                            var attachment = Model?.File;
+                                            files.AddCustomFile(
+                                            new UploadFile
+                                    {
+                                        Id = attachment!.Id,
+                                        Name = attachment.Name,
+                                        Url = attachment.Url,
+                                        Size = attachment.Size,
+                                        Extension = attachment.Extension,
+                                        Data = new Dictionary<string, object> { { "prefix", filePrefix } }
+                                    });
+                                        }
+                                    }))
+                                @Html.ValidationMessage($"{filePrefix}Url")
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="step-box-body">
+                <div class="step-box fullwidth">
+                    <button class="bttn warning right sendRegistrationRequest-js">
+                        @Localizer["SendReqistrationRequest"]
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("_FileTemplate");
+}

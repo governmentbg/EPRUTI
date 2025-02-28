@@ -1,0 +1,52 @@
+﻿@using Ais.Data.Models.Document;
+@using Ais.Data.Models.Service.Object;
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer
+@model OutDocument
+<div class="content-wrap step-wrap add-object-wrapper-js">
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["Objects"]
+            </h3>
+        </div>
+        <div class="selected-objects-js objects-list">
+            @{
+                ViewBag.ApplicationUniqueId = Model.UniqueId;
+                await Html.RenderPartialAsync("BasicData/_Objects", Model.Objects ?? new List<IServiceObject>());
+            }
+        </div>
+    </div>
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["BasicData"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input fullwidth">
+                    @Html.Label(Localizer["ReceiveMethod"])
+                    @(Html.Kendo().DropDownList()
+                        .Name("ReceiveMethodId")
+                        .DataTextField("Name")
+                        .DataValueField("Id")
+                        .Value(Model?.ReceiveMethod?.Id?.ToString())
+                        .ValueTemplate("<input type='hidden' value ='#: Name #' name= 'ReceiveMethod.Name'/> <input type='hidden' value ='#: Id #' name= 'ReceiveMethod.Id'/> <span>#:Name#</span>")
+                        .DataSource(x => x.Read(s => s.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nreceivemethod" }))))
+                        .Deferred(true))
+                    @Html.ValidationMessage("ReceiverMethod")
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-input fullwidth">
+                    @Html.Label(Localizer["Description"])
+                    @(Html.Kendo().TextAreaFor(x => x.Note).HtmlAttributes(new { @class = "basicdata" }).Rows(2).Deferred(true))
+                    @Html.ValidationMessage("Description")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

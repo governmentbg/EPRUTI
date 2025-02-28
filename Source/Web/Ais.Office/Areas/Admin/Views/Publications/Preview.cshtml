@@ -1,0 +1,87 @@
+﻿@using EnumHelper = Ais.Data.Models.Helpers.EnumHelper
+@using Ais.Data.Models.Publication
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using System.Web
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model Ais.Office.ViewModels.Publications.PublicationUpsertViewModel
+@{
+    var isPreview = ViewBag.IsPreview is bool && (bool)ViewBag.IsPreview;
+    if (isPreview && !Model.StartDate.HasValue)
+    {
+        Model.StartDate = DateTime.Now;
+    }
+
+    var shareUrl = Model.Id.HasValue == true
+        ? Url.AbsoluteAction("Info", "Publications", new { id = Model.Id })
+        : null;
+
+    var typeName = Enum.GetName(typeof(PublicationType), EnumHelper.GetPublicationTypeById(Model.Type.Id!.Value));
+
+    var date = Model.EndDate.HasValue
+                ? $"{Model.StartDate:d} - {Model.EndDate:d}"
+                : $"{Model.StartDate:d}";
+}
+
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $(".images-wrap img").magnificPopup({ type: "image", gallery: { enabled: true } });
+        })
+    </script>
+}
+
+<div class="inner-center @(typeName?.ToLower())">
+    <span class="n-date ctrl">
+            @date
+    </span>
+    <h1 class="pagetitle">
+        @Model.Title
+    </h1>
+    @if (Model.Pictures.IsNotNullOrEmpty())
+    {
+        <div class="images-wrap cover">
+            @foreach (var image in Model.Pictures)
+            {
+                <a href="@image.Url" class="magnet">
+                    <img src="@image.Url?width=400" alt="@Localizer["NotFound"]" />
+                </a>
+            }
+        </div>
+    }
+    <article class="ctrl">
+        @if (Model.Content.IsNotNullOrEmpty())
+        {
+            var content = HttpUtility.HtmlDecode(Model.Content);
+            @Html.Raw(content)
+        }
+    </article>
+    @if (shareUrl.IsNotNullOrEmpty())
+    {
+        <div class="share-btns social">
+            <strong>@Localizer["ShareIn"]</strong>
+            <a class="sharebtn fb" target="_blank" href="http://www.facebook.com/sharer/sharer.php?u=@shareUrl"><svg class="icon"><use xlink:href="#icon-fb"></use></svg></a>
+            <a class="sharebtn in" target="_blank" href="http://www.linkedin.com/shareArticle?url=@shareUrl"><svg class="icon"><use xlink:href="#icon-in"></use></svg></a>
+            <a class="sharebtn tw" target="_blank" href="http://twitter.com/share?url=@shareUrl"><svg class="icon"><use xlink:href="#icon-tw"></use></svg></a>
+        </div>
+    }
+    
+    <div class="clear"></div>
+    @if (isPreview)
+    {
+        <div class="button-wrap">
+            <a data-ajax="true" data-ajax-method="POST" href="@Url.Action("Save", new { sessionId = Model.UniqueId })" class="bttn main caps right">@Localizer["Save"]</a>
+            <a href="@Url.Action("Upsert", new { sessionId = Model.UniqueId })" class="bttn caps right">@Localizer["Edit"]</a>
+        </div>
+        <div class="clear"></div>
+    }
+</div>

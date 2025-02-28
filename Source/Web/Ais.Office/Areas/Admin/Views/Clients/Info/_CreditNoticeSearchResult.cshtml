@@ -1,0 +1,37 @@
+﻿@using Ais.Data.Models.CreditNotice;
+@using Ais.Office.Areas.Admin.Controllers;
+@using Ais.WebUtilities.Extensions;
+@using Microsoft.Extensions.Localization;
+@model List<CreditNoticeTableModel>
+@inject IStringLocalizer Localizer;
+@(
+    Html.Kendo().Grid<CreditNoticeTableModel>(Model)
+                .Name("credit-notices")
+                .HtmlAttributes(new { @class = "fullwidth" })
+                .ToolBar(tb => tb.ClientTemplateId("credit-notices-toolbar"))
+                .Selectable(s => s.Enabled(true).Mode(GridSelectionMode.Single).Type(GridSelectionType.Row))
+                .Columns(column =>
+                {
+                    column.Bound(c => c.RegNum).Title(Localizer["RegNum"]);
+                    column.Bound(c => c.EntryDate).Format("{0:d}").Title(Localizer["Date"]);
+                    column.Bound(c => c.Amount).Format("{0:c2}").Title(Localizer["Amount"]);
+                    column.Bound(c => c.Reason).Title(Localizer["Reason"]);
+                    column.Bound(c => c.File).ClientTemplate($"<a href='#:core.getBaseUrl()#Attachment/Download?ids=#:File.Id #' target='_blank'>#: File != null  && File.Id != null? File.Name : '' #</a>").Title(Localizer["File"]);
+                    column.Bound(c => c.Entered).Title(Localizer["Entered"]);
+                    column.Bound(c => c.RegDate).Format("{0:G}").Title(Localizer["RegDate"]);
+                })
+)
+
+<script id="credit-notices-toolbar" type="text/x-kendo-template">
+    <div class="left">
+        @{
+             var controllerType = typeof(ClientsController);
+             if (this.Url.HasRightsToAction("UpsertCreditNotice", controllerType))
+             {
+                  <a href="\\#" class="k-small k-button edit-notice-js" title="@Localizer["Edit"]">
+                      <i class="k-i-edit k-icon k-font-icon"></i>
+                  </a>
+             }
+        }
+    </div>
+</script>

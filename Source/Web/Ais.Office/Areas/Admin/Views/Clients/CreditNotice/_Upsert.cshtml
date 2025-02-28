@@ -1,0 +1,112 @@
+﻿@using Ais.Infrastructure.KendoExt;
+@using Ais.Office.ViewModels.CreditNotices;
+@using Ais.Utilities.Extensions;
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+@model CreditNoticeViewModel
+<form method="post" action="@Url.ActionLink("UpsertCreditNotice", "Clients")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="admin_clients.onCreditNoticeUpsert">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.ClientId)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["CreditNotice"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @Html.LabelFor(m => m.RegNum,  new { @class = "required" })
+                        @Html.Kendo().TextBoxFor(m => m.RegNum)
+                        @Html.ValidationMessageFor(m => m.RegNum)
+                    </div>
+                    <div class="form-input fullwidth">
+                        @Html.LabelFor(m => m.Date,  new { @class = "required" })
+                        @Html.Kendo().DatePickerFor(x => x.Date)
+                        @Html.ValidationMessageFor(m => m.Date)
+                    </div>
+                    <div class="form-input fullwidth">
+                        @Html.LabelFor(m => m.Price,  new { @class = "required" })
+                        @{
+                            object attributes = new { style = "" };
+                            var isNotReadOnly = Model == null || Model.IsNew;
+                            if (!isNotReadOnly)
+                            {
+                                attributes = new { style = "", @readonly = "readonly" };
+                            }
+                        }
+                        @Html.Kendo().NumericTextBoxFor(x => x.Price).Min(0).Format("c2").HtmlAttributes(attributes)
+                        @Html.ValidationMessageFor(m => m.Price)
+                    </div>
+                    <div class="form-input fullwidth">
+                        @Html.LabelFor(m => m.Reason,  new { @class = "required" })
+                        @Html.Kendo().TextAreaFor(x => x.Reason).Rows(3)
+                        @Html.ValidationMessageFor(m => m.Reason)
+                    </div>
+                    <div class="form-input fullwidth">
+                        @{
+                            var prefix = "File.";
+                            var asyncUploadChunkSize = 307200;
+                        }
+                        @Html.LabelFor(x => x.File, Localizer["File"].ToString(), new { @class = "required" })
+                        @(Html.Kendo().Upload()
+                            .Name($"{prefix}Url")
+                            .HtmlAttributes(new { accept = "doc, docx, pdf, jpg, jpeg, png", id = Guid.NewGuid().ToString(), data_prefix = prefix, name = string.Empty })
+                            .Messages(x => x.Select(Localizer["SelectFiles"])
+                            .DropFilesHere(Localizer["DropFilesHere"])
+                            .InvalidFileExtension(Localizer["InvalidFileExtension"])
+                            .Cancel(Localizer["Cancel"]))
+                            .Async(a => a
+                            .Save("Upload", "Attachment", new { area = string.Empty })
+                            .Remove("Remove", "Attachment", new { area = string.Empty })
+                            .AutoUpload(true)
+                            .ChunkSize(asyncUploadChunkSize)
+                            .Concurrent(false))
+                            .ShowFileList(true)
+                            .Multiple(false)
+                            .TemplateId("fileTemplate")
+                            .Validation(validation =>
+                            {
+                                validation.AllowedExtensions("doc", "docx", "pdf", "jpg", "jpeg", "png");
+                            })
+                            .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+                            .Files(files =>
+                            {
+                                if (Model?.File?.Name.IsNotNullOrEmpty() == true)
+                                {
+                                    var attachment = Model?.File;
+                                    files.AddCustomFile(
+                                    new Ais.Infrastructure.KendoExt.UploadFile
+                                {
+                                    Id = attachment!.Id,
+                                    Name = attachment.Name,
+                                    Url = attachment.Url,
+                                    Size = attachment.Size,
+                                    Extension = attachment.Extension,
+                                    Data = new Dictionary<string, object> { { "prefix", prefix } }
+                                });
+                                }
+                            }))
+                        @Html.ValidationMessageFor(m => m.File)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third  closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+@{
+    await Html.RenderPartialAsync("_FileTemplate");
+}

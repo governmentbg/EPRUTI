@@ -1,0 +1,50 @@
+﻿@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model Ais.Data.Models.Document.OutAdmAct
+
+<div class="step-box">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["ActObject"]
+        </h3>
+    </div>
+    <div class="step-box-body">
+        @if (Model?.Object?.AdmActObjects != null)
+        {
+            @foreach (var item in Model.Object.AdmActObjects)
+            {
+                <div class="admact-object-js">
+
+                    <div class="flex info-row align-center">
+                        <i class="@(item?.AddressList.IsNotNullOrEmpty() == true ? "k-i-caret-alt-down" : "k-i-sarrow-e") k-font-icon arrow-icon"></i>
+                        <div class="left">
+                            @{
+                                @Html.Raw(item.FullDescriptionHtml)
+                            }
+                        </div>
+                    </div>
+                    <div class="admact-object-addresses-js">
+                        @if (item?.AddressList.IsNotNullOrEmpty() == true)
+                        {
+                            var index = 1;
+                            @foreach (var objectAddress in item.AddressList)
+                            {
+                                ViewBag.ItemIndex = index;
+                                <div class="flex info-row align-center">
+                                    <div class="number">@(ViewBag.ItemIndex).</div>
+                                    <div class="left">
+                                        @{
+                                            @Html.Raw(objectAddress.FullDescriptionHtml)
+                                        }
+                                    </div>
+                                </div>
+                                index++;
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

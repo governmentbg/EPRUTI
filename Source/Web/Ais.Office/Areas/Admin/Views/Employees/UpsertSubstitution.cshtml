@@ -1,0 +1,59 @@
+﻿@using Ais.Office.ViewModels.Employees
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Nomenclature
+@inject IStringLocalizer Localizer
+@model SubstitutionUpsertViewModel
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var employees = this.ViewBag.Employees as List<Nomenclature>;
+}
+<form method="post" action="@Url.ActionLink("AddSubstitution", "Employees")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.EmployeeId)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["OverTime"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.SubstituteEmployee, new { @class = "required" })
+                        @(Html.Kendo().DropDownListFor(m => m.SubstituteEmployee.Id)
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .Filter(FilterType.Contains)
+                            .BindTo(employees)
+                            .Deferred(deferred))
+                        @Html.ValidationMessageFor(m => m.SubstituteEmployee)
+                    </div>
+
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.From, new { @class = "required" })
+                        @Html.EditorFor(m => m.From, "Date", additionalViewData: new { min = DateTime.Now })
+                        @Html.ValidationMessageFor(m => m.From)
+                    </div>
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.To, new { @class = "required" })
+                        @Html.EditorFor(m => m.To, "Date", additionalViewData: new { min = DateTime.Now })
+                        @Html.ValidationMessageFor(m => m.To)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

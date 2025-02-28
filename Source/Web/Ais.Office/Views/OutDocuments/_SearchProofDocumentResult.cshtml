@@ -1,0 +1,34 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Office.ViewModels.Documents.OutDocuments
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@model string
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().Grid<OutDocShortViewModel>()
+        .Name(Guid.NewGuid().ToString())
+        .HtmlAttributes(new { @class = "fullwidth" })
+        .Columns(
+            col =>
+            {
+                col.Bound(x => x.RegNumber)
+                   .Title(Localizer["RegNumber"]);
+                col.Bound(x => x.Type.Name)
+                   .Title(Localizer["Type"]);
+                col.Bound(x => x.RegDate)
+                   .Title(Localizer["Date"])
+                   .Format("{0:G}");
+                col.Bound(string.Empty)
+                   .Width(50)
+                   .ClientTemplate($"<button type='button' class='k-button k-small add-proof-doc-js' title='{Localizer["Add"]}'><i class='k-icon k-font-icon k-i-check'></i></span></button>");
+            })
+        .Sortable()
+        .Pageable(p => p.Enabled(true).PreviousNext(true).ButtonCount(5))
+        .Events(e => e.DataBound("searchTable.onGridDataBound"))
+        .DataSource(
+            dataSource => dataSource
+                          .Ajax()
+                          .PageSize(5)
+                          .Read(read => read.Action("ReadSearchShort", "OutDocuments", new { key = Model, Area = string.Empty })))
+        .Deferred(deferred))

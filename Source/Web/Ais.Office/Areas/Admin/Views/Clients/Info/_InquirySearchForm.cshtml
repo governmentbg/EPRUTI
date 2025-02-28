@@ -1,0 +1,87 @@
+﻿@using Ais.Office.Controllers
+@using Ais.Office.ViewModels.Inquiries;
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+@model InquiryQueryViewModel
+<section id="top-search" class="top-search k-pb-0">
+    <div class="center">
+        <div class="white-box">
+            <form action="@Url.ActionLink("SearchInquiries", "Clients")"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-update="#inquiry-search-result"
+                  class="search">
+                <div class="form-row">
+                    @Html.HiddenFor(x => x.ClientId)
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.RegNum)
+                        @Html.EditorFor(x => x.RegNum)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.RegDateFrom)
+                        @Html.EditorFor(x => x.RegDateFrom, "Date")
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.RegDateTo)
+                        @Html.EditorFor(x => x.RegDateTo, "Date")
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.Object)
+                        @Html.EditorFor(x => x.Object)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.InquiryTypeId)
+                        @(
+                            Html.Kendo().DropDownListFor(x => x.InquiryTypeId)
+                            .HtmlAttributes(new { id = Guid.NewGuid().ToString() })
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .Filter("contains")
+                            .DataSource(s => s.Read("GetInquiryTypes", "Clients", new { Area = "Admin" })))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.StatusId)
+                        @(
+                            Html.Kendo().DropDownListFor(x => x.StatusId)
+                            .HtmlAttributes(new { id = Guid.NewGuid().ToString() })
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .Filter("contains")
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataSource(s => s.Read(x => x.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "ninqstatus" })))))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.PayStatusId)
+                        @(
+                            Html.Kendo().DropDownListFor(x => x.PayStatusId)
+                            .HtmlAttributes(new { id = Guid.NewGuid().ToString() })
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .Filter("contains")
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataSource(s => s.Read(x => x.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "ndocpaidstatus" })))))
+                    </div>
+                    <div class="form-input auto w100">
+                        @Html.LabelFor(x => x.Limit)
+                        @Html.EditorFor(x => x.Limit, "ResultLimit")
+                    </div>
+                    <div class="form-input autosize k-ml-auto nest">
+                        <label class="empty"></label>
+                        <button class="bttn bttn-icon search" title="@Localizer["Search"]" value="@Localizer["Search"]" id="searchTablebutton">
+                            <svg class="icon">
+                                <use xlink:href="#icon-search"></use>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<section id="datatable">
+    <div class="center fullwidth">
+        <div class="table-wrapper" id="inquiry-search-result"></div>
+    </div>
+</section>

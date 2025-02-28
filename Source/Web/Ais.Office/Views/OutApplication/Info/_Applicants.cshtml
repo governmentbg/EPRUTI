@@ -1,0 +1,90 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Utilities.Extensions
+@using Ais.Data.Models.Client
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Document.OutDocument
+@{
+    void RenderClient(Client client)
+    {
+        <div class="ib">
+            <strong>@(client.GetFullName())</strong>
+            @{
+                if (client.EgnBulstat.IsNotNullOrEmpty())
+                {
+                    <span>@Localizer["EgnBulstat"]: <strong class="@(client.IsDead ? "statusDead" : null)">@client.EgnBulstat</strong></span>
+                }
+
+                if (client.IsDead)
+                {
+                    <span><strong>@($"{Localizer["IsDead"]} {client.DateOfDeath:d}".Trim())</strong></span>
+                }
+            }
+        </div>
+    }
+
+    if (Model?.Applicants.IsNotNullOrEmpty() == true)
+    {
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["Recipient"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                @foreach (var applicant in Model.Applicants)
+                {
+                    if (applicant.Recipient != null)
+                    {
+                        RenderClient(applicant.Recipient);
+                    }
+
+                    if (applicant.Author != null)
+                    {
+                        <div>
+                            @Localizer["ByRepresentative"]
+                            @{
+                                RenderClient(applicant.Author);
+                            }
+                        </div>
+                    }
+
+                    if (applicant.AuthorQuality != null)
+                    {
+                        <div>@Localizer["AuthorQuality"]: <strong>@(applicant.AuthorQuality.Type?.Name)</strong></div>
+                        var powerOfAttorney = applicant.AuthorQuality.PowerOfAttorney;
+                        if (powerOfAttorney != null)
+                        {
+                            var file = powerOfAttorney.File;
+                            var downloadData = file?.GetDownloadData();
+                            var downloadLink = downloadData != null
+                                ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                                : null;
+                            if (downloadLink.IsNotNullOrEmpty())
+                            {
+                                <div>
+                                    @Localizer["PowerOfAttorney"]:
+                                    <a href="@downloadLink" class="simplelink" target="_blank">
+                                        @(file?.Name ?? Localizer["Download"])
+                                    </a>
+                                </div>
+                            }
+                            <div>
+                                @($"{Localizer["RegDate"]}: {powerOfAttorney!.RegDate:d} {Localizer["RegNumber"]}: {powerOfAttorney!.RegNumber}, {Localizer["Notary"]} {powerOfAttorney!.NotaryNumber}, {Localizer["ValidToDate"]}: {powerOfAttorney!.EndDate:d}")
+                            </div>
+                        }
+                    }
+
+                    if (applicant.Recipient?.ContactData != null)
+                    {
+                        <div class="contact-data">
+                            <div>@Localizer["Email"]: <strong>@(applicant.Recipient.ContactData?.Email)</strong></div>
+                            <div>@Localizer["Phone"]: <strong>@(applicant.Recipient.ContactData?.Phone)</strong> </div>
+                            <div>@Localizer["Address"]: <strong>@(applicant.Recipient.ContactData?.FullDescription)</strong></div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+}

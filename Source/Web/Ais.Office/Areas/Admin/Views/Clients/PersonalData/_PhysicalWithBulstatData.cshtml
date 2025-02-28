@@ -1,0 +1,12 @@
+﻿@using Ais.Office.ViewModels.Clients;
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model ClientUpsertModel
+<div class="clientType-js physicalwithbulstat-js" style="display: none;">
+    @{
+        ViewBag.RequiredFields = new List<string> { "FirstNames", "FamilyNames" };
+    }
+    <partial name="PersonalData/_Names" />
+    <div class="form-row">
+        <partial name="PersonalData/_DeathData" />
+    </div>
+</div>

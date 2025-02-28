@@ -1,0 +1,30 @@
+﻿@using Microsoft.Extensions.Localization
+@using Ais.WebUtilities.Extensions
+@inject IStringLocalizer Localizer
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+<div class="three">
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["TotalStatisticsForPeriod"]:
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="flex k-flex-nowrap">
+                    <div class="form-input column">
+                        @Html.Kendo().DatePicker().Name("TaskByPeriodFrom").HtmlAttributes(new { @class = "central" }).Value(DateTime.Now.AddDays(-7)).Events(x => x.Change("account.periodFromChange")).Deferred(deferred)
+                    </div>
+                    <div class="form-input-dash"></div>
+                    <div class="form-input column">
+                        @Html.Kendo().DatePicker().Name("TaskByPeriodTo").HtmlAttributes(new { @class = "central" }).Value(DateTime.Now).Events(x => x.Change("account.periodToChange")).Deferred(deferred)
+                    </div>
+                </div>
+            </div>
+            <div class="chart-horizontal" id="donut-charts-wrapper">
+            </div>
+        </div>
+    </div>
+</div>

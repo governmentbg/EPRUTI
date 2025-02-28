@@ -1,0 +1,73 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@model ICollection<Ais.Data.Models.Folder.History>
+@{
+    void Render()
+    {
+        if (Model.IsNotNullOrEmpty())
+        {
+            @(Html.Kendo().Grid(Model)
+                .Name(Guid.NewGuid().ToString())
+                .HtmlAttributes(new { @class = "fullwidth" })
+                .Sortable()
+                .Pageable()
+                .Columns(
+                    columns =>
+                    {
+                        columns.Bound(c => c.User.UserName).Title(Localizer["UserName"]);
+                        columns.Bound(c => c.User.FullName).Title(Localizer["User"]);
+                        columns.Bound(c => c.Folder.Number).Title(Localizer["Folder"]);
+                        columns.Bound(c => c.FromDate).Title(Localizer["FromDate"]).Format("{0:G}");
+                        columns.Bound(c => c.ToDate).Title(Localizer["ToDate"]).Format("{0:G}");
+                        columns.Bound(c => c.Note).Title(Localizer["Comment"]);
+                        columns.Bound(c => c.Section.Name).Title(Localizer["Section"]);
+                        columns.Bound(c => c.Action.Name).Title(Localizer["Action"]);
+                    })
+                .DataSource(
+                    dataSource => dataSource
+                                  .Ajax()
+                                  .PageSize(10)
+                                  .ServerOperation(false)))
+        }
+        else
+        {
+            <h5>@Localizer["NoDataFound"]</h5>
+        }
+    }
+
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    if (deferred)
+    {
+        @section Breadcrumbs
+        {
+            @{
+                await Html.RenderPartialAsync("_Breadcrums");
+            }
+        }
+
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["History"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    @{
+                        Render();
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="step-box-body">
+            <div class="form-row">
+                @{
+                    Render();
+                }
+            </div>
+        </div>
+    }
+}

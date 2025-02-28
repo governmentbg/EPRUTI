@@ -1,0 +1,29 @@
+﻿@using Ais.Office.Controllers.Documents
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model Ais.Office.ViewModels.Documents.OutDocuments.SendingDataViewModel
+<form action="@Url.DynamicAction(nameof(OutDocumentsController.SendingData), typeof(OutDocumentsController))" method="post" data-ajax="true">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(m => m.OutDocumentId)
+    <div class="step-box fullwidth">
+        <div class="form-row">
+            <div class="form-input fullwidth">
+                @Html.LabelFor(m => m.Subject, new { @class = "required" })
+                @Html.EditorFor(m => m.Subject)
+                @Html.ValidationMessageFor(m => m.Subject)
+            </div>
+            <div class="form-input fullwidth">
+                @Html.LabelFor(m => m.Content, new { @class = "required" })
+                @Html.EditorFor(m => m.Content)
+                @Html.ValidationMessageFor(m => m.Content)
+            </div>
+        </div>
+    </div>
+    <div class="button-wrap fullwidth">
+        <button type="submit" class="right bttn main">
+            @Localizer["Save"]
+        </button>
+    </div>
+</form>

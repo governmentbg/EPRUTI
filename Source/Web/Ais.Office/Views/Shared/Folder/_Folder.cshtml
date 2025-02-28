@@ -1,0 +1,70 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Document
+@using Ais.Data.Models.Folder
+@model Ais.Data.Models.Folder.Folder
+@if (Model != null)
+{
+    var prefix = $"{nameof(Document.Folders)}";
+    var index = Model.UniqueId;
+    var name = $"{prefix}[{index}].";
+    var sectionNameId = $"{name}{nameof(Folder.Section)}.{nameof(Folder.Section.Id)}";
+    var sectionIdName = $"{name}{nameof(Folder.Section)}.{nameof(Folder.Section.Name)}";
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    <div class="form-row flex info-row align-center folder-wrapper-js">
+        @Html.Hidden($"{prefix}.Index", index)
+        @Html.Hidden($"{name}{nameof(Folder.Id)}", Model.Id)
+        @Html.Hidden($"{name}{nameof(Folder.Number)}", Model.Number)
+        @Html.Hidden($"{name}{nameof(Folder.IsInitFolder)}", Model.IsInitFolder)
+        <div class="form-input w20 number-js">
+            <strong>@(ViewBag.ItemIndex).</strong>
+        </div>
+        <div class="form-input fg-1">
+            <div class="ib">
+                <strong>
+                    @Model.GetTitle()
+                </strong>
+            </div>
+        </div>
+        @if (!Model.IsInitFolder)
+        {
+            <div class="form-input w-auto">
+                <div class="checkbox-form">
+                    @Html.Kendo().CheckBoxFor(x => x.IncludeAllFolders).Checked(Model.IsInitFolder).Name($"{name}{nameof(Folder.IncludeAllFolders)}").Deferred(deferred)
+                    <label>
+                        @Localizer["IncludeAllFolders"]
+                    </label>
+                </div>
+            </div>
+        }
+        <div class="form-input">
+            @(Html.Kendo().DropDownList()
+                .Name(sectionNameId)
+                .Value(Model.Section?.Id?.ToString())
+                .HtmlAttributes(new { id = Guid.NewGuid().ToString() })
+                .DataValueField("Id")
+                .DataTextField("Name")
+                .Filter(FilterType.Contains)
+                .ValueTemplate(
+                    $"<input type='hidden' name='{sectionIdName}' value='#:Name#'/>" +
+                    "<span>#:Name#</span>")
+                .DataSource(
+                    d =>
+                        d.Custom()
+                         .Transport(
+                             transport => transport
+                                 .Read(read => { read.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nsection" })); }))
+                         .ServerFiltering(false))
+                .Deferred(deferred))
+            @Html.ValidationMessage(sectionNameId)
+        </div>
+
+        @if (ViewBag.SkipDelete != true)
+        {
+            <button type="button" class="bttn  bttn-icon third small autosize remove-folder-js" title="@Localizer["Remove"]">
+                <i class="k-i-x k-icon k-font-icon"></i>
+            </button>
+        }
+    </div>
+}

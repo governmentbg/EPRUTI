@@ -1,0 +1,51 @@
+﻿@using Ais.Data.Models.Document
+@using Ais.Office.Controllers.Documents
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@model Guid
+@inject IStringLocalizer Localizer
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    if (deferred)
+    {
+        @section Breadcrumbs
+        {
+            @{
+                await Html.RenderPartialAsync("_Breadcrums");
+            }
+        }
+    }
+
+    async Task RenderScripts()
+    {
+        <script src="~/bundles/outdocuments.min.js" asp-append-version="true"></script>
+    }
+}
+@(Html.Kendo().TabStrip()
+    .Name(Guid.NewGuid().ToString())
+    .HtmlAttributes(new { @class = "fullheight" })
+    .Items(tab =>
+    {
+        tab.Add().Selected(true)
+           .Text(Localizer["Document"])
+           .LoadContentFrom(Url.DynamicAction(nameof(OutApplicationController.Info), typeof(OutApplicationController), new { id = Model }));
+        tab.Add().Text(this.Localizer["Folders"])
+           .LoadContentFrom(Url.DynamicAction(nameof(FoldersController.Info), typeof(FoldersController), new { id = Model, type = EntryType.OutDocument }));
+        tab.Add().Text(this.Localizer["DeliveryData"])
+           .LoadContentFrom(Url.DynamicAction(nameof(OutDocumentsController.SendingData), typeof(OutDocumentsController), new { id = Model }));
+        tab.Add().Text(this.Localizer["DeliverData"])
+           .LoadContentFrom(Url.DynamicAction(nameof(OutDocumentsController.DeliveryData), typeof(OutDocumentsController), new { outDocId = Model }));
+    })
+    .Deferred(deferred))
+@if (!deferred)
+{
+    await RenderScripts();
+}
+else
+{
+    @section Scripts {
+        @{
+            await RenderScripts();
+        }
+    }
+}

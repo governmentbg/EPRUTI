@@ -1,0 +1,18 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var controllerType = typeof(OutApplicationTypesController);
+    var createUrl = Url.DynamicActionWithRightsCheck(nameof(OutApplicationTypesController.Upsert), controllerType);
+    if (createUrl.IsNotNullOrEmpty())
+    {
+        <div class="form-input autosize additional-buttons">
+            <label class="empty"></label>
+            <a href="@createUrl" class="bttn bttn-icon add-outapplication-type-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Create"]">
+                <i class="k-i-plus k-icon k-font-icon"></i>
+            </a>
+        </div>
+    }
+}

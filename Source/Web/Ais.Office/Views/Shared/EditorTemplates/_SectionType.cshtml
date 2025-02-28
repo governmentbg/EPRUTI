@@ -1,0 +1,24 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Nomenclature.Nomenclature
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+
+@(Html.Kendo().DropDownListFor(m => m)
+    .HtmlAttributes(attributes)
+    .DataTextField("Name")
+    .DataValueField("Id")
+    .OptionLabel(Localizer["Choose"].ToString())
+    .DataSource(ds => ds.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nsection" })))))
