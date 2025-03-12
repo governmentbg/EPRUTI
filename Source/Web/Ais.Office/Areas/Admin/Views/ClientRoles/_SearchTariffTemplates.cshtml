@@ -1,0 +1,38 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Ais.Office.Areas.Admin.Controllers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model Ais.Data.Models.TariffTemplate.TariffTemplateQueryModel
+@{
+    var wrapperId = Guid.NewGuid().ToString();
+}
+<div action="@Url.DynamicAction(nameof(ClientRolesController.SearchTariffTemplates), typeof(ClientRolesController))"
+     data-ajax="true"
+     data-ajax-method="POST"
+     data-ajax-update="#@wrapperId">
+    <div class="form-row">
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.TariffTitle, Localizer["Title"])
+            @Html.Kendo().TextBoxFor(m => m.TariffTitle)
+        </div>
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.RegDateFrom, Localizer["RegisterFrom"])
+            @Html.Kendo().DatePickerFor(m => m.RegDateFrom)
+        </div>
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.RegDateTo, Localizer["RegisterTo"])
+            @Html.Kendo().DatePickerFor(m => m.RegDateTo)
+        </div>
+        <div class="form-input quad">
+            <label class="empty"></label>
+            <button class="bttn bttn-icon blue" title="@Localizer["Search"]" ajax-button-submit>
+                <svg class="icon">
+                    <use xlink:href="#icon-search"></use>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+<div id="@wrapperId" class="fullwidth">
+</div>

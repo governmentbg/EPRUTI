@@ -1,0 +1,77 @@
+﻿@using Ais.Office.ViewModels.Authentication;
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Configuration
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+@inject IConfiguration Configuration
+@model LoginViewModel
+@{
+    ViewBag.DontRenderMenu = true;
+    ViewBag.IsNotCenterContent = true;
+    var authenticationSchemes = this.ViewBag.ExternalProviders as AuthenticationScheme[];
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+}
+<div id="fixed-bgr"></div>
+<div id="wrap">
+    <div id="main">
+        <div class="content login">
+            <div class="center">
+                <div class="column-wrap">
+                    <div class="column left">
+                        <a>
+                            <img src="images/logo@(mrrbFlag ? "MRRB": null).png" alt="@(mrrbFlag ? "МРРБ": "АГКК")">
+                        </a>
+                    </div>
+                    @if (mrrbFlag)
+                    {
+                        <div class=" form-row">
+                            <a href="@Url.Action("ELogin", "Authentication")" class="bttn secondary">
+                                @Localizer["ELogin"]
+                            </a>
+                        </div>
+                    }
+                    <form method="post" class="column right" asp-all-route-data="@(new AttributeDictionary{ { "returnUrl", ViewBag.ReturnUrl as string } })">
+                        <div asp-validation-summary="ModelOnly"></div>
+                        <div class="form-input fullwidth">
+                            <label asp-for="@Model.UserName"></label>
+                            <input asp-for="@Model.UserName" placeholder="yourmail@mail.com">
+                            <span asp-validation-for="@Model.UserName"></span>
+                        </div>
+                        <div class="form-input fullwidth">
+                            <label asp-for="@Model.Password"></label>
+                            <input asp-for="@Model.Password" type="password">
+                            <span asp-validation-for="@Model.Password"></span>
+                        </div>
+                        <div class="form-input fullwidth">
+                            <input asp-for="@Model.RememberMe" type="checkbox" class="ib">
+                            <label asp-for="@Model.RememberMe" class="ib"></label>
+                            <span asp-validation-for="@Model.RememberMe"></span>
+                        </div>
+                        <div class="form-input fullwidth">
+                            <button type="submit" class="bttn fullwidth">@Localizer["Enter"]</button>
+                        </div>
+                    </form>
+                    @if (authenticationSchemes.IsNotNullOrEmpty())
+                    {
+                        @if (!mrrbFlag)
+                        {
+                            @foreach (var scheme in authenticationSchemes!.OrderBy(p => p.DisplayName))
+                            {
+                                <form action="@Url.DynamicAction("SignIn", typeof(AuthenticationController))" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="Provider" value="@scheme.Name" />
+                                    <input type="hidden" name="ReturnUrl" value="@ViewBag.ReturnUrl" />
+                                    <button class="bttn fullwidth" type="submit">@(string.Format(Localizer["LoginWith"], scheme.DisplayName))</button>
+                                </form>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>  

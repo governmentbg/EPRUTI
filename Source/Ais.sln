@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{E389DEB6-5F90-444B-A054-12A10D39C76F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ais.Office", "Web\Ais.Office\Ais.Office.csproj", "{89792CD6-1855-4BBF-AE38-FE88FD7C6B4E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{89792CD6-1855-4BBF-AE38-FE88FD7C6B4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89792CD6-1855-4BBF-AE38-FE88FD7C6B4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89792CD6-1855-4BBF-AE38-FE88FD7C6B4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89792CD6-1855-4BBF-AE38-FE88FD7C6B4E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{89792CD6-1855-4BBF-AE38-FE88FD7C6B4E} = {E389DEB6-5F90-444B-A054-12A10D39C76F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {384484BE-4680-4529-9CC2-AD37BA4D12D1}
+	EndGlobalSection
+EndGlobal

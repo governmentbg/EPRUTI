@@ -1,0 +1,86 @@
+﻿@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Office.ViewModels.Application
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.Document
+<div class="control-menu">
+    <ul>
+        @{
+            var step = (Step)ViewBag.Step;
+            var steps = step?.AllowSteps;
+            if (steps.IsNotNullOrEmpty())
+            {
+                var index = step!.GetCurrentIndex();
+                for (var i = 0; i < steps.Count; i++)
+                {
+                    RenderStep(i, index, steps[i]);
+                }
+            }
+        }
+    </ul>
+</div>
+@functions
+{
+    private void RenderStep(int index, int activeIndex, StepType type)
+    {
+        string icon = default;
+        string iconColor = default;
+        switch (type)
+        {
+            case StepType.Applicant:
+                {
+                    icon = "k-i-user";
+                    iconColor = "bg-blue";
+                    break;
+                }
+            case StepType.BasicData:
+                {
+                    icon = "k-i-grid-layout";
+                    iconColor = "bg-darkblue";
+                    break;
+                }
+            case StepType.Attachments:
+                {
+                    icon = "k-i-file";
+                    iconColor = "bg-orange";
+                    break;
+                }
+            case StepType.Folder:
+                {
+                    icon = "k-i-folder";
+                    iconColor = "bg-lime";
+                    break;
+                }
+            case StepType.Overview:
+                {
+                    icon = "k-i-eye";
+                    iconColor = "bg-red";
+                    break;
+                }
+        }
+
+        var name = Enum.GetName(type);
+        var isDone = index < activeIndex;
+        var stepName = Localizer[$"{name}Step"];
+        <li class="@(index == activeIndex ? "active" : string.Empty)">
+            @if (isDone)
+            {
+                <a href="#" class="steps-box done" data-step="@type">
+                    <span class="icon @iconColor">
+                        <i class="k-icon k-font-icon @icon"></i>
+                    </span>
+                    @stepName
+                </a>
+            }
+            else
+            {
+                <a>
+                    <span class="icon @iconColor">
+                        <i class="k-icon k-font-icon @icon"></i>
+                    </span>
+                    @stepName
+                </a>
+            }
+        </li>
+    }
+}

@@ -1,0 +1,30 @@
+﻿@using Ais.Office.ViewModels.Clients;
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model string
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().Grid<AgentViewModel>()
+    .Name(Guid.NewGuid().ToString())
+    .HtmlAttributes(new { @class = "fullwidth" })
+    .Columns(
+        column =>
+        {
+            column.Bound(c => c.FullName).Title(Localizer["FullName"]);
+            column.Bound(c => c.EgnBulstat).Title(Localizer["EgnBulstat"]).ClientTemplate("#:EgnBulstat ? EgnBulstat : ''#");
+            column.Bound(c => c.UniqueId).Title(Localizer["Actions"]).Width("80")
+            .ClientTemplate($"<a href='\\#' class='k-button k-small add-representative-js' data-clientuniqueid='{Model}'> <span class='k-i-plus k-icon k-font-icon k-button-icon'></span> </a>");
+        })
+    .Sortable()
+    .Pageable(p => p.Enabled(true).PreviousNext(true).ButtonCount(5))
+    .Width("auto")
+    .Events(e => e.DataBound("searchTable.onGridDataBound"))
+    .DataSource(
+        dataSource => dataSource
+                      .Ajax()
+                      .PageSize(10)
+                      .Model(m => m.Id("Id"))
+                      .Read(read => read.Action("ReadSearchClients", "Clients", new { clientUniqueId = Model })))
+    .Deferred(deferred))

@@ -1,0 +1,35 @@
+﻿@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Breadcrumb = Ais.Data.Models.Breadcrumb;
+@{
+    var items = TempData.Get<IEnumerable<Breadcrumb>>("Breadcrumbs");
+}
+
+@if (items.IsNotNullOrEmpty())
+{
+    <div class="page-top">
+        <div class="breadcrumbs">
+            @foreach (var item in items!.Where(entry => entry.Title.IsNotNullOrEmpty()))
+            {
+                DisplayMenuItem(item);
+            }
+        </div>
+    </div>
+}
+
+@functions {
+
+    private void DisplayMenuItem(Breadcrumb item)
+    {
+        if (item.Url.IsNotNullOrEmpty())
+        {
+            <a href="@item.Url">@item.Title</a>
+        }
+        else
+        {
+            <span>
+                @item.Title
+            </span>
+        }
+    }
+}

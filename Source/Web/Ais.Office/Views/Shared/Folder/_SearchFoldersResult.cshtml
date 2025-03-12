@@ -1,0 +1,28 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Office.ViewModels.Folders;
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@model string
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().Grid<FolderTableViewModel>()
+      .Name(Guid.NewGuid().ToString())
+      .HtmlAttributes(new { data_show_first_details = true, @class = "withoutpager" })
+      .Columns(columns =>
+      {
+          columns.Bound(x => x.Uri).Title(Localizer["Number"]);
+          columns.Bound(x => x.Name).Title(Localizer["Name"]);
+          columns.Bound(string.Empty).Width(90)
+                 .ClientTemplate("<button type='button' class='bttn bttn-icon fourth small autosize add-folder-js' value='#:data.Id#'><i class='k-icon k-font-icon k-i-check'></i></button>");
+      })
+      .Sortable()
+      .Pageable(p => p.Enabled(true).PreviousNext(true).ButtonCount(5))
+      .Width("auto")
+      .Events(e => e.DataBound("searchTable.onGridDataBound"))
+      .DataSource(
+          dataSource => dataSource
+              .Ajax()
+              .PageSize(20)
+              .Read(read => read.Url(Url.DynamicAction(nameof(FoldersController.ReadSearchFolders), typeof(FoldersController), new { searchQueryId = Model }))))
+      .Deferred(deferred)) 

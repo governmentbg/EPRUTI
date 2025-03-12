@@ -1,0 +1,26 @@
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@model object
+@{
+    var data = ViewData["Collection"] as IEnumerable<KeyValuePair<string, string>>;
+
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+
+@(Html.Kendo().DropDownListFor(m => m)
+      .DataValueField("Key")
+      .DataTextField("Value")
+      .HtmlAttributes(attributes)
+      .BindTo(data)
+      .AutoWidth(true)
+      .Filter(FilterType.Contains)
+      .Deferred(!Context.Request.IsAjaxRequest()))

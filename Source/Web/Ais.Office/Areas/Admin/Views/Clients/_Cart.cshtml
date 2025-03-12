@@ -1,0 +1,36 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Office.ViewModels.Clients
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().Grid<ClientTableViewModel>()
+      .Name("clientCart")
+      .Pageable()
+      .Sortable()
+      .Resizable(r => r.Columns(true))
+      .ToolBar(
+          t =>
+          {
+              t.Custom().Text(" ").HtmlAttributes(new { @class = "merge-clients-js", title = Localizer["MergeClients"].ToString() }).IconClass("k-i-link");
+          })
+      .Columns(
+          column =>
+          {
+              column.Bound(c => c.Knik)
+                    .Title(Localizer["Knik"]);
+              column.Bound(c => c.FullName)
+                    .Title(Localizer["FullName"]);
+              column.Bound(c => c.Email)
+                    .Title(Localizer["Email"]);
+          })
+      .HtmlAttributes(new { @class = "fullwidth" })
+      .Events(e => e.DataBound("searchTable.onGridDataBound"))
+      .DataSource(
+          dataSource => dataSource
+                        .Ajax()
+                        .PageSize(10)
+                        .Read(read => read.Url(Url.DynamicAction(nameof(ClientsController.ReadCart), typeof(ClientsController)))))
+      .Deferred(deferred))

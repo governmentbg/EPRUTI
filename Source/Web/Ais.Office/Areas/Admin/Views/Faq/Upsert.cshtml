@@ -1,0 +1,82 @@
+﻿@using Ais.Office.Areas.Admin.Controllers;
+@using Ais.Office.Controllers
+@using Ais.Office.ViewModels.Faq;
+@using Microsoft.Extensions.Localization;
+@using Ais.WebUtilities.Extensions;
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@inject IStringLocalizer Localizer;
+@model FaqUpsertViewModel
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+@section Scripts
+    {
+    <script src="~/bundles/admin_faq.min.js" asp-append-version="true"></script>
+}
+<div class="center">
+    @using (Html.BeginForm(
+    "Upsert",
+    "Faq", FormMethod.Post))
+    {
+        @Html.ValidationSummary(true)
+        @Html.AntiForgeryToken()
+        @if (Model.Id.HasValue)
+        {
+            @Html.HiddenFor(m => m.Id)
+        }
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.Category, new { @class = "required" })
+            @(Html.Kendo().DropDownListFor(m => m.Category.Id)
+                .DataValueField("Key")
+                .DataTextField("Value")
+                .OptionLabel(Localizer["Choose"].ToString())
+                .DataSource(dataSource => dataSource.Read("GetFaqCategories", "Faq", new { Area = "Admin" }).ServerFiltering(false)).Deferred(true)
+                )
+            @Html.ValidationMessageFor(m => m.Category)
+            @Html.ValidationMessageFor(m => m.Category.Id)
+
+        </div>
+        var controllerType = typeof(FaqController);
+        if (this.Url.HasRightsToAction("Upsert", controllerType))
+        {
+            <div class="form-input pint">
+                <label class="empty"></label>
+                <button class="k-button k-small third bttn-icon autosize manageFAQCategory-js">
+                    @Localizer["ManageCategories"]
+                </button>
+            </div>
+        }
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.Status, new { @class = "required" })
+            @(Html.Kendo().DropDownListFor(m => m.Status.Id)
+                .DataValueField("Id")
+                .DataTextField("Name")
+                .OptionLabel(Localizer["Choose"].ToString())
+                .DataSource(dataSource => dataSource.Read(x => x.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nfaqstatus" }))).ServerFiltering(false)).Deferred(true))
+            @Html.ValidationMessageFor(m => m.Status)
+        </div>
+
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.ScheduledArchiveDate)
+            @(Html.Kendo().DatePickerFor(m => m.ScheduledArchiveDate).Deferred())
+        </div>
+        <div class="form-input fullwidth">
+            @Html.EditorFor(model => model.Questions, "InternationalizationTextBox")
+            @Html.ValidationMessageFor(m => m.Questions)
+        </div>
+
+        <div class="form-input fullwidth">
+            @Html.EditorFor(model => model.Answers, "InternationalizationEditor")
+            @Html.ValidationMessageFor(m => m.Answers)
+        </div>
+        <div class="clear"></div>
+        <div class="button-wrap fullwidth">
+            <button type="submit" class="bttn main caps right">@Localizer["Save"]</button>
+        </div>
+        <div class="clear"></div>
+    }
+</div>

@@ -1,0 +1,152 @@
+@using System.ComponentModel.DataAnnotations
+@using Ais.Utilities.Attributes
+@using Ais.Utilities.Extensions
+@using Ais.Utilities.Helpers
+@using Ais.WebUtilities.Helpers
+@using Kendo.Mvc.UI.Fluent
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Localization
+@using System.Web
+@using Ais.WebUtilities.Extensions
+@inject IStringLocalizer Localizer
+@inject IConfiguration Configuration;
+@model IDictionary<Guid, string>
+@{
+    var propertyName = ViewData.ModelMetadata.PropertyName;
+    var isRequired = propertyName!.IsNotNullOrEmpty()
+                     && ViewData.ModelMetadata.ContainerType?.GetProperty(propertyName!)
+                                ?.GetCustomAttributes(typeof(RequiredAttribute), true)
+                                 .OfType<RequiredAttribute>()
+                                 .Any() == true;
+
+    var stringLengthAttribute = propertyName!.IsNotNullOrEmpty()
+        ? ViewData.ModelMetadata.ContainerType?.GetProperty(propertyName!)
+                  ?.GetCustomAttributes(typeof(DictionaryStringLengthAttribute), true)
+                   .OfType<DictionaryStringLengthAttribute>().FirstOrDefault()
+        : null;
+
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+        ? ViewData["htmlAttributes"]
+        : null;
+
+    var wrapperClass = ViewData.ContainsKey("wrapperClass")
+        ? ViewData["wrapperClass"] as string
+        : null;
+
+    var tools = ViewData.ContainsKey("tools")
+        ? ViewData["tools"] as Action<EditorToolFactory>
+        : x =>
+            x.Clear()
+             .Bold().Italic().Underline().Strikethrough()
+             .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
+             .InsertUnorderedList().InsertOrderedList()
+             .Outdent().Indent()
+             .CreateLink().Unlink()
+             .InsertImage()
+             .InsertFile()
+             .SubScript()
+             .SuperScript()
+             .TableEditing()
+             .ViewHtml()
+             .Formatting()
+             .CleanFormatting()
+             .FontName()
+             .FontSize()
+             .ForeColor()
+             .BackColor()
+             .Print()
+             .ExportAs();
+}
+
+@foreach (var cultureData in LocalizationHelper.SupportedCultures)
+{
+    var key = cultureData.Id;
+    var language = Localizer[cultureData.Name];
+    var value = Model?.ContainsKey(key) == true ? Model[key] : null;
+    if (Model != null && !Model.ContainsKey(key))
+    {
+        Model.Add(key, string.Empty);
+    }
+
+    var name = $"{Html.DisplayNameForModel().Trim()}({language})";
+    var required = isRequired && cultureData.Required;
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        (required
+            ? new Dictionary<string, object>
+                          {
+                  { "data-val", "true" },
+                  { "data-val-required", string.Format(Localizer["Required"], name) }
+                          }
+            : null)!,
+        stringLengthAttribute != null
+            ? new Dictionary<string, object>
+                          {
+                  { "data-val", "true" },
+                  { "data-rule-minlength", stringLengthAttribute.MinimumLength },
+                  { "data-rule-maxlength", stringLengthAttribute.MaximumLength },
+                  { "data-msg-minlength", string.Format(Localizer["StringLengthAttribute_ValidationErrorIncludingMinimum"], name, stringLengthAttribute.MaximumLength, stringLengthAttribute.MinimumLength) },
+                  { "data-msg-maxlength", string.Format(Localizer["StringLengthAttribute_ValidationErrorIncludingMinimum"], name, stringLengthAttribute.MaximumLength, stringLengthAttribute.MinimumLength) }
+                          }
+            : null);
+
+    value = value.IsNotNullOrEmpty()
+        ? HttpUtility.HtmlDecode(value ?? string.Empty)
+        : null;
+
+    if (wrapperClass.IsNotNullOrEmpty())
+    {
+        <div class="@wrapperClass">
+            @Html.Label(propertyName, name, new { @class = required ? "required" : string.Empty })
+            @(Html.Kendo()
+                  .EditorFor(m => m[key])
+                  .Encoded(false)
+                  .Value(value ?? string.Empty)
+                  .HtmlAttributes(attributes)
+                  .Tools(tools)
+                  .ImageBrowser(
+                      imageBrowser => imageBrowser
+                                      .Image($"{Configuration.GetValue<string>("Attachment:VirtualPath")}/{ImageBrowserController.Folder}/{{0}}")
+                                      .Read(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Read), typeof(ImageBrowserController))))
+                                      .Create(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Create), typeof(ImageBrowserController))))
+                                      .Destroy(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Destroy), typeof(ImageBrowserController))))
+                                      .Upload(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Upload), typeof(ImageBrowserController))))
+                                      .Thumbnail(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Thumbnail), typeof(ImageBrowserController)))))
+                  .FileBrowser(
+                      fileBrowser => fileBrowser
+                                     .File($"{Configuration.GetValue<string>("Attachment:VirtualPath")}/{FileBrowserController.Folder}/{{0}}")
+                                     .Read(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Read), typeof(FileBrowserController))))
+                                     .Create(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Create), typeof(FileBrowserController))))
+                                     .Destroy(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Destroy), typeof(FileBrowserController))))
+                                     .Upload(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Upload), typeof(FileBrowserController)))))
+                  .Deferred(!Context.Request.IsAjaxRequest()))
+            @Html.ValidationMessageFor(m => m[key])
+        </div>
+    }
+    else
+    {
+        @Html.Label(propertyName, name, new { @class = required ? "required" : string.Empty })
+        @(Html.Kendo().EditorFor(m => m[key])
+              .Value(value ?? string.Empty)
+              .HtmlAttributes(attributes)
+              .Encoded(false)
+              .Tools(tools)
+              .ImageBrowser(
+                  imageBrowser => imageBrowser
+                                  .Image($"{Configuration.GetValue<string>("Attachment:VirtualPath")}/{ImageBrowserController.Folder}/{{0}}")
+                                  .Read(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Read), typeof(ImageBrowserController))))
+                                  .Create(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Create), typeof(ImageBrowserController))))
+                                  .Destroy(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Destroy), typeof(ImageBrowserController))))
+                                  .Upload(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Upload), typeof(ImageBrowserController))))
+                                  .Thumbnail(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Thumbnail), typeof(ImageBrowserController)))))
+              .FileBrowser(
+                  fileBrowser => fileBrowser
+                                 .File($"{Configuration.GetValue<string>("Attachment:VirtualPath")}/{FileBrowserController.Folder}/{{0}}")
+                                 .Read(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Read), typeof(FileBrowserController))))
+                                 .Create(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Create), typeof(FileBrowserController))))
+                                 .Destroy(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Destroy), typeof(FileBrowserController))))
+                                 .Upload(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Upload), typeof(FileBrowserController)))))
+              .Deferred(!Context.Request.IsAjaxRequest()))
+        @Html.ValidationMessageFor(m => m[key])
+    }
+}

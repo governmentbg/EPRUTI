@@ -1,0 +1,250 @@
+﻿@using Ais.Data.Models.Attachment
+@using Ais.Data.Models.Nomenclature
+@using Ais.Data.Models.Signature
+@using Ais.Infrastructure.KendoExt
+@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Office.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile
+@inject IStringLocalizer Localizer
+@inject IConfiguration Configuration
+@model Ais.Office.ViewModels.OutApplicationTypes.OutApplicationTypeViewModel
+@{
+    var asyncUploadChunkSize = Configuration.GetValue<double>("Attachment:AsyncUploadChunkSize");
+    var officeTemplateBgType = ViewBag.OfficeTemplateBGType as AttachmentType ?? new AttachmentType();
+    var officeTemplateBgPrefix = "File.";
+    var outDocTypes = ViewBag.OutDocTypes as List<Nomenclature>;
+}
+<form method="post" class="dirty-check" action="@Url.DynamicAction(nameof(OutApplicationTypesController.Upsert), typeof(OutApplicationTypesController))"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(x => x.Id)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["BasicData"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @Html.EditorFor(m => m.Names, "InternationalizationEditor")
+                    </div>
+                    <div class="form-input column">
+                        @Html.EditorFor(m => m.ShortNames, "InternationalizationTextBox")
+                        @Html.ValidationMessageFor(m => m.ShortNames)
+                    </div>
+                    <div class="form-input column">
+                        @Html.InfoLabel(officeTemplateBgType.Title.ToString())
+                        @(Html.Kendo().Upload()
+                            .Name($"{officeTemplateBgPrefix}Url")
+                            .HtmlAttributes(new { accept = officeTemplateBgType.Extensions, id = Guid.NewGuid().ToString(), data_prefix = officeTemplateBgPrefix, name = string.Empty })
+                            .Messages(x => x.Select(Localizer["SelectFiles"])
+                            .DropFilesHere(Localizer["DropFilesHere"])
+                            .InvalidFileExtension(Localizer["InvalidFileExtension"])
+                            .Cancel(Localizer["Cancel"]))
+                            .Async(a => a
+                            .Save("Upload", "Attachment", new { area = string.Empty })
+                            .Remove("Remove", "Attachment", new { area = string.Empty })
+                            .AutoUpload(true)
+                            .ChunkSize(asyncUploadChunkSize)
+                            .Concurrent(false))
+                            .ShowFileList(true)
+                            .Multiple(false)
+                            .TemplateId("templateFileTemplate")
+                            .Validation(validation =>
+                            {
+                                validation.AllowedExtensions(officeTemplateBgType.ExtensionsCollection);
+                                validation.MaxFileSize(officeTemplateBgType.MaxSizeInBytes);
+                                validation.MinFileSize(1);
+                            })
+                            .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+                            .Files(files =>
+                            {
+                                if (Model?.File?.Url.IsNotNullOrEmpty() == true || Model?.File?.Id.HasValue == true)
+                                {
+                                    var attachment = Model.File!;
+                                    files.AddCustomFile(
+                                    new UploadFile
+                                {
+                                    Id = attachment.Id,
+                                    Name = attachment.Name,
+                                    Url = attachment.Url,
+                                    Size = attachment.Size,
+                                    Extension = attachment.Extension,
+                                    Data = new Dictionary<string, object> { { "prefix", officeTemplateBgPrefix } }
+                                });
+                                }
+                            }))
+                        @{
+                            var officeTemplateBbTypeDescription = officeTemplateBgType.Description?.ToString();
+                            if (officeTemplateBbTypeDescription.IsNotNullOrEmpty())
+                            {
+                                <small>
+                                    @Html.Raw(officeTemplateBbTypeDescription)
+                                </small>
+                            }
+                        }
+                    </div>
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.RegisterIndex, new { @class = "required" })
+                        @(
+                            Html.Kendo().DropDownListFor(m => m.RegisterIndex.Id)
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .Filter(FilterType.Contains)
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataSource(x => x.Read("GetRegIndexes", "OutApplicationTypes")))
+                        @Html.ValidationMessageFor(m => m.RegisterIndex)
+                    </div>
+                    <div class="form-input quad">
+                        <label class="empty"></label>
+                        @Html.Kendo().CheckBoxFor(m => m.IsOutDocForApproval).Label(Localizer["IsOutDocForApproval"])
+                        @Html.ValidationMessageFor(m => m.IsOutDocForApproval)
+                    </div>
+                    <div class="form-input quad">
+                        <label class="empty"></label>
+                        @Html.Kendo().CheckBoxFor(m => m.IsOutDocForObjection).Label(Localizer["IsOutDocForObjection"])
+                        @Html.ValidationMessageFor(m => m.IsOutDocForObjection)
+                    </div>
+                    <div class="form-input quad">
+                        <label class="empty"></label>
+                        @Html.Kendo().CheckBoxFor(m => m.IsOutDocSendToAll).Label(Localizer["IsOutDocSendToAll"])
+                        @Html.ValidationMessageFor(m => m.IsOutDocSendToAll)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["DeliveryData"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @Html.LabelFor(m => m.Subject, new { @class = "required" })
+                        @Html.EditorFor(m => m.Subject)
+                        @Html.ValidationMessageFor(m => m.Subject)
+                    </div>
+                    <div class="form-input fullwidth">
+                        @Html.LabelFor(m => m.Content, new { @class = "required" })
+                        @Html.EditorFor(m => m.Content)
+                        @Html.ValidationMessageFor(m => m.Content)
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-input column">
+                        @Html.Label(Localizer["OutDocumentsForSend"])
+                        @(Html.Kendo().DropDownList()
+                            .Name(Guid.NewGuid().ToString())
+                            .HtmlAttributes(new { @class = "outDocTypesDropDown-js" })
+                            .Filter(FilterType.Contains).MinLength(3)
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .BindTo(outDocTypes))
+                    </div>
+                    <div class="form-input column">
+                        <label class="empty"></label>
+                        <a href="#" class="k-button k-small add-outdoc-type-js">
+                            <span class="k-i-plus k-icon k-font-icon k-button-icon"></span>
+                        </a>
+                    </div>
+                    <div class="form-input fullwidth">
+                        @(Html.Kendo().ListView(Model?.OutDocTypesForSend ?? new List<Nomenclature>())
+                            .Name(Guid.NewGuid().ToString())
+                            .HtmlAttributes(new { @class = "outDocTypesListView-js" })
+                            .TagName("div")
+                            .DataSource(d => d.Ajax().Model(m => m.Id("Id")))
+                            .ClientTemplateId("OutDocTypesListViewClientTemplate"))
+                    </div>
+                </div>
+            </div>
+        </div>
+        @{
+            ViewBag.Prefix = nameof(Model.SignatureOptions);
+            await Html.RenderPartialAsync("_SignatureOptions", Model?.SignatureOptions ?? new SignatureOptions());
+        }
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["WaitData"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-input three">
+                    <label>@Localizer["WaitTimeReponse"]</label>
+                    @Html.Kendo().NumericTextBoxFor(x => x.WaitTimeReponse).Min(0).Max(short.MaxValue).Format("n0")
+                    @Html.ValidationMessageFor(m => m.WaitTimeReponse)
+                </div>
+                <div class="form-input three">
+                    <label>@Localizer["WaitTimeObjection"]</label>
+                    @Html.Kendo().NumericTextBoxFor(x => x.WaitTimeObjection).Min(0).Max(short.MaxValue).Format("n0")
+                    @Html.ValidationMessageFor(m => m.WaitTimeObjection)
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn third right closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+<script id="templateFileTemplate" type="text/x-kendo-template">
+    #var file = files[0];#
+    #var downloadUrl = "@Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))?";#
+    #var query = file.url ? { urls: file.url } : file.id && file.id != '@Guid.Empty' ? { ids: file.id } : file.Url ? { urls: file.Url } : file.Id && file.Id != '@Guid.Empty' ? { ids: file.Id } : null;#
+    #var url = downloadUrl && query ? downloadUrl + $.param(query) : null;#
+    <span class="k-progress"></span>
+    <span class="k-file-group-wrapper">
+        <span class="k-file-group k-icon k-font-icon k-i-#=kendo.getFileGroup(file.extension)#"></span>
+        <span class="k-file-state"></span>
+    </span>
+    <span class="k-file-name-size-wrapper">
+        #if(url){#
+            <input type="hidden" name="#:file["prefix"]#Id" value="#:file.id#" />
+            <input type="hidden" name="#:file["prefix"]#Name" value="#:file.name#" />
+            <input type="hidden" name="#:file["prefix"]#Size" value="#:file.size#" />
+            <a href="#:url#" target="_blank" class="k-file-name" title="#:file.name#">#:file.name#</a>
+            #if(file.url) { #
+                <input type="hidden" name="#:file["prefix"]#Url" value="#:file.url#" />
+            #}#
+        #}
+        else{#
+            <span class="k-file-name" title="#:file.name#">#:file.name#</span>
+        #}#
+        <span class="k-file-size">#:core.getFileSizeMessage(file)#</span>
+    </span>
+    <strong class="k-upload-status">
+        <button type="button" class="k-upload-action"></button>
+        <button type="button" class="k-upload-action"></button>
+    </strong>
+</script>
+<script id="OutDocTypesListViewClientTemplate" type="text/x-kendo-template">
+    <div>
+        #var index = kendo.guid();#
+        <input type="hidden" name="@(nameof(Model.OutDocTypesForSend)).Index" value="#:index#" />
+        <input type="hidden" name="@(nameof(Model.OutDocTypesForSend))[#:index#].Id" value="#:data.Id#" />
+        <input type="hidden" name="@(nameof(Model.OutDocTypesForSend))[#:index#].Name" value="#:data.Name#" />
+        <div class="form-input double">
+           <span>#:data.Name#</span>
+        </div>
+        <div class="form-input half">
+           <a class="k-button k-small remove-outdoc-type-js">
+             <span class="k-icon k-font-icon k-i-delete"></span>
+           </a>
+        </div>
+    </div>
+</script>

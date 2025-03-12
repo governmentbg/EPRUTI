@@ -1,0 +1,67 @@
+﻿@using Ais.Data.Models.AdmActAttachment
+@using Ais.Utilities.Extensions;
+@model Ais.Data.Models.Document.OutDocument
+@{
+    async Task RenderAttachmentAsync(AttachmentGroup group)
+    {
+        var i = 1;
+        @foreach (var attachmentType in group.Attachments)
+        {
+            var filteredAttachments = Model?.Attachments?.Where(x => x.Type.Id == attachmentType.Id).ToList();
+            if (filteredAttachments?.Count == 0)
+            {
+                continue;
+            }
+
+            <fieldset class="open">
+                <legend class="attachment-group-name">@group.Name</legend>
+                <div class="attachments-wrap">
+                    <label>@(i). @(attachmentType.Type.Title)</label>
+                    <div class="attachment-group-wrapper">
+                        @if (filteredAttachments.IsNotNullOrEmpty())
+                        {
+                            await Html.RenderPartialAsync("_Attachment.cshtml", filteredAttachments);
+                        }
+                    </div>
+                </div>
+            </fieldset>
+        }
+    }
+
+
+    async Task RenderAttachmentGroupsAsync(AttachmentGroup group)
+    {
+        @if (group.HasChildren)
+        {
+            <fieldset>
+                <legend class="attachment-group-name">@group.Name</legend>
+                <div class="attachments-wrap">
+                    @if (group.Attachments != null && group.Attachments.IsNotNullOrEmpty())
+                    {
+                        await RenderAttachmentAsync(group);
+                    }
+
+                    @foreach (var child in group.Children)
+                    {
+                        await RenderAttachmentGroupsAsync(child);
+                    }
+                </div>
+            </fieldset>
+        }
+        else
+        {
+            if (group.Attachments != null && group.Attachments.IsNotNullOrEmpty())
+            {
+                await RenderAttachmentAsync(group);
+            }
+        }
+
+    }
+
+    var group = ViewBag.Group as AttachmentGroup;
+    <div class="steps-body">
+        @{
+            await RenderAttachmentGroupsAsync(group);
+        }
+    </div>
+}

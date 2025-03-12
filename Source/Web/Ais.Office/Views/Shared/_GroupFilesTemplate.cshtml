@@ -1,0 +1,45 @@
+﻿@using Ais.Data.Models.Attachment
+@using Ais.WebUtilities.Extensions
+<script id="groupFileTemplate" type="text/x-kendo-template">
+    #var file = files[0];#
+    #var downloadUrl = "@Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))?";#
+    #var query = file.url ? { urls: file.url } : file.id && file.id != '@Guid.Empty' ? { ids: file.id } : file.Url ? { urls: file.Url } : file.Id && file.Id != '@Guid.Empty' ? { ids: file.Id } : null;#
+    #var url = downloadUrl && query ? downloadUrl + $.param(query) : null;#
+    <span class="k-progress"></span>
+    <span class="k-file-group-wrapper">
+        <span class="k-file-group k-icon k-font-icon k-i-#=kendo.getFileGroup(file.extension)#"></span>
+        <span class="k-file-state"></span>
+    </span>
+    <span class="k-file-name-size-wrapper">
+           <input type="hidden" name="#:file["prefix"]#@nameof(Attachment.Url)" value="#:file.url ? file.url : ''#" />
+            <input type="hidden" name="#:file["prefix"]#@nameof(Attachment.Name)" value="#:file.name#" />
+            <input type="hidden" name="#:file["prefix"]#@nameof(Attachment.Size)" value="#:file.size#" />
+            <input type="hidden" name="#:file["prefix"]#@nameof(Attachment.GroupRelDocId)" value="#:file.groupreldocid#" />
+            <input type="hidden" name="#:file["prefix"]#@nameof(Attachment.Type.Title)" value="#:file["typename"]#" />
+            <input type="hidden" name="#:file["prefix"]#@nameof(Attachment.Type.Id)" value="#:file["typeid"]#" />
+        #if(url){#
+            #if(file && (file.id || file.Id)){#
+                #if(file.id){#
+                    <input type="hidden" name="#:file["prefix"]#@nameof(Attachment.Id)" value="#:file.id#" />
+                #}#
+                #if(file.Id){#
+                    <input type="hidden" name="#:file["prefix"]#@nameof(Attachment.Id)" value="#:file.Id#" />
+                #}#
+            #}#
+
+            <a href="#:url#" target="_blank" class="k-file-name" title="#:file.name#">#:file.name#</a>
+        #}else{#
+            <span class="k-file-name" title="#:file.name#">#:file.name#</span>
+                       <input type="hidden" name="#:file["prefix"]#@nameof(Attachment.Url)" value="#:file.url ? file.url : ''#" />
+        #}#
+        #if(file.validationErrors && file.validationErrors.length > 0){#
+            <span class="k-file-validation-message">#:kendo.ui.Upload.prototype.options.localization[file.validationErrors[0]]#</span>
+        #}else{#
+            <span class="k-file-size">#:core.getFileSizeMessage(file)#</span>
+        #}#
+    </span>
+    <strong class="k-upload-status">
+        <button type="button" class="k-upload-action"></button>
+        <button type="button" class="k-upload-action"></button>
+    </strong>
+</script>

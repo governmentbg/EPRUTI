@@ -1,0 +1,100 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Ais.Utilities.Attributes
+@using Ais.Utilities.Extensions
+@using Ais.Utilities.Helpers
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model IDictionary<Guid, string>
+@{
+    var propertyName = ViewData.ModelMetadata.PropertyName;
+    var isRequired = propertyName.IsNotNullOrEmpty()
+                     && ViewData.ModelMetadata.ContainerType?.GetProperty(ViewData.ModelMetadata.PropertyName!)
+                                ?.GetCustomAttributes(typeof(RequiredAttribute), true)
+                                 .OfType<RequiredAttribute>()
+                                 .Any() == true;
+
+    var stringLengthAttribute = propertyName.IsNotNullOrEmpty()
+        ? ViewData.ModelMetadata.ContainerType?.GetProperty(ViewData.ModelMetadata.PropertyName!)
+                  ?.GetCustomAttributes(typeof(DictionaryStringLengthAttribute), true)
+                   .OfType<DictionaryStringLengthAttribute>().FirstOrDefault()
+        : null;
+
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+        ? ViewData["htmlAttributes"]
+        : null;
+
+    var wrapperClass = ViewData.ContainsKey("wrapperClass")
+        ? ViewData["wrapperClass"] as string
+        : null;
+
+    var label = ViewData.ContainsKey("label")
+         ? ViewData["label"]
+        : null;
+
+    var languages = LocalizationHelper.SupportedCultures;
+}
+
+@foreach (var cultureData in languages)
+{
+    var key = cultureData.Id;
+    if (Model != null && !Model.ContainsKey(key))
+    {
+        Model.Add(key, string.Empty);
+    }
+
+    var name = $"{Html.DisplayNameForModel().Trim()}({cultureData.Name})";
+    if(label != null)
+    {
+        name = $"{label}({cultureData.Name})";
+    }
+
+    var required = (isRequired && cultureData.Required) || (languages.Length == 1 && propertyName is "Names");
+    var id = Guid.NewGuid().ToString();
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        required
+            ? new Dictionary<string, object>
+              {
+                  { "id", id },
+                  { "data-val", "true" },
+                  { "required", "required" },
+                  { "data-val-required", string.Format(Localizer["Required"], name) }
+              }
+            : null,
+        stringLengthAttribute != null
+            ? new Dictionary<string, object>
+              {
+                  { "id", id },
+                  { "data-val", "true" },
+                  { "data-rule-minlength", stringLengthAttribute.MinimumLength },
+                  { "data-rule-maxlength", stringLengthAttribute.MaximumLength },
+                  { "data-msg-minlength", string.Format(Localizer["StringLengthAttribute_ValidationErrorIncludingMinimum"], name, stringLengthAttribute.MaximumLength, stringLengthAttribute.MinimumLength) },
+                  { "data-msg-maxlength", string.Format(Localizer["StringLengthAttribute_ValidationErrorIncludingMinimum"], name, stringLengthAttribute.MaximumLength, stringLengthAttribute.MinimumLength) }
+              }
+            : null);
+
+    if (wrapperClass.IsNotNullOrEmpty())
+    {
+        <div class="@wrapperClass">
+            @Html.Label(propertyName, name, new { @class = required ? "required" : string.Empty })
+            @Html.Kendo().TextAreaFor(m => m[key]).HtmlAttributes(attributes).Resize(TextAreaResize.Vertical).Deferred(!Context.Request.IsAjaxRequest())
+            @Html.ValidationMessageFor(m => m[key])
+        </div>
+    }
+    else
+    {
+        @Html.Label(propertyName, name, new { @class = required ? "required" : string.Empty })
+        @Html.Kendo().TextAreaFor(m => m[key]).HtmlAttributes(attributes).Resize(TextAreaResize.Vertical).Deferred(!Context.Request.IsAjaxRequest())
+        @Html.ValidationMessageFor(m => m[key])
+    }
+
+    if (Model?.ContainsKey(key) == true && Model[key].IsNotNullOrEmpty())
+    {
+        // Dirty fix - https://github.com/telerik/kendo-ui-core/issues/6135
+        <script>
+            kendo.syncReady(function(){$('@($"#{id}")').data("kendoTextArea").value('@(Model[key])');});
+        </script>
+    }
+}

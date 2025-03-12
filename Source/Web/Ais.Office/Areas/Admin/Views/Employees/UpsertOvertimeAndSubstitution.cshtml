@@ -1,0 +1,119 @@
+﻿@using Ais.Infrastructure.Roles
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Employee
+@using Ais.Office.Areas.Admin.Controllers.Employees
+@model Guid
+@inject IStringLocalizer Localizer
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var queue = this.ViewBag.Queue as Queue;
+}
+<div class="steps-body">
+
+    @if (User.IsInRole(UserRolesConstants.UpsertEmployeeOverTime))
+    {
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["OverTime"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @(Html.Kendo().Grid<OverTimeRow>()
+                            .ToolBar(t => t.Custom().HtmlAttributes(new { @class = "add-overtimes-js", title = $"{Localizer["Add"]}", data_employeeid = Model }).IconClass("k-i-plus k-icon k-font-icon").Text(" "))
+                            .Name("OverTimesGrid")
+                            .Pageable()
+                            .Columns(
+                            c =>
+                            {
+                                c.Bound(b => b.Day)
+                                .Title(Localizer["Day"])
+                                .ClientTemplate("#:kendo.toString(data.Day, 'd')# #:core.formatTimeSpan(data.From, 't')# - #:core.formatTimeSpan(data.To, 't')#");
+                                c.Bound(b => b.UniqueId)
+                                .Title(Localizer["Actions"])
+                                .ClientTemplate(
+                                "<div class='flex'>" +
+                                "#if(data.EnableButtons){# " +
+                                $"<a href='\\#' title='{Localizer["Edit"]}' data-id='#: data.Id #' data-employeeid='{Model}' class='k-button k-small edit-overtime-js'><span class='k-i-pencil k-icon k-font-icon k-button-icon'></span></a>" +
+                                $"<a href='\\#' title='{Localizer["Remove"]}' data-id='#: data.Id #' data-employeeid='{Model}' class='k-button k-small remove-overtime-js'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a>" +
+                                "#}#" +
+                                "</div>");
+                            })
+                            .DataSource(d => d.Ajax().Read(nameof(EmployeesController.ReadOverTimes), "Employees", new { employeeId = Model }).PageSize(10))
+                            .Deferred(deferred))
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (User.IsInRole(UserRolesConstants.UpsertEmployeeSubstitution))
+    {
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["Substitution"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @(Html.Kendo().Grid<Substitution>()
+                            .ToolBar(t => t.Custom().HtmlAttributes(new { @class = "add-substitution-js", title = $"{Localizer["Add"]}", data_employeeid = Model }).IconClass("k-i-plus k-icon k-font-icon").Text(" "))
+                            .Name("SubstitutionsGrid")
+                            .Pageable()
+                            .Columns(
+                            c =>
+                            {
+                                c.Bound(b => b.SubstituteEmployee.Name)
+                                .Title(Localizer["SubstituteEmployee"])
+                                .ClientTemplate(" #:data.SubstituteEmployee && data.SubstituteEmployee.Name ? data.SubstituteEmployee.Name : '' #  #:kendo.toString(data.From, 'd')# - #:kendo.toString(data.To, 'd')#");
+                                c.Bound(b => b.UniqueId)
+                                .Title(Localizer["Actions"])
+                                .ClientTemplate(
+                                "<div class='flex'>" +
+                                "#if(data.EnableButtons){# " +
+                                $"<a href='\\#' title='{Localizer["Edit"]}' data-id='#: data.Id #' data-employeeid='{Model}' class='k-button k-small edit-substitution-js'><span class='k-i-pencil k-icon k-font-icon k-button-icon'></span></a>" +
+                                $"<a href='\\#' title='{Localizer["Remove"]}' data-id='#: data.Id #' data-employeeid='{Model}' class='k-button k-small remove-substitution-js'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a>" +
+                                "#}#" +
+                                "</div>");
+                            })
+                            .DataSource(d => d.Ajax().Read(nameof(EmployeesController.ReadSubstitutions), "Employees", new { employeeId = Model }).PageSize(10))
+                            .Deferred(deferred))
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (User.IsInRole(UserRolesConstants.UpsertEmployeeQueue))
+    {
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["Queue"]</h3>
+            </div>
+
+            <form method="post" action="@Url.ActionLink("UpsertQueue", "Employees")"
+                  data-ajax="true"
+                  data-ajax-method="POST">
+                @Html.ValidationSummary(true)
+                @Html.AntiForgeryToken()
+                @Html.Hidden("EmployeeId", Model)
+
+                <div class="step-box-body">
+                    <div class="form-row">
+                        <div class="form-input">
+                            @Html.Editor("IsFastQueue", "Boolean", new { label = this.Localizer["IsFastQueue"], isChecked = queue.IsFastQueue })
+                        </div>
+                        <div class="form-input">
+                            @Html.Editor("IsSlowQueue", "Boolean", new { label = this.Localizer["IsSlowQueue"], isChecked = queue.IsSlowQueue })
+                        </div>
+                        <button class="bttn right main">
+                            @($"{Localizer["Save"]} {Localizer["Queue"].ToString().ToLower()}")
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    }
+
+</div>

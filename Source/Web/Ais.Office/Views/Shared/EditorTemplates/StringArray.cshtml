@@ -1,0 +1,39 @@
+﻿@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Helpers
+
+@using HtmlHelperExt = Ais.WebUtilities.Helpers.HtmlHelperExt;
+
+@model IEnumerable<string>
+
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+           ? ViewData["htmlAttributes"]
+           : null;
+
+}
+@if (Model.IsNotNullOrEmpty())
+{
+    foreach (var value in Model)
+    {
+        var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+                                {
+            { "id", Guid.NewGuid().ToString() },
+            { "class", "names-input" },
+                                });
+
+        @Html.RenderNamesInputs(ViewData.TemplateInfo.HtmlFieldPrefix, value, attributes);
+    }
+}
+else
+{
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+ htmlAttributes,
+ new Dictionary<string, object>
+                                     {
+            { "id", Guid.NewGuid().ToString() },
+            { "class", "names-input" },
+                                     });
+    @Html.RenderNamesInputs(ViewData.TemplateInfo.HtmlFieldPrefix, string.Empty, attributes);
+}

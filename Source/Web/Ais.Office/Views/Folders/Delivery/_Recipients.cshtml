@@ -1,0 +1,70 @@
+﻿@using Ais.Data.Models.Client
+@using Ais.WebUtilities.Extensions
+@using Ais.Office.ViewModels.Application
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+<div class="search-client-wrapper-js">
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["Search"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                @{
+                    await Html.RenderPartialAsync("Delivery/_SearchClients", new ClientQueryViewModel());
+                }
+            </div>
+        </div>
+    </div>
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["Recipients"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                @(Html.Kendo().Grid<Client>()
+                    .Name(Guid.NewGuid().ToString())
+                    .HtmlAttributes(new { @class = "recipients-js" })
+                    .BindTo(ViewBag.Recipients as IEnumerable<Client> ?? Array.Empty<Client>())
+                    .Columns(
+                        c =>
+                        {
+                            c.Bound(string.Empty)
+                             .Width(24)
+                             .ClientTemplateId("recipientTemplate");
+                            c.Bound(m => m.FullName)
+                             .Title(Localizer["FullName"]);
+                            c.Bound(m => m.EgnBulstat)
+                             .Title(Localizer["EgnBulstat"])
+                             .ClientTemplate("#:EgnBulstat ? EgnBulstat : ''#");
+                        })
+                    .Filterable()
+                    .Sortable()
+                    .Width("auto")
+                    .Events(e => e.DataBound("searchTable.onGridDataBound"))
+                    .DataSource(
+                        d =>
+                            d.Ajax()
+                             .Model(m => { m.Id("Id"); })
+                             .ServerOperation(false))
+                    .Deferred(deferred))
+                <script id="recipientTemplate" type="text/kendo-ui-template">
+                    #var checked = data["Checked"] == true ? 'checked="checked"' : '';#
+                    #var index = kendo.guid();#
+                    #var prefix = "recipients[" + index + "].";#
+                    <input class="k-checkbox" type="checkbox" name="recipients.Index" value="#:index#" #=checked#/>
+                    <input type="hidden" name="#:prefix#Id" value="#:Id#" />
+                    <input type="hidden" name="#:prefix#FullName" value="#:FullName#" />
+                    <input type="hidden" name="#:prefix#EgnBulstat" value="#:EgnBulstat#" />
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

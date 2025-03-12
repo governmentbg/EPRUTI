@@ -1,0 +1,93 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Office.ViewModels.Clients;
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization;
+@using Ais.Infrastructure.Roles;
+@inject IStringLocalizer Localizer;
+@model ClientUpsertModel
+@{
+    var isRepresentative = ViewBag.IsRepresentative is bool && (bool)ViewBag.IsRepresentative;
+    var successCallback = "core.onKendoWindowSuccessCallback";
+    var id = Guid.NewGuid().ToString();
+    var actionName = isRepresentative ? nameof(ClientsController.CreateRepresentative) : Model.IsNew ? nameof(ClientsController.CreatePost) : nameof(ClientsController.Edit);
+    var url = Url.DynamicAction(actionName, typeof(ClientsController));
+}
+<form method="post" action="@url"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="@successCallback"
+      id="@id">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.Hidden("clientUniqueId", ViewBag.ClientUniqueId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.UserId)
+    @Html.HiddenFor(m => m.UniqueId)
+    @Html.HiddenFor(m => m.IsSelfRegistered)
+    @Html.HiddenFor(m => m.CanRequestGCCAServices)
+    <div>
+        <partial name="PersonalData/_PersonalData" />
+        <partial name="_Addresses" />
+        @if (!isRepresentative)
+        {
+            if (User.IsInRole(UserRolesConstants.UpsertApplicantRepresentatives))
+            {
+                <partial name="_Representatives" />
+            }
+        }
+        @if (User.IsInRole(UserRolesConstants.UpsertApplicantAccess))
+        {
+            <div class="step-box fullwidth">
+                <div class="step-box-head">
+                    <h3 class="step-box-title">@Localizer["Access"]</h3>
+                </div>
+                <div class="step-box-body pb-0">
+                    <div class="form-row">
+                        <div class="form-input quad">
+                            @Html.LabelFor(m => m.UserName, new { @class = Model.DenialOfElectronicServices ? string.Empty : "required" })
+                            <div class="action-input">
+                                @Html.EditorFor(m => m.UserName, new { htmlAttributes = Model.DenialOfElectronicServices ? new { disabled = "disabled" } : null })
+                                <div class="actions">
+                                    <a href="#" class="k-button k-small check-username-js">
+                                        <span class="k-i-search k-icon k-font-icon k-button-icon"></span>
+                                    </a>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(m => m.UserName)
+                        </div>
+                        <div class="form-input quad">
+                            @Html.LabelFor(m => m.Email, new { @class = Model.DenialOfElectronicServices ? string.Empty : "required" })
+                            @Html.EditorFor(m => m.Email, "EmailAddress", new { htmlAttributes = Model.DenialOfElectronicServices ? new { disabled = "disabled" } : null })
+                            @Html.ValidationMessageFor(m => m.Email)
+                        </div>
+                        <div class="form-input w-auto">
+                            <label class="empty"></label>
+                            @Html.EditorFor(m => m.SendChangePasswordEmail, new { htmlAttributes = Model.DenialOfElectronicServices ? new { disabled = "disabled" } : null })
+                            @Html.ValidationMessageFor(m => m.SendChangePasswordEmail)
+                        </div>
+                        <div class="form-input w-auto">
+                            <label class="empty"></label>
+                            @Html.EditorFor(m => m.DenialOfElectronicServices, new { htmlAttributes = new { @class = "denial-es-js" } })
+                            @Html.ValidationMessageFor(m => m.DenialOfElectronicServices)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+<script>
+    $(document).ready(function () {
+        $("#@id [name='@(nameof(Model.IsDead))']").trigger("change");
+        $("#@id input.registerType-js").trigger("change");
+    })
+</script>

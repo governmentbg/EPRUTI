@@ -1,0 +1,33 @@
+﻿@using Ais.Office.Controllers.Documents
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+        ? ViewData["htmlAttributes"]
+        : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() }
+        });
+}
+@(Html.Kendo().DropDownList()
+    .Name(Guid.NewGuid().ToString())
+    .HtmlAttributes(attributes)
+    .DataTextField("FullDescriptionWithMail")
+    .DataValueField("Id")
+    .OptionLabel(Localizer["Choose"].ToString())
+    .HtmlAttributes(new { @class = "rec-address" })
+    .Events(ev => ev.Select("outdocuments.onAddressSelect"))
+    .AutoBind(false)
+    .DataSource(
+        source => source
+                  .Custom()
+                  .Group(g => g.Add("ClientFullName", typeof(string)))
+                  .Transport(
+                      transport => transport
+                          .Read(r => r.Url(Url.DynamicAction(nameof(OutDocumentsController.GetApplicantAddresses), typeof(OutDocumentsController)))))))

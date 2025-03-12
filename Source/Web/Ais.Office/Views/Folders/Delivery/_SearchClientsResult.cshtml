@@ -1,0 +1,40 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.Office.ViewModels.Application
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model string
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().Grid<ClientSearchResultViewModel>()
+      .Name(Guid.NewGuid().ToString())
+      .HtmlAttributes(new { @class = "withoutpager" })
+      .Columns(columns =>
+      {
+          columns.Bound(e => e.Knik)
+                 .ClientTemplate("#:Knik ? Knik : ''#");
+          columns.Bound(e => e.WithoutEgnBulstat)
+                 .ClientTemplate("#:WithoutEgnBulstat ? resources.getResource('Yes') : resources.getResource('No')#");
+          columns.Bound(e => e.EgnBulstat)
+                 .ClientTemplate(
+                     "#var egn = EgnBulstat ? EgnBulstat : '';#" +
+                     "#if(IsDead){#<span class='statusDead'>#:egn#</span>#}else{##:egn##}#");
+          columns.Bound(e => e.FullName)
+                 .ClientTemplate("#:FullName ? FullName : ''#");
+          columns.Bound(e => e.ForeignPersonData)
+                 .ClientTemplate("#:ForeignPersonData ? ForeignPersonData : ''#");
+          columns.Bound(string.Empty)
+                 .Width(50)
+                 .ClientTemplate(
+                     $"<button type='button' class='k-button k-small add-exist-client-js' title='{Localizer["Add"]}'><i class='k-icon k-font-icon k-i-check'></i></button>");
+      })
+      .Sortable()
+      .Pageable(p => p.Enabled(true).PreviousNext(true).ButtonCount(5))
+      .Width("auto")
+      .Events(e => e.DataBound("searchTable.onGridDataBound"))
+      .DataSource(
+          dataSource => dataSource
+              .Ajax()
+              .PageSize(5)
+              .Read(read => read.Url(Url.DynamicAction(nameof(FoldersController.ReadSearchClients), typeof(FoldersController), new { uniqueId = Model }))))
+      .Deferred(deferred))

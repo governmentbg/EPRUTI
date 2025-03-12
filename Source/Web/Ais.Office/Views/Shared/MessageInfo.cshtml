@@ -1,0 +1,77 @@
+﻿@using Microsoft.Extensions.Localization;
+@using Ais.Utilities.Extensions;
+@model EdeliveryService.DcMessageDetails
+@inject IStringLocalizer Localizer;
+
+@if (Model != null)
+{
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["BasicData"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="ib fullwidth">
+                    @Localizer["Title"]:
+                    <strong>@Model.Title</strong>
+                </div>
+                <div class="ib">
+                    @Localizer["Sender"]:
+                    <strong>@Model.SenderProfile?.ElectronicSubjectName</strong>
+                </div>
+                <div class="ib">
+                    @Localizer["Recipient"]:
+                    <strong>@Model.ReceiverProfile?.ElectronicSubjectName</strong>
+                </div>
+                <div class="ib">
+                    @Localizer["DateCreated"]:
+                    <strong>@Model.DateCreated.ToShortDateString()</strong>
+                </div>
+                <div class="ib">
+                    @Localizer["DateSent"]:
+                    <strong>@Model.DateSent?.ToShortDateString()</strong>
+                </div>
+                <div class="ib">
+                    @Localizer["DateReceived"]:
+                    <strong>@Model.DateReceived?.ToShortDateString()</strong>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["Content"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="ib">
+                    @Model.MessageText
+                </div>
+            </div>
+        </div>
+
+        @if (Model.AttachedDocuments.IsNotNullOrEmpty())
+        {
+            <div class="step-box fullwidth">
+                <div class="step-box-head collapsible">
+                    <h3 class="step-box-title">@Localizer["Attachments"]</h3>
+                </div>
+                <div class="step-box-body">
+                    <div class="form-row">
+                        @foreach (var item in Model.AttachedDocuments)
+                        {
+                            <div class="form-input fullwidth">
+                                <a download="@item.DocumentName" href="data:@item.ContentType;base64,@Convert.ToBase64String(item.Content)" title="@item.DocumentName">@item.DocumentName</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+}
+
+<div class="k-dialog-buttongroup">
+    <button class="bttn  third  right closeKendoWindow-js">
+        @Localizer["Close"]
+    </button>
+</div>

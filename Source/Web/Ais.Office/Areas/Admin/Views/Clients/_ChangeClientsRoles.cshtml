@@ -1,0 +1,67 @@
+﻿@using Ais.Office.ViewModels.ClientRoles;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+
+<form method="post" action="@Url.ActionLink("UpsertClientsRoles", "Clients")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.Hidden("uniqueId", ViewBag.UniqueId as string)
+
+    @Html.AntiForgeryToken()
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">@Localizer["RolesSettings"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input column">
+                        @Html.Label(Localizer["AllRoles"])
+                        @(
+                            Html.Kendo().DropDownList()
+                            .Name("rolesDropdown")
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .Filter(FilterType.Contains)
+                            .DataSource(x => x.Ajax().Read("GetRoles", "Clients", new { Area = "Admin" })))
+                    </div>
+                    <div class="form-input quad">
+                        <button class="bttn right main add-clientsrole-js">
+                            @Localizer["Add"]
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input fullwidth">
+                    @(Html.Kendo().ListView<ClientRoleViewModel>()
+                        .Name("clientsRoles")
+                        .TagName("div")
+                        .ClientTemplateId("clientsRolesClientTemplateId")
+                        .Events(events => events.DataBound("admin_clients.onClientsRolesListViewDataBound"))
+                        .DataSource(x => x.Ajax().Read("ReadClientsRolesListView", "Clients", new { Area = "Admin", uniqueId = ViewBag.UniqueId as string, searchQueryId = ViewBag.SearchQueryId as string })))
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="k-dialog-buttongroup">
+            <button class="bttn right main">
+                @Localizer["Save"]
+            </button>
+            <button class="bttn right third closeKendoWindow-js">
+                @Localizer["Close"]
+            </button>
+        </div>
+</form>
+
+<script id="clientsRolesClientTemplateId" type="text/x-kendo-template">
+    <div>
+    @Html.Kendo().CheckBox().Name("#=Id#").Label("#:Name#").Events(ev => ev.Change("admin_clients.onClientsRolesCheckboxChange")).ToClientTemplate()
+    </div>
+</script>

@@ -1,0 +1,21 @@
+﻿@using Ais.Office.Areas.Admin.Controllers;
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var controllerType = typeof(FaqController);
+
+    if (this.Url.HasRightsToAction("Upsert", controllerType))
+    {
+        <a href="\\#" class="k-small k-button edit-faq-js"  title="@Localizer["Edit"]">
+            <i class="k-i-edit k-icon k-font-icon"></i>
+        </a>
+    }
+
+    if (this.Url.HasRightsToAction("Delete", controllerType))
+    {
+        <a href="\\#" class="k-small k-button delete-faq-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Delete"]">
+            <i class="k-i-delete k-icon k-font-icon"></i>
+        </a>
+    }
+}

@@ -1,0 +1,23 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var controllerType = typeof(OutApplicationTypesController);
+    var updateUrl = Url.DynamicActionWithRightsCheck(nameof(OutApplicationTypesController.Upsert), controllerType);
+    if (updateUrl.IsNotNullOrEmpty())
+    {
+        <a href="@updateUrl" class="k-small k-button edit-outapplication-type-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Edit"]">
+            <i class="k-i-edit k-icon k-font-icon"></i>
+        </a>
+    }
+
+    var deleteUrl = Url.DynamicActionWithRightsCheck(nameof(OutApplicationTypesController.Delete), controllerType);
+    if (deleteUrl.IsNotNullOrEmpty())
+    {
+        <a href="@deleteUrl" class="k-small k-button delete-outapplication-type-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Delete"]">
+            <i class="k-i-delete k-icon k-font-icon"></i>
+        </a>
+    }
+}

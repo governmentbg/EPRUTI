@@ -1,0 +1,38 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.Data.Models.Service.Object
+@using Ais.Utilities.Extensions
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var url = ViewBag.ReadUrl as string;
+    if (url.IsNullOrEmpty() && ViewBag.Data is object data && ViewContext.RouteData.Values.TryGetValue("controller", out var controller))
+    {
+        url = Url.Action("ReadObjects", (string)controller, data);
+    }
+
+    if (url.IsNotNullOrEmpty())
+    {
+        @(Html.Kendo().ListView<IServiceObject>()
+              .Name(Guid.NewGuid().ToString())
+              .ClientTemplateId("viewObjectTemplate")
+              .TagName("div")
+              .DataSource(d =>
+                              d.Ajax()
+                               .Read(r => r.Url(url))
+                               .PageSize(200)
+                               .ServerOperation(true))
+              .Scrollable(ListViewScrollableMode.Endless)
+              .HtmlAttributes(new { style = "height: 280px;", @class = "object-list-wrap endlessScrollList" })
+              .Deferred(deferred))
+        <script id="viewObjectTemplate" type="text/kendo-ui-template">
+            <div class="object">
+                <a class="label pointer">
+                    <svg class="icon">
+                        <use xlink:href="\\#icon-lt#:Type#"></use>
+                    </svg>
+                    #:Title#
+                </a>
+                <div class="object-properties">#:Description ? Description : ''#</div>
+            </div>
+        </script>
+    }
+}

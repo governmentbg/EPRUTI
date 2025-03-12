@@ -1,0 +1,69 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Office.Areas.OutAdministrativeAct.Controllers
+@using Microsoft.AspNetCore.Mvc.Controllers
+@using Microsoft.Extensions.Localization
+@using Ais.Office.ViewModels.Application
+@using Ais.WebUtilities.Extensions
+@model Ais.Data.Models.Document.Document
+<div class="steps-footer k-display-inline-flex k-gap-10">
+    @{
+        string SaveAdmAct()
+        {
+            return Url.DynamicAction(
+            nameof(Ais.Office.Areas.OutAdministrativeAct.Controllers.OutApplicationController.SaveAdmAct),
+            ((ViewContext.ActionDescriptor as ControllerActionDescriptor)!).ControllerTypeInfo,
+            new
+            {
+                applicationUniqueId = Model.UniqueId,
+            });
+        }
+
+        var step = (Step)ViewBag.Step;
+        string GetNextAction(Direction direction, string operation = null)
+        {
+            return Url.DynamicAction(
+                nameof(OutApplicationController.AdmStep),
+                ((ViewContext.ActionDescriptor as ControllerActionDescriptor)!).ControllerTypeInfo,
+                new
+                {
+                    applicationUniqueId = Model.UniqueId,
+                    current = step.Current,
+                    direction,
+                    next = direction == Direction.Forward ? step.GetNext() : step.GetPrevious(),
+                    operation
+                });
+        }
+
+        if (!step.IsFirst())
+        {
+            <button type="submit" class="left bttn big third" form="application" formaction="@GetNextAction(Direction.Backward)">
+                <svg class="icon r180">
+                    <use xlink:href="#icon-navarrow"></use>
+                </svg>
+                @Localizer["Backward"]
+            </button>
+        }
+
+        if (!step.IsLast())
+        {
+            <button type="submit" class="right bttn big main" form="application" formaction="@GetNextAction(Direction.Forward)">
+                <svg class="icon">
+                    <use xlink:href="#icon-navarrow"></use>
+                </svg>
+                @Localizer["Forward"]
+            </button>
+        }
+        else
+        {
+            // var signUrl = Url.Action("Download", "OutApplication", new { applicationUniqueId = Model.UniqueId, sign = true });
+            // var callback = "outapplication.signCallback";
+            //this will be publish button
+            // <button type="submit" class="right bttn big main sign-xml-js" form="application" formaction="@GetNextAction(Direction.Forward, "Save")" data-download="@signUrl" data-callback="@callback">
+            //     @Localizer["Save"]
+            // </button>
+            <button type="submit" class="right bttn big main save-adm-act" form="application" formaction="@SaveAdmAct()">
+                @Localizer["Save"]
+            </button>
+        }
+    }
+</div>

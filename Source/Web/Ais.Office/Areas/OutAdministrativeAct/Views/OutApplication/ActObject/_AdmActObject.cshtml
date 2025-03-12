@@ -1,0 +1,48 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.OutAdmAct.OutAdmActObject
+@model Ais.Data.Models.OutAdmAct.OutAdmActObject.ActObject
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+
+@if (Model != null)
+{
+    <div class="admact-object-js">
+        <div class="flex info-row align-center">
+            @* <div class="number">@(ViewBag.ItemIndex).</div> *@
+            <i class="@(Model?.AddressList.IsNotNullOrEmpty() == true ? "k-i-caret-alt-down" : "k-i-sarrow-e") k-font-icon arrow-icon"></i>
+            <div class="left">
+                @{
+                    @Html.Raw(Model.FullDescriptionHtml)
+                }
+            </div>
+            <div class="bttn-wrap w-auto flex gap-5">
+                <button type="button" class="bttn bttn-icon small autosize k-ml-auto add-admact-object-address-js" title="@Localizer["AddAddress"]" data-admobjectuniqueid="@(Model.UniqueId)">
+                    <i class="k-icon k-font-icon k-i-edit-tools"></i>
+                </button>
+                <button type="button" class="bttn bttn-icon third small autosize k-ml-auto add-admact-object-js edit-admact-object-js" title="@Localizer["Edit"]" data-uniqueid="@(Model.UniqueId)">
+                    <i class="k-icon k-font-icon k-i-pencil"></i>
+                </button>
+                <button type="button" class="bttn bttn-icon red small remove-actObject-js autosize" data-uniqueid="@(Model.UniqueId)" title="@Localizer["Remove"]">
+                    <i class="k-i-x k-icon k-font-icon"></i>
+                </button>
+            </div>
+        </div>
+        <div class="admact-object-addresses-js">
+            @if (Model?.AddressList.IsNotNullOrEmpty() == true)
+            {
+                var index = 1;
+                foreach (var objectAddress in Model.AddressList!)
+                {
+                    ViewBag.ItemIndex = index;
+                    await Html.RenderPartialAsync("_AdmObjectAddress.cshtml", objectAddress);
+                    index++;
+                }
+            }
+        </div>
+    </div>
+
+}

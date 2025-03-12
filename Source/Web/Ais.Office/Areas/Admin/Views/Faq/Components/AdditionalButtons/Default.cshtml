@@ -1,0 +1,17 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var controllerType = typeof(FaqController);
+    if (this.Url.HasRightsToAction("Upsert", controllerType))
+    {
+        <div class="form-input autosize additional-buttons">
+            <label class="empty">&nbsp;</label>
+            <a class="bttn bttn-icon  text blue" href="@Url.DynamicAction("Upsert", controllerType)" title="@Localizer["AddFaq"]">
+                <i class="k-i-plus k-icon k-font-icon"></i>
+                <span>@Localizer["AddFaq"]</span>
+            </a>
+        </div>
+    }
+}

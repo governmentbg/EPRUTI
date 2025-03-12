@@ -1,0 +1,167 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Configurations>Debug;Release</Configurations>
+    <RazorCompileOnPublish>false</RazorCompileOnPublish>
+    <SatelliteResourceLanguages>en-US;bg-BG</SatelliteResourceLanguages>
+    <CodeAnalysisRuleSet>..\..\Rules.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>CS8600;CS8602;CS8603</WarningsAsErrors>
+    <NoWarn>NU1608;NU1803</NoWarn>
+    <Version>3.1.8</Version>
+	<NuGetAudit>false</NuGetAudit>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="..\..\stylecop.json" />
+		<None Include="..\..\.editorconfig" Link=".editorconfig" />
+		<TypeScriptCompile Remove="node_modules\**" />
+		<Content Include="..\..\Libs\Kendo.Mvc.resources.dll" Link="bg-BG\Kendo.Mvc.resources.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="EasyCaching.Redis" Version="1.9.2" />
+		<PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="1.9.2" />		
+		<PackageReference Include="Google.Protobuf" Version="3.27.3" />
+		<PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" Version="2.65.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.1" />
+		<PackageReference Include="System.ServiceModel.Primitives" Version="8.0.0" />
+		<PackageReference Include="AutoMapper" Version="13.0.1" />
+		<PackageReference Include="AspNet.Security.OAuth.ArcGIS" Version="8.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="8.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="8.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.7" />
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.5.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="MimeKit" Version="4.7.0" />
+		<PackageReference Include="Npgsql" Version="8.0.3" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
+		<PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.1.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+		<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
+		<PackageReference Include="Serilog.Sinks.Http" Version="9.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.7" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.10.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
+		<PackageReference Include="NEST" Version="7.17.5" />
+		<PackageReference Include="System.ServiceModel.Duplex" Version="6.0.0" />
+		<PackageReference Include="System.ServiceModel.Federation" Version="8.0.0" />
+		<PackageReference Include="System.ServiceModel.Http" Version="8.0.0" />
+		<PackageReference Include="System.ServiceModel.NetTcp" Version="8.0.0" />
+		<PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <Reference Include="Ais.Common">
+	    <HintPath>..\..\Libs\Ais.Common.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Data">
+	    <HintPath>..\..\Libs\Ais.Data.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Data.Common">
+	    <HintPath>..\..\Libs\Ais.Data.Common.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Data.Models">
+	    <HintPath>..\..\Libs\Ais.Data.Models.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Infrastructure">
+	    <HintPath>..\..\Libs\Ais.Infrastructure.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Office.ViewModels">
+	    <HintPath>..\..\Libs\Ais.Office.ViewModels.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Portal.ViewModels">
+	    <HintPath>..\..\Libs\Ais.Portal.ViewModels.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Regix.Net.Core">
+	    <HintPath>..\..\Libs\Ais.Regix.Net.Core.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Resources">
+	    <HintPath>..\..\Libs\Ais.Resources.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Services">
+	    <HintPath>..\..\Libs\Ais.Services.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Services.Data">
+	    <HintPath>..\..\Libs\Ais.Services.Data.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Services.Mapping">
+	    <HintPath>..\..\Libs\Ais.Services.Mapping.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Table.Mvc">
+	    <HintPath>..\..\Libs\Ais.Table.Mvc.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Utilities">
+	    <HintPath>..\..\Libs\Ais.Utilities.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.WebServices">
+	    <HintPath>..\..\Libs\Ais.WebServices.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.WebUtilities">
+	    <HintPath>..\..\Libs\Ais.WebUtilities.dll</HintPath>
+	  </Reference>
+	  <Reference Include="DocumentFormat.OpenXml">
+	    <HintPath>..\..\Libs\DocumentFormat.OpenXml.dll</HintPath>
+	  </Reference>
+	  <Reference Include="DocumentFormat.OpenXml.Framework">
+	    <HintPath>..\..\Libs\DocumentFormat.OpenXml.Framework.dll</HintPath>
+	  </Reference>
+	  <Reference Include="IO.SignTools">
+	    <HintPath>..\..\Libs\IO.SignTools.dll</HintPath>
+	  </Reference>
+	  <Reference Include="itext.kernel">
+	    <HintPath>..\..\Libs\itext.kernel.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Kendo.Mvc">
+	    <HintPath>..\..\Libs\Kendo.Mvc.dll</HintPath>
+	  </Reference>
+	  <Reference Include="OpenXmlTemplateEngine">
+	    <HintPath>..\..\Libs\OpenXmlTemplateEngine.dll</HintPath>
+	  </Reference>
+	  <Reference Include="SkiaSharp">
+	    <HintPath>..\..\Libs\SkiaSharp.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Telerik.Documents.Core">
+	    <HintPath>..\..\Libs\Telerik.Documents.Core.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Telerik.Documents.Fixed">
+	    <HintPath>..\..\Libs\Telerik.Documents.Fixed.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Telerik.Documents.Flow">
+	    <HintPath>..\..\Libs\Telerik.Documents.Flow.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Telerik.Documents.Flow.FormatProviders.Pdf">
+	    <HintPath>..\..\Libs\Telerik.Documents.Flow.FormatProviders.Pdf.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Telerik.Documents.ImageUtils">
+	    <HintPath>..\..\Libs\Telerik.Documents.ImageUtils.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Telerik.Documents.Spreadsheet">
+	    <HintPath>..\..\Libs\Telerik.Documents.Spreadsheet.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Telerik.Documents.SpreadsheetStreaming">
+	    <HintPath>..\..\Libs\Telerik.Documents.SpreadsheetStreaming.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Telerik.Reporting">
+	    <HintPath>..\..\Libs\Telerik.Reporting.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <Folder Include="Logs\" />
+	  <Folder Include="wwwroot\bundles\" />
+	</ItemGroup>
+
+	<Target Name="CustomActionsAfterPublish" AfterTargets="AfterPublish">
+		<Exec Command="xcopy.exe /Y &quot;$(TargetDir)bg-BG\Kendo.Mvc.resources.dll&quot; &quot;$(PublishUrl)bg-BG\Kendo.Mvc.resources.dll&quot;" />
+	</Target>
+
+</Project>

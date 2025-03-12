@@ -1,0 +1,98 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Office.ViewModels.Application
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Document.OutDocument
+<section class="flex" id="zaqvlenie">
+    @{
+        ViewBag.BodyClass = "application";
+        ViewBag.IsNotCenterContent = true;
+        ViewBag.ApplicationUniqueId = Model.UniqueId;
+        var step = (Step)ViewBag.Step;
+        await Html.RenderPartialAsync("_Steps");
+        await Html.RenderPartialAsync("_Errors");
+        <div class="k-window-split-wrap k-widget k-splitter" data-role="splitter">
+            <div class="k-window-left-wrap k-pane k-scrollable" role="group">
+                <form id="application"
+                      action="@Url.Action("AdmStep", new { applicationUniqueId = Model.UniqueId, current = step.Current, area = ViewContext.RouteData.Values["area"] })"
+                      method="post"
+                      class="content-wrap step-wrap"
+                      data-save="@Url.Action("Save", "OutApplication", new { applicationUniqueId = Model.UniqueId, current = step.Current })">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    @Html.HiddenFor(m => m.UniqueId)
+                    @if (!Model.IsNew)
+                    {
+                        @Html.HiddenFor(m => m.CreateFolder)
+                    }
+                    @{
+                        await Html.RenderPartialAsync("_Step");
+                    }
+                </form>
+            </div>
+        </div>
+        await Html.RenderPartialAsync("_Buttons");
+    }
+</section>
+
+@section Scripts
+{
+    <script src="~/bundles/outapplicationbundle.min.js" asp-append-version="true"></script>
+    @{
+        if (step.Current == StepType.Applicant)
+        {
+            <script src="~/bundles/admin_clients.min.js" asp-append-version="true"></script>
+            <script id="objectTemplate" type="text/kendo-ui-template">
+                <div class="object">
+                    <a class="label pointer">
+                        <svg class="icon">
+                            <use xlink:href="\\#icon-lt#:Type#"></use>
+                        </svg>
+                        #:Title#
+                        #if(ShortDescription){#
+                            <div class="object-shortinfo">#:ShortDescription#</div>
+                        #}#
+                    </a>
+                    <div class="right object-options zebra-reverse">
+                        #if(IsChecked != true){#
+                            <a class="object-option cart-js pointer k-tooltip-bottom" title="@Localizer["AddToCart"]">
+                                <svg class="icon">
+                                    <use xlink:href="\\#icon-plus"></use>
+                                </svg>
+                            </a>
+                        #}else{#
+                            <a class="object-option cart-js pointer removable k-tooltip-bottom" title="@Localizer["RemoveFromCart"]">
+                                <svg class="icon">
+                                    <use xlink:href="\\#icon-minus"></use>
+                                </svg>
+                            </a>
+                        #}#
+                    </div>
+                    <div class="object-properties">#:Description ? Description : ''#</div>
+                </div>
+            </script>
+        }
+
+        if (step.Current is StepType.Attachments)
+        {
+            await Html.RenderPartialAsync("_FileTemplate");
+        }
+
+        if (step.Current is StepType.CopyAdmAct)
+        {
+            await Html.RenderPartialAsync("_FileTemplate");
+        }
+
+        if (step.Current == StepType.Folder)
+        {
+            <script src="~/bundles/searchFolders.min.js" asp-append-version="true"></script>
+        }
+    }
+}
+
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}

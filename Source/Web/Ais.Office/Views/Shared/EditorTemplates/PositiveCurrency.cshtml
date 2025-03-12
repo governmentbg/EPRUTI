@@ -1,0 +1,21 @@
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+                {
+            { "id", Guid.NewGuid().ToString() },
+                });
+}
+
+@model decimal?
+@(Html.Kendo().CurrencyTextBoxFor(m => m)
+      .HtmlAttributes(attributes)
+      .Min(0)
+      .Deferred(!Context.Request.IsAjaxRequest()))

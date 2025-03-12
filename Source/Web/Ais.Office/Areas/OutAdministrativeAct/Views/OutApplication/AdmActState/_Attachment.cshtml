@@ -1,0 +1,85 @@
+﻿@inject IStringLocalizer Localizer
+@inject IOptions<AttachmentOptions> ApplicationOption
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Kendo.Mvc.TagHelpers
+@using Ais.Utilities.Extensions
+@using Ais.Data.Models.Attachment
+@using Ais.Data.Models.Document
+@using Ais.Infrastructure.KendoExt
+@using Ais.Infrastructure.Options
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Options
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile
+@model Ais.Data.Models.Attachment.AttachmentType
+@{
+    var attachment = ViewBag.Attachment as Attachment;
+    var required = ViewBag.Required is bool && (bool)ViewBag.Required;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var type = Model;
+    var uniqueId = attachment?.UniqueId ?? Guid.NewGuid().ToString();
+    var prefix = $"Attachments[{uniqueId}].";
+
+    @Html.Hidden("Attachments.Index", uniqueId)
+    @Html.Hidden($"{prefix}Type.Id", type.Id)
+    @Html.Hidden($"{prefix}Type.Title", type.Title)
+    @Html.Hidden($"{prefix}UniqueId", uniqueId)
+
+    await Html.RenderPartialAsync("_FileTemplate");
+
+    <div class="form-row fullwidth no-wrap">
+        <div class="form-input fg-1 file">
+            @Html.InfoLabel(Localizer["UploadFile"], key: "UploadFile", labelClass: required ? "required" : string.Empty)
+            @(Html.Kendo().Upload()
+            .Name($"{prefix}Url")
+            .Messages(x => x.Select(Localizer["SelectFiles"])
+            .InvalidFileExtension(Localizer["InvalidFileExtension"])
+            .Cancel(Localizer["Cancel"]))
+            .HtmlAttributes(new { accept = type.Extensions, id = Guid.NewGuid().ToString(), data_prefix = prefix, name = string.Empty })
+            .Async(a => a
+            .Save("Upload", "Attachment", new { Area = string.Empty })
+            .Remove("Remove", "Attachment", new { Area = string.Empty })
+            .AutoUpload(true)
+            .ChunkSize(ApplicationOption.Value.AsyncUploadChunkSize)
+            .Concurrent(false))
+            .ShowFileList(true)
+            .Multiple(false)
+            .TemplateId("fileTemplate")
+            .Validation(validation =>
+            {
+                validation.AllowedExtensions(type.ExtensionsCollection);
+                validation.MaxFileSize(type.MaxSizeInBytes);
+                validation.MinFileSize(1);
+            })
+            .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+            .Files(files =>
+            {
+                if (attachment?.Url.IsNotNullOrEmpty() == true || attachment?.Id.HasValue == true)
+                {
+                    files.AddCustomFile(
+                    new UploadFile
+                {
+                    Name = attachment.Name,
+                    Url = attachment.Url,
+                    Id = attachment.Id,
+                    Size = attachment.Size,
+                    Extension = attachment.Extension,
+                    Data = new Dictionary<string, object> { { "prefix", prefix } }
+                });
+                }
+            })
+            .Deferred(deferred)
+                )
+            @Html.ValidationMessage($"{prefix}Url")
+            <small>
+                @($"{Localizer["AllowExtensions"]}: {type?.Extensions}, {Localizer["MaxFileSize"]}: {type?.MaxSize} MB.")
+            </small>
+        </div>
+        <div class="cancelelement">
+            <label class="empty"></label>
+            <button type="button" class="bttn small cancel remove-attachment-js">
+                X
+            </button>
+        </div>
+    </div>
+}

@@ -1,0 +1,23 @@
+﻿@using Ais.Office.Areas.Admin.Controllers.Employees;
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var controllerType = typeof(EmployeesController);
+    var editUrl = Url.DynamicActionWithRightsCheck(nameof(EmployeesController.Edit), controllerType);
+    if (editUrl.IsNotNullOrEmpty())
+    {
+        <a href="@editUrl" class="k-small k-button edit-employee-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Edit"]">
+            <i class="k-i-edit k-icon k-font-icon"></i>
+        </a>
+    }
+
+    var upsertOvertimeAndSubstitutionUrl = Url.DynamicActionWithRightsCheck(nameof(EmployeesController.UpsertOvertimeAndSubstitution), controllerType);
+    if (upsertOvertimeAndSubstitutionUrl.IsNotNullOrEmpty())
+    {
+        <a href="@upsertOvertimeAndSubstitutionUrl" class="k-small k-button edit-o-and-s-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Settings"]">
+            <i class="k-i-gear k-icon k-font-icon"></i>
+        </a>
+    }
+}

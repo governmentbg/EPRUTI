@@ -1,0 +1,48 @@
+﻿@using Ais.Data.Models.Publication
+@using Ais.Office.Areas.Admin.Controllers
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var controllerType = typeof(PublicationsController);
+    if (Url.HasRightsToAction("Upsert", controllerType))
+    {
+        <div class="form-input autosize additional-buttons">
+            <label class="empty">&nbsp;</label>
+            <a class="bttn bttn-icon w-auto" href="@Url.DynamicAction("Upsert", controllerType, new { type = PublicationType.News })" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["CreateNews"]">
+                <i class="k-i-plus k-icon k-font-icon"></i>
+                <span>@Localizer["CreateNews"]</span>
+            </a>
+        </div>
+    }
+    if (Url.HasRightsToAction("Upsert", controllerType))
+    {
+        <div class="form-input autosize">
+            <label class="empty">&nbsp;</label>
+            <a class="bttn bttn-icon w-auto" href="@Url.DynamicAction("Upsert", controllerType, new { type = PublicationType.Event })" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["CreateEvent"]">
+                <i class="k-i-plus k-icon k-font-icon"></i>
+                <span>@Localizer["CreateEvent"]</span>
+            </a>
+        </div>
+    }
+    if (Url.HasRightsToAction("Upsert", controllerType))
+    {
+        <div class="form-input autosize">
+            <label class="empty">&nbsp;</label>
+            <a class="bttn bttn-icon w-auto" href="@Url.DynamicAction("Upsert", controllerType, new { type = PublicationType.Message })" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["CreateMessage"]">
+                <i class="k-i-plus k-icon k-font-icon"></i>
+                <span>@Localizer["CreateMessage"]</span>
+            </a>
+        </div>
+    }
+    if (Url.HasRightsToAction("Upsert", controllerType))
+    {
+        <div class="form-input autosize">
+            <label class="empty">&nbsp;</label>
+            <a class="bttn bttn-icon w-auto" href="@Url.DynamicAction("Upsert", controllerType, new { type = PublicationType.Panel })" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["CreatePanel"]">
+                <i class="k-i-plus k-icon k-font-icon"></i>
+                <span>@Localizer["CreatePanel"]</span>
+            </a>
+        </div>
+    }
+}

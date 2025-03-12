@@ -1,0 +1,172 @@
+﻿@using Ais.Data.Models.Document
+@using Ais.Data.Models.Folder
+@using Ais.Data.Models.Helpers
+@using Ais.Office.ViewModels.Folders
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model Guid
+@{
+    var folderControllerType = typeof(FoldersController);
+    var deliverLink = Url.DynamicActionWithRightsCheck(nameof(FoldersController.Deliver), folderControllerType, new { key = Model });
+    var deliverFlag = deliverLink.IsNotNullOrEmpty();
+    var selectOutDocumentsToDeliveryLink = deliverFlag
+        ? Url.DynamicActionWithRightsCheck(nameof(FoldersController.SelectOutDocumentToDelivery), folderControllerType, new { key = Model })
+        : null;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var wrapperId = Guid.NewGuid();
+    async Task RenderScriptsAsync()
+    {
+        <script src="~/bundles/folders.min.js" asp-append-version="true"></script>
+        <script type="text/x-kendo-template" id="folderTitleTemplate">
+         <div class="tr-container">
+            @if (deliverFlag)
+            {
+                <text>
+                    #if(Type != 4){#
+                        <input type="checkbox" 
+                            class="k-checkbox k-checkbox-md k-rounded-md section-selected-js #if(Type == 2 && DocumentTypeId != '@EnumHelper.GetOutDocumentTypeIdByType(OutDocumentType.DeliveryMessage)'){# outdoc-js #}#"
+                            data-section="#:SectionType#"
+                            data-folderid="#:FolderXDocId#"
+                            value="#:Id#"
+                            #if(IsChecked == true){# checked="checked" #}#>
+                        </input>#}#
+                </text>
+            }
+            <div class='row-container sectionType#:SectionType# folder#:Type#'>
+                <div class="icon-container">
+                        <span class="k-icon k-font-icon k-icon k-font-icon-md #:folders.getFolderIconByType(Type)#"></span>
+                    </div>
+                    <span class='title open-docinfo-short-js #: (Type == 1 || Type == 2)? "info-link" : "" #' sectionType#: SectionType#' data-id='#:Id#' data-type="#:Type#" title="@Localizer["Info"]">#:Title ? Title : resources.getResource("NoName")#</span>
+                    <div class="btn-group-row">
+                           #if(Type == 1 || Type == 2){#
+                            <a class="k-small k-button change-section-js" data-id=#:FolderXDocId# data-regnum="#:Title#" data-section=#:SectionType# title="@Localizer["ChangeSection"]"><i class="k-i-login k-font-icon k-icon"></i></a>
+                        #}#
+                        #if(FileId || (Type == 3 && HasFiles == true)){#
+                            @{
+                                var downloadUrl = Url.DynamicActionWithRightsCheck(nameof(FoldersController.Download), typeof(FoldersController));
+                                if (downloadUrl.IsNotNullOrEmpty())
+                                {
+                                    @:<a class="k-small k-button" href="@downloadUrl?key=@Model&id=#=Id#" title="@Localizer["Download"]"><i class="k-i-download k-font-icon k-icon"></i></a>
+                                }
+
+                                var previewUrl = Url.DynamicActionWithRightsCheck(nameof(FoldersController.Preview), typeof(FoldersController));
+                                if (previewUrl.IsNotNullOrEmpty())
+                                {
+                                    @:#if(FileId){#<a class="k-small k-button" href="@previewUrl?key=@Model&id=#=Id#" title="@Localizer["Preview"]"><i class="k-i-hyperlink-open k-font-icon k-icon"></i></a>#}#
+                                }
+                            }
+                        #}#
+                        @{
+                            var historyUrl = Url.DynamicActionWithRightsCheck(nameof(FoldersController.History), typeof(FoldersController));
+                            if (historyUrl.IsNotNullOrEmpty())
+                            {
+                                @:#if(Type <= 3){#<a class="k-small k-button js-trigger-popup" href="@historyUrl?id=#:Id#&type=#:Type#" title="@Localizer["History"]"><i class="k-i-track-changes k-font-icon k-icon"></i></a>#}#
+                            }
+                        }
+                    </div>
+                </div>
+            <div>
+        </script>
+        <script>folders.initFolder($("#@wrapperId"));</script>
+    }
+    if (deferred)
+    {
+        @section Breadcrumbs
+        {
+            @{
+                await Html.RenderPartialAsync("_Breadcrums");
+            }
+        }
+        @section Scripts
+        {
+            @{
+                await RenderScriptsAsync();
+            }
+        }
+    }
+    else
+    {
+        await RenderScriptsAsync();
+    }
+}
+<div id="@wrapperId" class="folder-tree" data-refresh="@(ViewBag.RefreshLink)">
+    @(Html.Kendo().Splitter()
+        .Name("horizontal")
+        .Orientation(SplitterOrientation.Horizontal)
+        .Panes(
+            horizontalPanes =>
+            {
+                horizontalPanes.Add()
+                               .HtmlAttributes(new { id = "left-pane", style = "height: 100%;" })
+                               .Scrollable(true)
+                               .Collapsible(true)
+                               .Content(
+                                   @<text>
+                                        <div class="sticky-container">
+                                            <div class="btn-group-header folder-buttons">
+                                                @{
+                                                    if (deliverFlag)
+                                                    {
+                                                        if (selectOutDocumentsToDeliveryLink.IsNotNullOrEmpty())
+                                                        {
+                                                            <a href="@selectOutDocumentsToDeliveryLink" class="k-small k-button selectOutDocumentToDelivery-js" title="@Localizer["SelectOutDocumentsToDelivery"]">
+                                                                <i class="k-i-check-outline k-font-icon k-icon"></i>
+                                                            </a>
+                                                        }
+                                                        <a href="@deliverLink" class="k-small k-button delivery-js" disabled="true" title="@Localizer["Deliver"]">
+                                                            <i class="k-i-document-manager k-font-icon k-icon"></i>
+                                                        </a>
+                                                    }
+                                                    <a class="k-small k-button change-sections-js" data-id=#:FolderXDocId# data-regnum="#:Title#" data-section=#:SectionType# title="@Localizer["ChangeSection"]">
+                                                        <i class="k-i-login k-font-icon k-icon"></i></a>
+                                                    <a class="k-small k-button section public section-type-js" data-section="@(SectionType.Official.GetHashCode())" title="@Localizer["PublicSectionButton"]">
+                                                        <i class="k-i-check-outline k-font-icon k-icon"></i>
+                                                    </a>
+                                                    <a class="k-small k-button section internal section-type-js" data-section="@(SectionType.Internal.GetHashCode())" title="@Localizer["InnerSectionButton"]">
+                                                        <i class="k-i-check-outline k-font-icon k-icon"></i>
+                                                    </a>
+                                                    <a class="k-small k-button section control section-type-js" data-section="@(SectionType.Control.GetHashCode())" title="@Localizer["ControlSectionButton"]">
+                                                        <i class="k-i-check-outline k-font-icon k-icon"></i>
+                                                    </a>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="pane-content">
+                                            @Html.Hidden("ModelId", Model)
+                                            @(Html.Kendo().TreeList<FolderTreeItemViewModel>()
+                                                  .Name(Guid.NewGuid().ToString())
+                                                  .Toolbar(toolbar => { toolbar.Search().Text(Localizer["Search"]); })
+                                                  .Columns(columns => { columns.Add().Field(f => f.Title).Title(" ").TemplateId("folderTitleTemplate"); })
+                                                  .Search(s => { s.Field(c => c.Title); })
+                                                  .HtmlAttributes(new { @class = "folders-list-js folders-list" })
+                                                  .DataSource(
+                                                      d =>
+                                                          d.Read(
+                                                               "ReadFolders",
+                                                               "Folders",
+                                                               new
+                                                               {
+                                                                   key = Model
+                                                               })
+                                                           .ServerOperation(false)
+                                                           .Model(
+                                                               m =>
+                                                               {
+                                                                   m.Id(f => f.UniqueId);
+                                                                   m.ParentId(f => f.UniqueIdParentId).Nullable();
+                                                                   m.Field(f => f.Title).Nullable();
+                                                                   m.Expanded<bool>(nameof(FolderTreeItemViewModel.Expanded));
+                                                               }))
+                                                  .Deferred(deferred))
+                                        </div>
+                                    </text>);
+                horizontalPanes.Add()
+                               .HtmlAttributes(new { id = "right-pane" })
+                               .Scrollable(true)
+                               .Collapsible(true)
+                               .Content(" ");
+            }))
+</div>

@@ -1,0 +1,37 @@
+﻿@using Ais.Office.ViewModels.OutApplication;
+@using Ais.WebUtilities.Extensions;
+@using Microsoft.Extensions.Localization;
+@model Ais.Data.Models.Document.Document
+@inject IStringLocalizer Localizer
+<div class="steps-body k-flex-column">
+    @{
+        ViewBag.ApplicationUniqueId = Model.UniqueId;
+        var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+        var hideOutNumber = ViewBag.HideOutNumber is bool && (bool)ViewBag.HideOutNumber;
+
+        if (Model.IsNew)
+        {
+            await Html.RenderPartialAsync("Folder/_CreateFolder");
+        }
+
+        await Html.RenderPartialAsync("Folder/_SearchFolders", new FolderQueryViewModel());
+        await Html.RenderPartialAsync("Folder/_Folders");
+    }
+
+    @if (!hideOutNumber)
+    {
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["OutNumber"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div>
+                    <label>@Localizer["OutNumber"]</label>
+                    @Html.Kendo().TextBoxFor(x => x.OutNumber).Deferred(deferred)
+                </div>
+            </div>
+        </div>
+    }
+</div>

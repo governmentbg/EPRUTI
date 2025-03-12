@@ -1,0 +1,80 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using Ais.Office.ViewModels.Sign
+@model Ais.Office.ViewModels.Sign.SignViewModel
+@{
+    ViewBag.DontRenderMenu = true;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    if (Model?.Id != null)
+    {
+        <form method="post" action="@Url.DynamicAction(nameof(SignController.SignPdfPost), typeof(SignController))">
+            @Html.ValidationSummary(true)
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.EntryType)
+            @Html.HiddenFor(m => m.AttachmentType)
+            @Html.HiddenFor(m => m.Url)
+            @Html.HiddenFor(m => m.Status)
+            @Html.HiddenFor(m => m.Operation)
+            @Html.HiddenFor(m => m.Check)
+            <div class="form-row">
+                <div class="form-input fullwidth">
+                    @(Html.Kendo().PDFViewer()
+                        .Name(Guid.NewGuid().ToString())
+                        .PdfjsProcessing(pdf => pdf.File(Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), new { urls = Model.Url, ids = Model.FileId })))
+                        .Toolbar(false)
+                        .Height(1000)
+                        .Deferred(deferred))
+                </div>
+            </div>
+            <div class="form-row wmax1000">
+                <div class="form-input fullwidth">
+                    @(Html.Kendo().Signature()
+                        .Name(nameof(SignViewModel.Signature))
+                        .HtmlAttributes(new { @class = "sign-canvaspdf", required = "required" })
+                        .Maximizable(false)
+                        .Color("#0000a9")
+                        .StrokeWidth(4)
+                        .Smooth(true)
+                        .HideLine(true)
+                        .Height(200)
+                        .Deferred(deferred))
+                        @Html.ValidationMessageFor(m => m.Signature)
+                </div>
+                <div class="k-dialog-buttongroup">
+                    <button class="bttn right main">
+                        @Localizer["Sign"]
+                    </button>
+                    <button class="bttn right reset-signature-js" type="button">
+                        @Localizer["Clear"]
+                    </button>
+                </div>
+            </div>
+        </form>
+    }
+    else
+    {
+        @($"{Localizer["Signing"]}...")
+    }
+}
+@section Scripts
+{
+    <script>
+        (function () {
+            signalr.attachToHub((connection) => {
+                connection.off('Reload');
+                connection.on('Reload', function (url) { window.location.href = url; });
+            });
+            core.rebindEvent("click", ".reset-signature-js", function (e) {
+                e.preventDefault();
+                var sender = $(e.currentTarget);
+                var signature = kendo.widgetInstance(sender.closest("form").find("[data-role=signature]"));
+                if (signature) {
+                    signature.reset();
+                }
+            })
+        })();
+    </script>
+}

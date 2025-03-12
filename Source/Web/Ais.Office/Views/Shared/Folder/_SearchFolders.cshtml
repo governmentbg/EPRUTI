@@ -1,0 +1,48 @@
+﻿@inject IStringLocalizer Localizer
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using Ais.WebUtilities.Extensions
+@model Ais.Office.ViewModels.OutApplication.FolderQueryViewModel
+@{
+    var searchQueryId = Guid.NewGuid().ToString();
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+<div class="step-box fg-1">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["SearchFolders"]
+        </h3>
+    </div>
+    <div class="step-box-body search-wrapper-js" data-searchqueryid="@searchQueryId">
+        <div action="@Url.DynamicAction(nameof(FoldersController.SearchFolders), typeof(FoldersController), new { searchQueryId = searchQueryId })" data-ajax-method="GET" data-ajax-update="#searchFolderResultWrapper" class="form-row no-wrap">
+            <div class="form-input quad">
+                @Html.LabelFor(m => m.RegNum)
+                @Html.TextBoxFor(m => m.RegNum, new { id = string.Empty })
+            </div>
+            <div class="form-input quad">
+                @Html.LabelFor(m => m.DocRegNum)
+                @Html.TextBoxFor(m => m.DocRegNum, new { id = string.Empty })
+            </div>
+            <div class="form-input auto">
+                @Html.LabelFor(m => m.From)
+                @Html.Kendo().DatePickerFor(m => m.From).HtmlAttributes(new { id = Guid.NewGuid().ToString() }).Deferred(deferred)
+            </div>
+            <div class="form-input auto">
+                @Html.LabelFor(m => m.To)
+                @Html.Kendo().DatePickerFor(m => m.To).HtmlAttributes(new { id = Guid.NewGuid().ToString() }).Deferred(deferred)
+            </div>
+            <div class="form-input w100">
+                @Html.LabelFor(m => m.Limit)
+                @Html.EditorFor(m => m.Limit, "ResultLimit")
+            </div>
+            <div class="form-input w-auto">
+                <label></label>
+                <button class="bttn blue small bttn-icon autosize" type="submit" ajax-button-submit>
+                    <i class="k-i-search k-icon k-font-icon"></i>
+                </button>
+            </div>
+        </div>
+        <div id="searchFolderResultWrapper">
+        </div>
+    </div>
+</div>

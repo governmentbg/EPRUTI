@@ -1,0 +1,58 @@
+﻿@using Ais.Office.ViewModels.Clients
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Address
+@model ClientUpsertModel
+@inject IStringLocalizer Localizer;
+@{
+    var addressesListName = $"AddressesList_{Guid.NewGuid()}";
+    var addressesKey = ViewBag.AddressesKey as string;
+}
+<div class="step-box fullwidth">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["Addresses"]
+        </h3>
+        <a class="k-button k-small k-ml-auto add-address-js" data-widgetname="@addressesListName">
+            <span class="k-icon k-font-icon k-i-plus"></span>
+        </a>
+    </div>
+    <div class="step-box-body">
+        <div class="form-row">
+            <div class="fullwidth">
+                @(Html.Kendo().Grid<Address>()
+                        .Name(addressesListName)
+                        .HtmlAttributes(new { data_clientid = Model?.UniqueId, @class = "withoutpager" })
+                        .Pageable()
+                        .Columns(
+                            column =>
+                            {
+                                column.Bound(c => c.FullDescription)
+                                      .Title(Localizer["Address"])
+                                      .ClientTemplate("#=kendo.format(data.Default == true ? \"<strong>{0}</strong>\" : \"{0}\", FullDescription)#");
+                                column.Bound(c => c.Email)
+                        .Title(Localizer["Email"]).Hidden();
+                                column.Bound(c => c.Phone)
+                        .Title(Localizer["Phone"]).Hidden();
+                                column.Bound(c => c.Origin.Name)
+                                      .Title(Localizer["Type"]).Hidden();
+                                column.Template(
+                                          "<div class='flex'>" +
+                                          $"<a href='\\#' class='k-button k-small edit-address-js' data-widgetname='{addressesListName}'><span class='k-i-pencil k-icon k-font-icon k-button-icon'></span></a>" +
+                                          $"<a href='\\#' class='k-button k-small remove-address-js' data-widgetname='{addressesListName}'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a>" +
+                                          "</div>")
+                                      .Title(Localizer["Actions"])
+                                      .Width(80);
+                        })
+                    .DataSource(
+                        d => 
+                            d.Ajax()
+                             .Read(
+                                 r => 
+                                     r.Action("ReadAddresses", "Clients", new { key = addressesKey }))
+                             .PageSize(10)
+                             .Model(m => m.Id("UniqueId")))
+                    .Events(e => e.DataBound("searchTable.onGridDataBound")))
+            </div>
+        </div>
+    </div>
+</div>

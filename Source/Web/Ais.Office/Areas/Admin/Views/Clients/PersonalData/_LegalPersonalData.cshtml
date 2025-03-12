@@ -1,0 +1,20 @@
+﻿@using Ais.Office.ViewModels.Clients;
+@using Kendo.Mvc.TagHelpers
+@model ClientUpsertModel
+@{
+    var namesAndEgnBulstatShouldBeReadOnly = ViewBag.NamesAndEgnBulstatShouldBeReadOnly is bool && (bool)ViewBag.NamesAndEgnBulstatShouldBeReadOnly;
+}
+<div class="clientType-js legal-js" style="display: none;">
+    <div class="form-row">
+        <div class="form-input quad">
+            <label class="empty"></label>
+            @Html.EditorFor(m => m.Division, new { htmlAttributes = new { @class = "division-js" }})
+            @Html.ValidationMessageFor(m => m.Division)
+        </div>
+        <div class="form-input quad">
+            @Html.LabelFor(m => m.FullName, new { @class = "required" })
+            @Html.EditorFor(m => m.FullName, new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly="readonly" } : null})
+            @Html.ValidationMessageFor(m => m.FullName)
+        </div>
+    </div>
+</div>

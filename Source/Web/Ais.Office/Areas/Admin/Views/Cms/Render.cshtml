@@ -1,0 +1,28 @@
+﻿@using Microsoft.Extensions.Localization
+@using System.Web
+@inject IStringLocalizer Localizer
+
+@model Ais.Office.ViewModels.Cms.PageViewModel
+
+@{
+    var sessionId = ViewBag.SessionId as string;
+}
+
+@section Breadcrumbs
+    {
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+    }
+
+    <div class="wrap-cms center">
+        @Html.Raw(HttpUtility.HtmlDecode(Model.Content))
+    @if (!string.IsNullOrWhiteSpace(sessionId))
+    {
+        <div class="clear"></div>
+        <div class="button-wrap fullwidth">
+            <a data-ajax="true" data-ajax-method="POST" href="@Url.Action("Upsert", new { sessionId = sessionId })" class="bttn main caps right">@Localizer["Save"]</a>
+            @Html.ActionLink(Localizer["Edit"], "Upsert", new { sessionId = sessionId }, new { @class = "bttn secondary caps right" })
+        </div>
+    }
+</div>

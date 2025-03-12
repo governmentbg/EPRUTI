@@ -1,0 +1,29 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@using Microsoft.Extensions.Localization
+@model bool?
+@inject IStringLocalizer Localizer;
+@{
+    var boolDataSource = new List<SelectListItem>
+                         {
+                             new() { Text = Localizer["Yes"], Value = "true" },
+                             new() { Text = Localizer["No"], Value = "false" }
+                         };
+
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+? ViewData["htmlAttributes"]
+: null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+                {
+            { "id", Guid.NewGuid().ToString() },
+                });
+}
+
+@(Html.Kendo().DropDownListFor(m => m)
+    .HtmlAttributes(attributes)
+    .Value(Model != null ? Model.ToString() : "false")
+    .BindTo(boolDataSource)
+    .Deferred(!Context.Request.IsAjaxRequest()))

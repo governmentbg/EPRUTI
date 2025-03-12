@@ -1,0 +1,5 @@
+﻿@model object
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+
+@Html.TextBoxFor(model => model, new { @class = "k-textbox", type = "email", data_msg_email = this.Localizer["InvalidEmail"] })

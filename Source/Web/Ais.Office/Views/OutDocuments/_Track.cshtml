@@ -1,0 +1,26 @@
+﻿@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+@model Ais.Office.ViewModels.BgPosts.ParcelDataViewModel
+<div class="steps-body">
+    <div class="step-box fullwidth">
+        <div class="step-box-head collapsible">
+            <h3 class="step-box-title">@Model.RecipientName</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input quad">
+                   @Html.Label(Localizer["BgPostsNumber"]) @Model.BgPostsCode
+                </div>
+                <div class="form-input quad">
+                   @Html.Label(Localizer["RegDate"]) @Model.DateReg
+                </div>
+                <div class="form-input quad">
+                    @Html.Label(Localizer["Delivered"]) @(Model.Finished ? Localizer["Yes"] : Localizer["No"])
+                </div>
+                <div class="form-input quad">
+                    @Html.Label(Localizer["DeliveryDate"]) @(Model.DateFinish.HasValue ? Model.DateFinish.Value.ToShortDateString() : "-")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

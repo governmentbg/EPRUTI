@@ -1,0 +1,35 @@
+﻿@using Ais.Data.Models.Nomenclature
+@using Ais.Infrastructure.Roles
+@using Ais.Office.Controllers
+@using Microsoft.Extensions.Localization
+@using Ais.WebUtilities.Extensions
+@using Ais.Office.ViewModels.Help
+@inject IStringLocalizer Localizer;
+@model HelpContentViewModel
+
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+    
+    @using (Html.BeginForm(
+        "Upsert",
+        "Help",
+        FormMethod.Post))
+    {
+        @Html.ValidationSummary(true)
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+        @Html.HiddenFor(m => m.Id)
+        @Html.LabelFor(m => m.Content)
+        @Html.EditorFor(model => model.Content, "KendoEditor", new { wrapperClass = "form-input fullwidth" })
+        @Html.ValidationMessageFor(m => m.Content)
+        </div>
+        <div class="k-dialog-buttongroup">
+            <button type="submit" class="bttn right main">
+                @Localizer["Save"]
+            </button>
+        </div>
+    }

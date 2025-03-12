@@ -1,0 +1,52 @@
+﻿@using Ais.Data.Models.Attachment
+@using Ais.Office.Areas.Admin.Controllers
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using FormTagHelper = Kendo.Mvc.TagHelpers.FormTagHelper
+@inject IStringLocalizer Localizer;
+@model Ais.Office.ViewModels.Clients.ClientAttachmentViewModel
+<form method="post" action="@Url.DynamicAction(nameof(ClientAttachmentsController.Upsert), typeof(ClientAttachmentsController), new { searchQueryId = ViewBag.SearchQueryId as string })"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.ClientId)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @Html.LabelFor(m => m.Type.Id, Localizer["Type"], new { required = true })
+                        @(Html.Kendo().DropDownListFor(m => m.Type.Id)
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .ValueTemplate("<input type='hidden' name='Type.Name' value='#:Name#'/><span>#:Name#</span>")
+                            .Events(e => e.Change("admin_clientattachments.onAttachmentTypeChange"))
+                            .DataSource(d => d.Read(r => r.Url(Url.DynamicAction(nameof(ClientAttachmentsController.Types), typeof(ClientAttachmentsController))))))
+                        @Html.ValidationMessageFor(m => m.Type)
+                        @Html.ValidationMessageFor(m => m.Type.Id)
+                    </div>
+                </div>
+                <div class="form-row attachment-js">
+                    @if (ViewBag.AttachmentType is AttachmentType type)
+                    {
+                        ViewBag.ClientAttachment = Model;
+                        await Html.RenderPartialAsync("_Attachment", type);
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

@@ -1,0 +1,48 @@
+﻿@using Ais.Office.ViewModels.Employees
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model OverTimeRowUpdateModel
+<form method="post" action="@Url.ActionLink("UpdateOverTimeRow", "Employees")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.EmployeeId)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["OverTime"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.Day, new { @class = "required" })
+                        @Html.EditorFor(m => m.Day, "Date", additionalViewData: new { min = DateTime.Now })
+                        @Html.ValidationMessageFor(m => m.Day)
+                    </div>
+                   
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.From, new { @class = "required" })
+                        @Html.EditorFor(m => m.From, "Time")
+                        @Html.ValidationMessageFor(m => m.From)
+                    </div>
+                    <div class="form-input quad">
+                        @Html.LabelFor(m => m.To, new { @class = "required" })
+                        @Html.EditorFor(m => m.To, "Time")
+                        @Html.ValidationMessageFor(m => m.To)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

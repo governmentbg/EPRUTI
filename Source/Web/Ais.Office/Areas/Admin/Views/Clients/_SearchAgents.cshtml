@@ -1,0 +1,44 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Office.ViewModels.Clients
+@using Ais.WebUtilities.Extensions;
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model Ais.Office.ViewModels.Application.ClientQueryViewModel
+@{
+    if (ViewBag.Client is ClientUpsertModel client)
+    {
+        ViewData.TemplateInfo.HtmlFieldPrefix = "query";
+        <div action="@Url.DynamicAction(nameof(ClientsController.SearchAgents), typeof(ClientsController), new { clientUniqueId = client.UniqueId })"
+             class="fullwidth"
+             data-ajax="true"
+             data-ajax-method="POST"
+             data-ajax-update="#searchagentswrapper">
+            <div class="form-input quad">
+                @Html.LabelFor(m => m.FullName)
+                @Html.EditorFor(m => m.FullName)
+            </div>
+            <div class="form-input quad">
+                @Html.LabelFor(m => m.EgnBulstat)
+                @Html.EditorFor(m => m.EgnBulstat)
+            </div>
+            <div class="form-input half">
+                @Html.LabelFor(m => m.Limit)
+                @Html.EditorFor(m => m.Limit, "ResultLimit")
+            </div>
+            <div class="form-input quad">
+                <label class="empty"></label>
+                <button class="bttn bttn-icon search" title="@Localizer["Search"]" value="@Localizer["Search"]" ajax-button-submit>
+                    <svg class="icon">
+                        <use xlink:href="#icon-search"></use>
+                    </svg>
+                </button>
+                <a href="#" class="k-button k-small create-representative-js" data-clientuniqueid="@(client.UniqueId)">
+                    <span class="k-i-plus k-icon k-font-icon k-button-icon"></span>
+                </a>
+            </div>
+        </div>
+        <div class="fullwidth" id="searchagentswrapper">
+        </div>
+    }
+}

@@ -1,0 +1,27 @@
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+<div id="fixed-bgr"></div>
+<div id="wrap">
+    <div id="main">
+        <div class="center login">
+            <div class="login-wrap">
+                <form method="post" asp-all-route-data="@(new AttributeDictionary{ { "returnUrl", ViewBag.ReturnUrl as string } })">
+                    <h2>@Localizer["Login"]</h2>
+                    <div class=" form-row">
+                        <p>@Localizer["ELoginText"]</p>
+                    </div>
+                    <div class=" form-row">
+                        <a href="@Url.Action("ELogin", "Authentication", new { returnUrl = ViewBag.ReturnUrl as string })" class="bttn primary fullwidth">
+                            @Localizer["LoginWithEAuth"]
+                        </a>
+                    </div>
+                    <div class=" form-row">
+                        <a href="@Url.Action("RegisterRequest", "Registration")" class="bttn secondary fullwidth">
+                            @Localizer["RegisterRequest"]
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

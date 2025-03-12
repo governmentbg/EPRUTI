@@ -1,0 +1,13 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer localizer
+@if (this.Url.HasRightsToAction("Create", typeof(TranslationsController)))
+{
+    <div class="form-input autosize additional-buttons">
+         <label class="empty"></label>
+         <a class="bttn bttn-icon add-translation-js" title="@localizer["Add"]" data-searchqueryid="@ViewBag.SearchQueryId" >
+              <i class="k-i-plus k-icon k-font-icon"></i>
+          </a>
+    </div>
+}

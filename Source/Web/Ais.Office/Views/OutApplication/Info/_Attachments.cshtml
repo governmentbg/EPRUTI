@@ -1,0 +1,93 @@
+﻿@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using Ais.Data.Models.Document
+@using System.Text.RegularExpressions
+@using Ais.WebUtilities.Extensions
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.OutDocument
+@{
+    string GetFileIconByName(string name)
+    {
+        var pattern = @"\.[a-z]+";
+        var match = Regex.Match(name ?? string.Empty, pattern);
+        var icon = match.Value switch
+        {
+            ".jpg" => "k-i-image",
+            ".jpeg" => "k-i-image",
+            ".pdf" => "k-i-pdf",
+            ".xml" => "k-i-file-programming",
+            ".xlsx" => "k-i-excel",
+            _ => "k-i-file"
+        };
+
+        return icon;
+    }
+    var firstFileCount = 20;
+    var firstObjectCount = 20;
+    if (Model.Attachments.IsNotNullOrEmpty())
+    {
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["Documents"]
+                </h3>
+            </div>
+            <div class="step-box-body flex wrap gap-5">
+                @{
+                    var hasMoreAttachments = Model.Attachments.Count > firstFileCount;
+                    var collection = hasMoreAttachments ? Model.Attachments.Take(firstFileCount).ToList() : Model.Attachments;
+                    foreach (var attachment in collection)
+                    {
+                        var fileIcon = GetFileIconByName(attachment.Name);
+                        <div class="flex gap-5 elements">
+                            <i class="@fileIcon k-font-icon k-icon"></i>
+                            <div class="fullwidth flex wrap gap-5 align-center">
+                                <span>@(attachment.Type?.Title?.ToString()) |</span>
+                                @{
+                                    if (attachment.Description.IsNotNullOrEmpty())
+                                    {
+                                        <span class="word-break">@(attachment.Description)  |</span>
+                                    }
+
+                                    var downloadData = attachment.GetDownloadData();
+                                    var downloadLink = downloadData != null
+                                        ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                                        : null;
+                                    if (downloadLink.IsNotNullOrEmpty())
+                                    {
+                                        <a href="@downloadLink" class="simplelink filename" target="_blank">
+                                            @(attachment.Name ?? Localizer["Download"])
+                                        </a>
+                                    }
+                                    if (attachment is ObjectAttachment objectAttachment && objectAttachment.Objects.IsNotNullOrEmpty())
+                                    {
+                                        var hasMoreObjects = objectAttachment.Objects.Count > 10;
+                                        var objects = hasMoreObjects ? objectAttachment.Objects.Take(firstObjectCount).ToList() : objectAttachment.Objects;
+                                        <span> | </span>
+                                        @foreach (var item in objects)
+                                        {
+                                            <span class="obj">@item.Title</span>
+                                        }
+                                        if (hasMoreObjects)
+                                        {
+                                            <a href="#" class="simplelink k-display-block view-objects-js" data-app-id="@Model.UniqueId" data-controllername="@ViewContext.RouteData.Values["Controller"]" data-type="attachment" data-id="@(attachment!.UniqueId)" data-title="@(attachment.Type?.Title?.ToString())">
+                                                @($"{Localizer["ViewAllObjects"]}({objectAttachment.Objects.Count})")
+                                            </a>
+                                        }
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    if (hasMoreAttachments)
+                    {
+                        <a href="#" class="simplelink k-mb-2 k-display-block view-all-attachments-js" data-controllername="@ViewContext.RouteData.Values["Controller"]" data-app-id="@Model.UniqueId">
+                            @($"{Localizer["ViewAllFiles"]}({Model.Attachments.Count})")
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+    }
+}

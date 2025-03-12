@@ -1,0 +1,30 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model object
+@{
+    var action = ViewData["ActionName"] as string;
+    var controller = ViewData["ControllerName"] as string;
+
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+
+@(Html.Kendo().DropDownListFor(m => m)
+      .OptionLabel(Localizer["All"].ToString())
+      .DataValueField("Id")
+      .DataTextField("Name")
+      .HtmlAttributes(attributes)
+      .Filter(FilterType.Contains)
+      .MinLength(3)
+      .DataSource(d => d.Read(r => r.Action(action, controller).Data("core.filterData")).ServerFiltering(true))
+      .Deferred(!Context.Request.IsAjaxRequest()))

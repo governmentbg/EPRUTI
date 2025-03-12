@@ -1,0 +1,64 @@
+﻿@using Ais.Office.Controllers.Documents;
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@using OutAdministrativeAct_OutApplicationController = Ais.Office.Areas.OutAdministrativeAct.Controllers.OutApplicationController
+@{
+    var controllerType = typeof(OutDocumentsController);
+
+    if (Url.HasRightsToAction(nameof(OutDocumentsController.SendToClericalWork), controllerType))
+    {
+        <a href="\\#" class="k-small k-button sent-clerical-work-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["SentInClericalWork"]">
+            <i class="k-i-indent k-icon k-font-icon"></i>
+        </a>
+    }
+
+    if (Url.HasRightsToAction(nameof(OutDocumentsController.MarkSendWithBgPosts), controllerType))
+    {
+        <a href="\\#" class="k-small k-button mark-bgposts-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["SendWithBgPosts"]">
+            <i class="k-i-envelop-link k-icon k-font-icon"></i>
+        </a>
+    }
+
+    // // if (Url.HasRightsToAction(nameof(OutDocumentsController.MarkSendWithEDelivery), controllerType))
+    // // {
+    // //     <a href="\\#" class="k-small k-button mark-edelivery-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["SendWithEDelivery"]">
+    // //         <i class="k-i-globe-unlink k-icon k-font-icon"></i>
+    // //     </a>
+    // // }
+
+    if (Url.HasRightsToAction(nameof(OutApplicationController.Edit), typeof(OutApplicationController)))
+    {
+        <a href="\\#" class="k-small k-button edit-outdoc-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Edit"]">
+            <i class="k-i-edit k-icon k-font-icon"></i>
+        </a>
+    }
+
+    if (Url.HasRightsToAction(nameof(OutAdministrativeAct_OutApplicationController.AdmActStateUpsert), typeof(OutAdministrativeAct_OutApplicationController)))
+    {
+        <a href="\\#" class="k-small k-button edit-admact-state-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["EditState"]">
+            <i class="k-i-gears k-icon k-font-icon"></i>
+        </a>
+    }
+
+    if (Url.HasRightsToAction(nameof(OutDocumentsController.DeleteAsync), controllerType))
+    {
+        <a href="\\#" class="k-small k-button delete-outdoc-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Delete"]">
+            <i class="k-i-delete k-icon k-font-icon"></i>
+        </a>
+    }
+
+    if (Url.HasRightsToAction(nameof(OutDocumentsController.Archive), controllerType))
+    {
+        <a href="\\#" class="k-small k-button archive-outdoc-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["Archive"]">
+            <i class="k-i-file-zip k-icon k-font-icon"></i>
+        </a>
+    }
+
+    if (Url.HasRightsToAction(nameof(OutDocumentsController.ChangeOffice), controllerType))
+    {
+        <a href="\\#" class="k-small k-button change-outdocs-office-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["ChangeOffice"]">
+            <i class="k-i-gears k-icon k-font-icon"></i>
+        </a>
+    }
+}

@@ -1,0 +1,13 @@
+﻿@using Ais.Office.ViewModels.Publications;
+@using Ais.Utilities.Extensions;
+
+@model List<PublicationPublicViewModel>
+@if (Model.IsNotNullOrEmpty())
+{
+    foreach (var item in Model)
+    {
+        <div class="warning text-center">
+            <strong>@item.Title</strong> @Html.Raw(item.Content)
+        </div>
+    }
+}

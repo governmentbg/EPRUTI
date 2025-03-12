@@ -1,0 +1,22 @@
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@model double?
+
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+
+@(Html.Kendo().NumericTextBoxFor(m => m)
+      .HtmlAttributes(attributes)
+      .Min(0)
+      .Max(double.MaxValue)
+      .Deferred(!Context.Request.IsAjaxRequest()))

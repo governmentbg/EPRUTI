@@ -1,0 +1,35 @@
+﻿@using Ais.Office.ViewModels.Application
+@model Ais.Data.Models.Document.Document
+@{
+    var step = (Step)ViewBag.Step;
+    switch (step.Current)
+    {
+        case StepType.Applicant:
+            {
+                await Html.RenderPartialAsync("Applicant/_Index");
+                break;
+            }
+       case StepType.BasicData:
+            {
+                await Html.RenderPartialAsync("BasicData/_Index");
+                break;
+            }
+        case StepType.Attachments:
+            {
+                await Html.RenderPartialAsync("Attachment/_Index");
+                break;
+            }
+        case StepType.Folder:
+            {
+                await Html.RenderPartialAsync("Folder/_Index");
+                break;
+            }
+        case StepType.Overview:
+            {
+                await Html.RenderPartialAsync("Overview/_Index");
+                break;
+            }
+        default:
+            throw new ArgumentOutOfRangeException();
+    }
+}

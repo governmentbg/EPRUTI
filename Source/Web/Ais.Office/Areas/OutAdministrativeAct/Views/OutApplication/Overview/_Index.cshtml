@@ -1,0 +1,16 @@
+﻿@using Ais.Office.Controllers
+@using Ais.Office.Areas.OutAdministrativeAct.Controllers
+@using Ais.WebUtilities.Extensions
+@using Microsoft.AspNetCore.Mvc.Controllers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model Ais.Data.Models.Document.OutAdmAct
+<div class="steps-body">
+    @{
+        ViewBag.SkipScripts = true;
+        ViewBag.IsOverview = true;
+
+        
+    }
+    @await Html.PartialAsync("Info/_Index")
+</div>

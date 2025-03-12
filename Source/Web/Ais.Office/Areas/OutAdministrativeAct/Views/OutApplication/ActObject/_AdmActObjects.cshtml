@@ -1,0 +1,25 @@
+﻿@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@model Ais.Data.Models.Document.OutAdmAct
+<div class="step-box admact-objects-js">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["Objects"]
+        </h3>
+    </div>
+    <div class="step-box-body admact-object-js">
+        @{
+            if (Model?.Object?.AdmActObjects?.IsNotNullOrEmpty() == true)
+            {
+                var index = 1;
+                foreach (var actObject in Model.Object.AdmActObjects!)
+                {
+                    ViewBag.ItemIndex = index;
+                    await Html.RenderPartialAsync("_AdmActObject.cshtml", actObject);
+                    index++;
+                }
+            }
+        }
+    </div>
+</div>

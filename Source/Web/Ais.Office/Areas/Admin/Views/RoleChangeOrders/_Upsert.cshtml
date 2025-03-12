@@ -1,0 +1,146 @@
+﻿@using Ais.Utilities.Extensions
+@using Ais.Infrastructure.KendoExt
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile
+@using Ais.Office.ViewModels.RoleChangeOrder
+@using Kendo.Mvc.TagHelpers
+@model Ais.Office.ViewModels.RoleChangeOrder.ChangeEmployeesRolesOrderViewModel
+@{
+    var asyncUploadChunkSize = Configuration.GetValue<double>("Attachment:AsyncUploadChunkSize");
+    var filePrefix = "File.";
+}
+<form method="post" class="dirty-check" action="@Url.ActionLink("Upsert", "RoleChangeOrders")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="admin_rolechangeorders.onRoleChangeSuccess">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.UniqueId)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">@Localizer["AddOrder"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input quad">
+                        @Html.Label("Name", Localizer["Name"], new { @class = "required" })
+                        @Html.Kendo().TextBoxFor(x => x.Name)
+                        @Html.ValidationMessage("Name")
+
+                    </div>
+                    <div class="form-input quad">
+                        @Html.Label("Number", Localizer["Number"], new { @class = "required" })
+                        @Html.Kendo().TextBoxFor(x => x.Number).Value(Model?.Number)
+                        @Html.ValidationMessage("Number")
+
+                    </div>
+                    <div class="form-input quad">
+                        @Html.Label("Date", Localizer["Date"], new { @class = "required" })
+                        @Html.Kendo().DatePickerFor(x => x.Date).Value(Model.Date.HasValue ? Model.Date.Value : DateTime.Now)
+                        @Html.ValidationMessage("Date")
+                    </div>
+                    <div class="form-input quad">
+                        @Html.LabelFor(x => x.File)
+                        @(Html.Kendo().Upload()
+                            .Name($"{filePrefix}Url")
+                            .HtmlAttributes(new { id = Guid.NewGuid().ToString(), data_prefix = filePrefix, name = string.Empty })
+                            .Messages(x => x.Select(Localizer["SelectFiles"])
+                            .DropFilesHere(Localizer["DropFilesHere"])
+                            .InvalidFileExtension(Localizer["InvalidFileExtension"])
+                            .Cancel(Localizer["Cancel"]))
+                            .Async(a => a
+                            .Save("Upload", "Attachment", new { area = string.Empty })
+                            .Remove("Remove", "Attachment", new { area = string.Empty })
+                            .AutoUpload(true)
+                            .ChunkSize(asyncUploadChunkSize)
+                            .Concurrent(false))
+                            .ShowFileList(true)
+                            .Multiple(false)
+                            .TemplateId("fileTemplate")
+                            .Validation(validation =>
+                            {
+                                validation.AllowedExtensions("doc", "docx", "pdf");
+                            })
+                            .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+                            .Files(files =>
+                            {
+                                if (Model?.File?.Name.IsNotNullOrEmpty() == true)
+                                {
+                                    var attachment = Model?.File;
+                                    files.AddCustomFile(
+                                    new UploadFile
+                                {
+                                    Id = attachment!.Id,
+                                    Name = attachment.Name,
+                                    Url = attachment.Url,
+                                    Size = attachment.Size,
+                                    Extension = attachment.Extension,
+                                    Data = new Dictionary<string, object> { { "prefix", filePrefix } }
+                                });
+                                }
+                            }))
+                        @Html.ValidationMessage($"{filePrefix}Url")
+                    </div>
+                    <div class="form-input fullwidth">
+                        @Html.Label(Localizer["Description"])
+                        @Html.Kendo().TextAreaFor(x => x.Description).Value(Model?.Description)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">@Localizer["Employees"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row fullwidth">
+                    @(Html.Kendo().Grid<ChangeEmployeeRoleTableViewModel>()
+                        .ToolBar(t =>
+                        {
+                            t.Custom().HtmlAttributes(new { @class = "edit-employees-roles-js" }).IconClass("k-i-pencil k-icon k-font-icon").Text(" ");
+                            t.Custom().HtmlAttributes(new { @class = "add-employees-roles-js" }).IconClass("k-i-search k-icon k-font-icon").Text(" ");
+                        })
+                        .Name("employeesGrid")
+                        .HtmlAttributes(new { @class = "fullwidth" })
+                        .Columns(column =>
+                        {
+                            column.Bound(c => c.IsChecked).Filterable(false)
+                            .ClientHeaderTemplate($"<input type='checkbox' class='k-checkbox select-all select-all-js' title='{Localizer["SelectAll"]}'/>")
+                            .ClientTemplate(
+                            "#if (IsChecked === true) {#" +
+                            "<input type='checkbox' class='k-checkbox select-employee-js' checked='checked' data-id='#: Employee.Id #' />" +
+                            "#} else {#" +
+                            "<input type='checkbox' class='k-checkbox select-employee-js' data-id='#: Employee.Id #' />" +
+                            "#} #");
+                            column.Bound(c => c.Employee.FullName).Title(Localizer["Name"]);
+                            column.Bound(c => c.Employee.User.UserName).Title(Localizer["UserName"]);
+                            column.Bound(c => c.CurrentRolesText).Title(Localizer["CurrentRoles"]);
+                            column.Bound(c => c.AddedRolesText).Title(Localizer["AddedRoles"]);
+                            column.Bound(c => c.RemovedRolesText).Title(Localizer["RemovedRoles"]);
+                            column.Bound(c => c.Actions).Title(Localizer["Actions"])
+                            .ClientTemplate("<a href='\\#' class='k-button k-small dirtyignore remove-employee-js'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a>");
+                        })
+                        .DataSource(d => d.Ajax().Read("ReadEmployeesForRolesChange", "RoleChangeOrders", new { id = Model?.UniqueId })))
+                    @Html.ValidationMessage("EmployeesRoles")
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+@{
+    await Html.RenderPartialAsync("_FileTemplate");
+}

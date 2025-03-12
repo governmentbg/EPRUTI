@@ -1,0 +1,51 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@model Ais.Office.ViewModels.Folders.ChangeSectionUpsertModel
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+<form method="post" class="dirty-check" action="@Url.ActionLink("ChangeSection", "Folders")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(m => m.Key)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head collapsible">
+                <h3 class="step-box-title">
+                    @Localizer["ChangeSection"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @Html.Label(Localizer["Section"])
+                        @(Html.Kendo().DropDownListFor(x => x.SectionId)
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .DataSource(x => x.Read(s => s.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nsection" }))))
+                            .Deferred(deferred))
+                        @Html.ValidationMessageFor(x => x.SectionId)
+                    </div>
+                    <div class="form-input fullwidth">
+                        @Html.Label(Localizer["Reason"])
+                        @(Html.Kendo().TextAreaFor(x => x.Reason)
+                            .Deferred(deferred))
+                        @Html.ValidationMessageFor(x => x.Reason)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

@@ -1,0 +1,59 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using System.Web
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration;
+@model string
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+        ? ViewData["htmlAttributes"]
+        : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+                {
+            { "id", Guid.NewGuid().ToString() }
+                });
+}
+@(Html.Kendo().EditorFor(m => m)
+    .Value(HttpUtility.HtmlDecode(Model ?? string.Empty))
+    .HtmlAttributes(attributes)
+    .Tools(
+        x =>
+            x.Clear()
+             .Bold().Italic().Underline().Strikethrough()
+             .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
+             .InsertUnorderedList().InsertOrderedList()
+             .Outdent().Indent()
+             .CreateLink().Unlink()
+             .InsertImage()
+             .InsertFile()
+             .SubScript()
+             .SuperScript()
+             .TableEditing()
+             .ViewHtml()
+             .Formatting()
+             .CleanFormatting()
+             .FontName()
+             .FontSize()
+             .ForeColor()
+             .BackColor()
+             .Print()
+             .ExportAs())
+    .ImageBrowser(
+        imageBrowser => imageBrowser
+                        .Image($"{Configuration.GetValue<string>("Attachment:VirtualPath")}/{ImageBrowserController.Folder}/{{0}}")
+                        .Read(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Read), typeof(ImageBrowserController))))
+                        .Create(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Create), typeof(ImageBrowserController))))
+                        .Destroy(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Destroy), typeof(ImageBrowserController))))
+                        .Upload(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Upload), typeof(ImageBrowserController))))
+                        .Thumbnail(r => r.Url(Url.DynamicAction(nameof(ImageBrowserController.Thumbnail), typeof(ImageBrowserController)))))
+    .FileBrowser(
+        fileBrowser => fileBrowser
+                       .File($"{Configuration.GetValue<string>("Attachment:VirtualPath")}/{FileBrowserController.Folder}/{{0}}")
+                       .Read(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Read), typeof(FileBrowserController))))
+                       .Create(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Create), typeof(FileBrowserController))))
+                       .Destroy(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Destroy), typeof(FileBrowserController))))
+                       .Upload(r => r.Url(Url.DynamicAction(nameof(FileBrowserController.Upload), typeof(FileBrowserController)))))
+    .Deferred(!Context.Request.IsAjaxRequest()))

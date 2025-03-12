@@ -1,0 +1,319 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Nomenclature
+@using Ais.Data.Models.Role
+@using Ais.Data.Models.TariffTemplate
+@using Ais.Office.ViewModels.TariffTemplates
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using FormTagHelper = Microsoft.AspNetCore.Mvc.TagHelpers.FormTagHelper
+@model Ais.Office.ViewModels.ClientRoles.ClientRoleUpsertModel
+@{
+    var serviceReceiveMethods = ViewBag.ServiceRevieceMethods as List<Nomenclature>;
+}
+
+@section Scripts
+{
+    <script src="~/bundles/admin_clientroles.min.js" asp-append-version="true"></script>
+}
+
+<form method="post" class="dirty-check" action="@Url.ActionLink(Model.IsNew ? "Create" : "Edit", "ClientRoles")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.UniqueId)
+    <div class="steps-body">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["RoleData"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input column">
+                        @Html.EditorFor(model => model.Names, "InternationalizationTextBox")
+                        @Html.ValidationMessageFor(m => m.Names)
+                    </div>
+                    <div class="form-input column">
+                        @Html.EditorFor(model => model.Descriptions, "InternationalizationTextBox")
+                        @Html.ValidationMessageFor(m => m.Descriptions)
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-input column">
+                        @Html.Label(Localizer["Category"])
+                        @(Html.Kendo().DropDownListFor(m => m.Category.Id)
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .Filter(FilterType.Contains)
+                            .DataSource(x => x.Read("GetRoleCategories", "ClientRoles")))
+                    </div>
+                    <div class="form-input column">
+                        <label class="empty"></label>
+                        @Html.Kendo().CheckBoxFor(m => m.IsDefaultCategory).Label(Localizer["IsDefaultCategory"])
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["Services"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @(Html.Kendo().Grid<Service>()
+                            .Name("ServicesList")
+                            .Filterable(f => f.Enabled(true).Mode(GridFilterMode.Row))
+                            .Columns(
+                            columns =>
+                            {
+                                columns.Bound(c => c.IsChecked).Width(20)
+                                .Filterable(false)
+                                .ClientHeaderTemplate($"<input type='checkbox' class='k-checkbox select-all select-all-js' title='{Localizer["SelectAll"]}'/>")
+                                .ClientTemplate(
+                                "<input type='hidden' name='Services.Index' value='#: UniqueId #' />" +
+                                "#if (IsChecked === true) {#" +
+                                "<input type='checkbox' class='k-checkbox select-js' checked='checked' name='Services[#: UniqueId #].Id' value='#: Id #' />" +
+                                "#} else {#" +
+                                "<input type='checkbox' class='k-checkbox select-js' name='Services[#: UniqueId #].Id' value='#: Id #' />" +
+                                "#} #");
+                                columns.Bound(c => c.DocumentType)
+                                .Title(Localizer["DocTypeName"])
+                                .Filterable(f => { f.Search(true).IgnoreCase(true).Cell(cell => cell.ShowOperators(false).Operator("contains").SuggestionOperator(FilterType.Contains)); });
+                                columns.Bound(c => c.Name)
+                                .Title(Localizer["Name"])
+                                .ClientTemplate("#=Name#")
+                                .Filterable(f => { f.Search(true).IgnoreCase(true).Cell(cell => cell.ShowOperators(false).Operator("contains").SuggestionOperator(FilterType.Contains)); });
+                                if (serviceReceiveMethods.IsNotNullOrEmpty())
+                                {
+                                    foreach (var item in serviceReceiveMethods!)
+                                    {
+                                        columns.Bound(c => c.ReceiveMethods)
+                                        .Filterable(false)
+                                        .Title(item.Name)
+                                        .ClientHeaderTemplate($"<input type='checkbox' class='k-checkbox select-receive-method-all-js' data-id='{item.Id}' title='{Localizer["SelectAll"]}'/> <span> {item.Name} </span>")
+                                        .ClientTemplate(
+                                        "#if (IsChecked === true) {#" +
+                                        $"# var receiveMethod = ReceiveMethods.find(x => x.Id == '{item.Id}') #" +
+                                        "#if (receiveMethod != undefined && receiveMethod.IsChecked) {#" +
+                                        $"<input type='checkbox' class='k-checkbox select-receive-method-js' data-service-id='#:Id#' checked='checked' data-id='{item.Id}' />" +
+                                        "#} else {#" +
+                                        $"<input type='checkbox' class='k-checkbox select-receive-method-js' data-service-id='#:Id#' data-id='{item.Id}' />" +
+                                        "#} #" +
+                                        "#} else {#" +
+                                        $"<input type='checkbox' class='k-checkbox select-receive-method-js' data-service-id='#:Id#' disabled='disabled' data-id='{item.Id}' />" +
+                                        "#} #");
+                                    }
+                                }
+                            })
+                            .DataSource(
+                            dataSource => dataSource
+                            .Ajax()
+                            .Read(r => r.Action("ReadServices", "ClientRoles", new { uniqueId = Model?.UniqueId }))
+                            .ServerOperation(false)))
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["PortalClientRights"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @(Html.Kendo().Grid<CheckableNomenclature>()
+                            .Name("RightsList")
+                            .Filterable(f => f.Enabled(true).Mode(GridFilterMode.Row))
+                            .Columns(
+                            columns =>
+                            {
+                                columns.Bound(c => c.IsChecked).Width(20)
+                                .Filterable(false)
+                                .ClientHeaderTemplate($"<input type='checkbox' class='k-checkbox select-all-js rights' title='{Localizer["SelectAll"]}'/>")
+                                .ClientTemplate(
+                                "# var rightsIndex = kendo.guid(); #" +
+                                "<input type='hidden' name='Rights.Index' value='#= rightsIndex #' />" +
+                                "#if (IsChecked === true) {#" +
+                                "<input type='checkbox' class='k-checkbox select-js rights' checked='checked' name='Rights[#= rightsIndex #].Id' value='#: Id #' />" +
+                                "#} else {#" +
+                                "<input type='checkbox' class='k-checkbox select-js rights' name='Rights[#= rightsIndex #].Id' value='#: Id #' />" +
+                                "#} #");
+                                columns.Bound(c => c.Name)
+                                .Title(Localizer["Name"])
+                                .ClientTemplate("#=Name#")
+                                .Filterable(f => { f.Search(true).IgnoreCase(true).Cell(cell => cell.ShowOperators(false).Operator("contains").SuggestionOperator(FilterType.Contains)); });
+                            })
+                            .DataSource(
+                            dataSource => dataSource
+                            .Ajax()
+                            .Read(r => r.Action("ReadRights", "ClientRoles", new { uniqueId = Model.UniqueId, roleId = Model?.Id }))
+                            .ServerOperation(false)))
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["Scope"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input half">
+                        @{
+                            var provinceElementId = Guid.NewGuid().ToString();
+                        }
+                        @Html.Label(Localizer["Province"])
+                        @(Html.Kendo().DropDownList()
+                            .Name("ProvincesDropDown")
+                            .HtmlAttributes(new { id = provinceElementId, @class = "provinces-dropdown-js" })
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .Filter(FilterType.Contains)
+                            .DataSource(d => d.Read(r => r.Action("GetProvinces", "Address", new { area = string.Empty }))))
+                    </div>
+                    <div class="form-input half">
+                        @{
+                            var municipalityElementId = Guid.NewGuid().ToString();
+                        }
+                        @Html.Label(Localizer["Municipality"])
+                        @(Html.Kendo().DropDownList()
+                            .Name("MunicipalitiesDropDown")
+                            .HtmlAttributes(new { id = municipalityElementId, @class = "municipality-dropdown-js" })
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .Filter(FilterType.Contains)
+                            .CascadeFrom(provinceElementId)
+                            .CascadeFromField("provinceId")
+                            .DataSource(
+                                d => d.Read(r => r.Action("GetMunicipalities", "Address", new { area = string.Empty }).Data("core.filterData"))
+                                      .ServerFiltering(true)))
+                    </div>
+                    <div class="form-input half">
+                        @{
+                            var ekatteElementId = Guid.NewGuid().ToString();
+                        }
+                        @Html.Label(Localizer["Settlement"])
+                        @(Html.Kendo().DropDownList()
+                            .Name("EkattesDropDown")
+                            .HtmlAttributes(new { id = ekatteElementId, @class = "ekattes-drodown-js" })
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .Filter(FilterType.Contains)
+                            .CascadeFrom(municipalityElementId)
+                            .CascadeFromField("municipalityId")
+                            .DataSource(
+                            d => d.Read(r => r.Action("GetEkattes", "Address", new { area = string.Empty }).Data("core.filterData"))
+                            .ServerFiltering(true)))
+                    </div>
+                    <div class="form-input half">
+                        <label class="empty"></label>
+                        <a href="#" class="k-button k-small add-scope-js">
+                            <span class="k-i-plus k-icon k-font-icon k-button-icon"></span>
+                        </a>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @(Html.Kendo().ListView(Model.Scopes ?? new List<Scope>())
+                            .Name("scopesListView")
+                            .TagName("div")
+                            .DataSource(d => d.Ajax().Model(m => m.Id("UniqueId")))
+                            .ClientTemplateId("scopesListViewClientTemplate"))
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["ReasonForPriceChanging"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    @{
+                        await Html.RenderPartialAsync("_SearchTariffTemplates", new TariffTemplateQueryModel { RegDateFrom = DateTime.Now.AddMonths(-1), RegDateTo = DateTime.Now });
+                    }
+                </div>
+                <div class="form-row">
+                    <div class="fullwidth">
+                        @Html.Label(Localizer["Chosen"])
+                        @(
+                            Html.Kendo().Grid<TariffTemplateTableViewModel>()
+                            .Name("RoleTariffTemplatesGrid")
+                            .Columns(
+                            column =>
+                            {
+                                column.Bound(c => c.Title).Title(Localizer["Title"]).Width("80%")
+                                .ClientTemplate(
+                                "# var contractsIndex = kendo.guid(); #" +
+                                "<input type='hidden' name='TariffTemplate.Id' value='#: Id #' />" +
+                                "<span> #: Title # </span>");
+                                column.Bound(c => c.UniqueId).Title(Localizer["Actions"]).Width("20%")
+                                .ClientTemplate("<a href='\\#' class='k-button k-small remove-tariff-template-js'> <span class='k-i-delete k-icon k-font-icon k-button-icon'></span> </a>");
+                            })
+                            .Events(e => e.DataBound("searchTable.onHiddenGridDataBound"))
+                            .DataSource(d => d.Ajax().Read(x => x.Action("GetRoleTarriff", "ClientRoles", new { roleId = Model.Id }))))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third  closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+
+<script id="scopesListViewClientTemplate" type="text/x-kendo-template">
+     <div>
+         #var index = kendo.guid();#
+         <input type="hidden" name="Scopes.Index" value="#:index#" />
+         #if(data.Province && data.Province.Id && data.Province.Name){#
+             <input type="hidden" name="Scopes[#:index#].Province.Id" value="#:data.Province.Id#" />
+             <input type="hidden" name="Scopes[#:index#].Province.Name" value="#:data.Province.Name#" />
+         #}#
+         #if(data.Municipality && data.Municipality.Id && data.Municipality.Name){#
+             <input type="hidden" name="Scopes[#:index#].Municipality.Id" value="#:data.Municipality.Id#" />
+             <input type="hidden" name="Scopes[#:index#].Municipality.Name" value="#:data.Municipality.Name#" />
+         #}#
+         #if(data.Ekatte && data.Ekatte.Id && data.Ekatte.Name){#
+             <input type="hidden" name="Scopes[#:index#].Ekatte.Id" value="#:data.Ekatte.Id#" />
+             <input type="hidden" name="Scopes[#:index#].Ekatte.Name" value="#:data.Ekatte.Name#" />
+         #}#
+         <input type="hidden" name="Scopes[#:index#].IsOnScreenInquiry" value="#:data.IsOnScreenInquiry#" />
+         <input type="hidden" name="Scopes[#:index#].IsOzlService" value="#:data.IsOzlService#" />
+         #var spantext = "";#
+         #if(data.Province && data.Province.Name && data.Province.Name != ""){
+             spantext = spantext + data.Province.Name + " ";
+         }#
+         #if(data.Municipality && data.Municipality.Name && data.Municipality.Name != ""){
+             spantext = spantext + data.Municipality.Name + " ";
+         }#
+         #if(data.Ekatte && data.Ekatte.Name && data.Ekatte.Name != ""){
+             spantext = spantext + data.Ekatte.Name + " ";
+         }#
+         <div class="form-input half double">
+            <span>#:spantext#</span>
+         </div>
+       <div class="form-input half">
+          <a class="k-button k-small remove-item-js">
+            <span class="k-icon k-font-icon k-i-delete"></span>
+          </a>
+       </div>
+    </div>
+</script>

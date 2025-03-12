@@ -1,0 +1,139 @@
+﻿@using Ais.Data.Models.Role;
+@using Ais.Office.ViewModels.ClientRoles;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+
+@model ClientRoleViewModel
+<script src="~/bundles/admin_clientroles.min.js" asp-append-version="true"></script>
+
+<form method="post" class="dirty-check" action="@Url.ActionLink("EditRoleScopes", "Clients")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="admin_clients.onScopesChangeSuccess">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.Name)
+    @Html.Hidden("clientId", ViewBag.ClientId as string)
+<div class="steps-body">
+    <div class="step-box fullwidth">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["Scope"]</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input half">
+                    @{
+                        var provinceElementId = Guid.NewGuid().ToString();
+                    }
+                    @Html.Label(Localizer["Province"])
+                    @(Html.Kendo().DropDownList()
+                        .Name("ProvincesDropDown")
+                        .HtmlAttributes(new { id = provinceElementId, @class = "provinces-dropdown-js" })
+                        .OptionLabel(Localizer["Choose"].ToString())
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .Filter(FilterType.Contains)
+                        .DataSource(d => d.Read(r => r.Action("GetProvinces", "Address", new { area = string.Empty }))))
+                </div>
+                <div class="form-input half">
+                    @{
+                        var municipalityElementId = Guid.NewGuid().ToString();
+                    }
+                    @Html.Label(Localizer["Municipality"])
+                    @(Html.Kendo().DropDownList()
+                        .Name("MunicipalitiesDropDown")
+                        .HtmlAttributes(new { id = municipalityElementId, @class = "municipality-dropdown-js" })
+                        .OptionLabel(Localizer["Choose"].ToString())
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .Filter(FilterType.Contains)
+                        .CascadeFrom(provinceElementId)
+                        .CascadeFromField("provinceId")
+                        .DataSource(d => d.Read(r => r.Action("GetMunicipalities", "Address", new { area = string.Empty }).Data("core.filterData"))
+                        .ServerFiltering(true)))
+                </div>
+                <div class="form-input half">
+                    @{
+                        var ekatteElementId = Guid.NewGuid().ToString();
+                    }
+                    @Html.Label(Localizer["Settlement"])
+                    @(Html.Kendo().DropDownList()
+                        .Name("EkattesDropDown")
+                        .HtmlAttributes(new { id = ekatteElementId, @class = "ekattes-drodown-js" })
+                        .OptionLabel(Localizer["Choose"].ToString())
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .Filter(FilterType.Contains)
+                        .CascadeFrom(municipalityElementId)
+                        .CascadeFromField("municipalityId")
+                        .DataSource(d => d.Read(r => r.Action("GetEkattes", "Address", new { area = string.Empty }).Data("core.filterData"))
+                        .ServerFiltering(true)))
+                </div>
+                <div class="form-input half">
+                    <label class="empty">&nbsp</label>
+                    <button class="k-button k-small add-scope-js dirtyignore">
+                        <span class="k-i-plus k-icon k-font-icon k-button-icon"></span>
+                    </button>
+                </div>
+            </div>
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @(Html.Kendo().ListView(Model.Scopes ?? new List<Scope>())
+                            .Name("scopesListView")
+                            .TagName("div")
+                            .DataSource(d => d.Ajax().Model(m => m.Id("UniqueId")))
+                            .ClientTemplateId("scopesListViewClientTemplate"))
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+<script id="scopesListViewClientTemplate" type="text/x-kendo-template">
+    <div class="ib"> 
+            # var index = kendo.guid(); #
+            <input type="hidden" name="Scopes.Index" value="#:index#" />
+            #if (data.Province && data.Province.Id && data.Province.Name) {#
+                <input type="hidden" name="Scopes[#:index#].Province.Id" value="#:data.Province.Id#" />
+                <input type="hidden" name="Scopes[#:index#].Province.Name" value="#:data.Province.Name#" />
+            #}#
+            #if (data.Municipality && data.Municipality.Id && data.Municipality.Name) {#
+                <input type="hidden" name="Scopes[#:index#].Municipality.Id" value="#:data.Municipality.Id#" />
+                <input type="hidden" name="Scopes[#:index#].Municipality.Name" value="#:data.Municipality.Name#" />
+            #}#
+
+            #if (data.Ekatte && data.Ekatte.Id && data.Ekatte.Name) {#
+                <input type="hidden" name="Scopes[#:index#].Ekatte.Id" value="#:data.Ekatte.Id#" />
+                <input type="hidden" name="Scopes[#:index#].Ekatte.Name" value="#:data.Ekatte.Name#" />
+            #}#
+
+            # var spantext = ""; #
+
+            # if (data.Province && data.Province.Name && data.Province.Name != "") {
+                spantext = spantext + data.Province.Name;
+            } #
+
+             # if (data.Municipality && data.Municipality.Name && data.Municipality.Name != "") {
+                spantext = spantext + ", " + data.Municipality.Name;
+            } #
+
+             # if (data.Ekatte && data.Ekatte.Name && data.Ekatte.Name != "") {
+                spantext = spantext + ", " + data.Ekatte.Name;
+            } #
+
+            <div class="k-ml-2 k-py-1">
+               <span> #: spantext # </span>
+               <a class="k-button k-small k-ml-1 remove-item-js" title="@Localizer["Delete"]">
+                  <span class="k-icon k-font-icon k-i-delete"></span>
+               </a>
+            </div>
+       </div>
+</script>

@@ -1,0 +1,41 @@
+﻿@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using Ais.Data.Models.Client
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.Applicant
+@if (Model != null)
+{
+    <div class="flex info-row">
+        <div class="number">@(ViewBag.ItemIndex).</div>
+        <div class="left">
+            @{
+                if (Model.Recipient != null)
+                {
+                    RenderClient(Model.Recipient);
+                }
+
+                if (Model.Author != null)
+                {
+                    <div>@Localizer["ByRepresentative"]</div>
+                    RenderClient(Model.Author);
+                }
+            }
+        </div>
+        <div class="bttn-wrap w-auto">
+        </div>
+    </div>
+
+    void RenderClient(Client client)
+    {
+        <div class="flex">
+            <div class="ib"><strong>@(client.GetFullName())</strong></div>
+            @if (client.EgnBulstat.IsNotNullOrEmpty())
+            {
+                <div class="ib">@Localizer["EgnBulstat"]: <strong class="@(client.IsDead ? "statusDead" : null)">@client.EgnBulstat</strong></div>
+                <div class="ib">@Localizer["Address"]: <strong class="@(client.IsDead ? "statusDead" : null)">@client.ContactData?.FullDescription</strong></div>
+            }
+        </div>
+    }
+}

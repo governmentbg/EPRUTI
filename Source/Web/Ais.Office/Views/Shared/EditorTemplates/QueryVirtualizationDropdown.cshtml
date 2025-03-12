@@ -1,0 +1,43 @@
+﻿@using Ais.Utilities.Extensions;
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@model object
+@{
+    var valMapper = ViewData["CustomValueMapper"] as string;
+
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+
+@(Html.Kendo().DropDownListFor(m => m)
+      .DataValueField("Key")
+      .DataTextField("Value")
+      .HtmlAttributes(attributes)
+      .MinLength(2)
+      .AutoWidth(true)
+      .Height(260)
+      .Filter(FilterType.Contains)
+      .AutoWidth(true)
+      .DataSource(source =>
+        {
+            source.Custom()
+                  .ServerFiltering(true)
+                  .ServerPaging(true)
+                  .PageSize(40)
+                  .Type("GET")
+                  .Transport(t => t.Read(x => x.Action(ViewData["ActionName"] as string, ViewData["ControllerName"] as string).Data("searchTable.virtualDdlPrepData")))
+            .Schema(schema =>
+            {
+                schema.Data("Data");
+                schema.Total("Total");
+            });
+        }).Virtual(v => v.ItemHeight(26).ValueMapper(valMapper.IsNotNullOrEmpty() ? valMapper :"searchTable.valueMapper"))
+      .Deferred(!Context.Request.IsAjaxRequest()))

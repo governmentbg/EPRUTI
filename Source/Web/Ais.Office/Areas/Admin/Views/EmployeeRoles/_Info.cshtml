@@ -1,0 +1,79 @@
+﻿@using Ais.Data.Models.Nomenclature
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model Ais.Data.Models.Employee.EmployeeRole
+<div class="steps-body">
+    <div class="step-box fullwidth">
+        <div class="step-box-head collapsible">
+            <h3 class="step-box-title">
+                @Localizer["BaseData"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input fullwidth">
+                    @Html.Label(Localizer["Name"])
+                    @Model.Name
+                </div>
+                <div class="form-input fullwidth">
+                    @Html.Label(Localizer["Description"])
+                    @Model.Description
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (Model.Activities.IsNotNullOrEmpty())
+    {
+        foreach (var group in Model.Activities.GroupBy(x => x.GroupCode))
+        {
+            <div class="step-box fullwidth">
+                <div class="step-box-head collapsible">
+                    <h3 class="step-box-title">
+                        @(group.First().GroupName)
+                    </h3>
+                </div>
+                <div class="step-box-body">
+                    <div class="form-row">
+                        <div class="form-input fullwidth">
+                            @(Html.Kendo().Grid(group)
+                                .Name(Guid.NewGuid().ToString())
+                                .Columns(
+                                    columns =>
+                                    {
+                                        columns.Bound(c => c.Name)
+                                               .Title(Localizer["Name"]);
+                                    }))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    <div class="step-box fullwidth">
+        <div class="step-box-head collapsible">
+            <h3 class="step-box-title">
+                @Localizer["Tasks"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input fullwidth">
+                    @(Html.Kendo().Grid(Model.TaskTypes ?? new List<Nomenclature>())
+                        .Name(Guid.NewGuid().ToString())
+                        .Columns(
+                            columns =>
+                            {
+                                columns.Bound(c => c.Name)
+                                       .Title(Localizer["Name"]);
+                            }))
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="k-dialog-buttongroup">
+    <button class="bttn right third closeKendoWindow-js">
+        @Localizer["Close"]
+    </button>
+</div>

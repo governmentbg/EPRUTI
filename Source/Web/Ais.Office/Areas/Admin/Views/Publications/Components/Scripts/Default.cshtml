@@ -1,0 +1,35 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@{
+    var publicationControllerType = typeof(PublicationsController);
+    var upsertLink = this.Url.DynamicActionWithRightsCheck("Upsert", publicationControllerType);
+    var deleteLink = this.Url.DynamicActionWithRightsCheck("Delete", publicationControllerType);
+}
+<script id="publicationActionTemplate" type="text/x-kendo-template">
+    @if (upsertLink.IsNotNullOrEmpty() || deleteLink.IsNotNullOrEmpty())
+    {
+         <div> 
+            @if (upsertLink.IsNormalized())
+            {
+              <a href="@upsertLink?id=#: Id #" title="@Localizer["Edit"]" class="k-small k-button">
+                  <span class="k-i-edit k-icon k-font-icon k-button-icon"></span>
+              </a>
+            }
+            @if (deleteLink.IsNotNullOrEmpty())
+            {
+               <a href="\\#" tittle="@Localizer["Remove"]" class="k-small k-button publication-remove-js">
+                   <span class="k-i-delete k-icon k-font-icon k-button-icon"></span>
+               </a>
+            }
+         </div>
+    }
+</script>
+
+<script id="publicationInfoTemplate" type="text/x-kendo-template">
+    <a href="@Url.Action("Info")?id=#: Id #" target="_blank" rel="noopener noreferrer">
+        #: Title #
+    </a>
+</script>

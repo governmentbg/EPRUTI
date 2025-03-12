@@ -1,0 +1,31 @@
+﻿@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Localization
+@using Ais.WebUtilities.Extensions
+@using Ais.Utilities.Extensions
+@model Ais.Office.ViewModels.ErrorViewModel
+@{
+    var corrId = Context.GetOrSetCorrelationId();
+    var flag = Model.Code >= 500 && corrId.IsNotNullOrEmpty();
+    var isAjax = ViewContext.HttpContext.Request.IsAjaxRequest();
+    if (isAjax)
+    {
+        @Model.Message
+        @if (flag)
+        {
+            <br />@Html.Raw($"{Localizer["ErrorId"]} - <div id=\"identificator\">{corrId}<span class=\"k-icon k-font-icon k-i-copy copy-ident-js\"></span></div>")
+        }
+    }
+    else
+    {
+        var defaultUrl = Url.RouteUrl("default", new { controller = string.Empty, action = string.Empty });
+        <div class="error404 text-center">
+            <div>@Model.Code</div>
+            <p>@Model.Message</p>
+            @if (flag)
+            {
+                <p>@($"{Localizer["ErrorId"]} - {corrId}")</p>
+            }
+            <a href="@defaultUrl">@Localizer["Home"]</a>
+        </div>
+    }
+}

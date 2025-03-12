@@ -1,0 +1,53 @@
+﻿<script id="infoTemplate" type="text/x-kendo-template">
+    <div class="k-notification-wrap">
+      <span class="k-icon k-font-icon k-i-info"></span>
+      <div class="k-notification-content">
+        #= message #
+      </div>
+      <span class="k-icon k-font-icon k-i-close"></span>
+    </div>
+</script>
+
+<script id="successTemplate" type="text/x-kendo-template">
+    <div class="k-notification-wrap">
+      <span class="k-icon k-font-icon k-i-success"></span>
+      <div class="k-notification-content">
+        #= message #
+      </div>
+      <span class="k-icon k-font-icon k-i-close"></span>
+    </div>
+</script>
+
+<script id="warningTemplate" type="text/x-kendo-template">
+    <div class="k-notification-wrap">
+      <span class="k-icon k-font-icon k-i-warning"></span>
+      <div class="k-notification-content">
+        #= message #
+      </div>
+      <span class="k-icon k-font-icon k-i-close"></span>
+    </div>
+</script>
+
+<script id="errorTemplate" type="text/x-kendo-template">
+    <div class="k-notification-wrap">
+      <span class="k-icon k-font-icon k-i-error"></span>
+      <div class="k-notification-content">
+        #= message #
+      </div>
+      <span class="k-icon k-font-icon k-i-close"></span>
+    </div>
+</script>
+
+@(Html.Kendo().Notification()
+      .Name("notification")
+      .Stacking(NotificationStackingSettings.Down)
+      .Events(e => e.Show("notification.onShowNotification"))
+      .HideOnClick(false)
+      .Templates(t =>
+      {
+          t.Add().Type("info").ClientTemplateID("infoTemplate");
+          t.Add().Type("success").ClientTemplateID("successTemplate");
+          t.Add().Type("warning").ClientTemplateID("warningTemplate");
+          t.Add().Type("error").ClientTemplateID("errorTemplate");
+      })
+      .Deferred())

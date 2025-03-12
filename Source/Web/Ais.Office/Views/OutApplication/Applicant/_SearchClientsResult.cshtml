@@ -1,0 +1,42 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Office.ViewModels.Application
+@model string
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().Grid<ClientSearchResultViewModel>()
+      .Name("grid")
+      .HtmlAttributes(new { data_show_first_details = true, @class = "withoutpager" })
+      .Columns(columns =>
+      {
+          columns.Bound(e => e.Knik)
+                 .ClientTemplate("#:Knik ? Knik : ''#").Hidden(true);
+          columns.Bound(e => e.WithoutEgnBulstat)
+                 .ClientTemplate("#: WithoutEgnBulstat ? resources.getResource('Yes') : resources.getResource('No') #");
+          columns.Bound(e => e.EgnBulstat)
+                 .ClientTemplate(
+                     "#var egn = EgnBulstat ? EgnBulstat : '';#" +
+                     "#if(IsDead){#<span class='statusDead'>#:egn#</span>#}else{##:egn##}#");
+          columns.Bound(e => e.FullName)
+                 .ClientTemplate("#:FullName ? FullName : ''#");
+          columns.Bound(e => e.ForeignPersonData)
+                 .ClientTemplate("#:ForeignPersonData ? ForeignPersonData : ''#").Hidden(true);
+          columns.Bound(string.Empty).Width(90)
+                  .ClientTemplate("<div class='flex gap-5'>" +
+                      $"<button type='button' class='bttn bttn-icon small autosize choose-applicant-js' title='{Localizer["Choose"]}' data-recipient='#:data.Id#'><i class='k-icon k-font-icon k-i-check'></i></button>" +
+                      $"<button type='button' class='bttn bttn-icon third small autosize edit-applicant-js' title='{Localizer["Edit"]}' value='#:data.Id#' data-name='#:data.FullName#'><i class='k-icon k-font-icon k-i-pencil'></i></button>" +
+                      "</div>");
+      })
+      .Sortable()
+      .Pageable(p => p.Enabled(true).PreviousNext(true).ButtonCount(5))
+      .Width("auto")
+      .ClientDetailTemplateId("recipientsTemplate")
+      .Events(e => e.DataBound("searchTable.onGridDataBound"))
+      .DataSource(
+          dataSource => dataSource
+              .Ajax()
+              .PageSize(5)
+              .Read(read => read.Action("ReadSearchClients", "OutApplication", new { applicationUniqueId = Model })))
+      .Deferred(deferred))

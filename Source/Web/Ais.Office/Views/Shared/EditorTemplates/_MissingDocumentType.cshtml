@@ -1,0 +1,21 @@
+﻿@using Ais.WebUtilities.Helpers;
+@using Ais.Data.Models.Nomenclature
+@model Ais.Data.Models.Nomenclature.Nomenclature
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+
+@(Html.Kendo().DropDownListFor(m => m)
+    .HtmlAttributes(attributes)
+    .DataTextField("Name")
+    .DataValueField("Id")
+    .BindTo(ViewBag.MissingDocumentTypes as IEnumerable<Nomenclature> ?? Array.Empty<Nomenclature>()))

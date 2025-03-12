@@ -1,0 +1,38 @@
+﻿@using Ais.Office.ViewModels.Faq;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+
+<div class="content-pre-wrap">
+    <div class="center">
+
+        @(Html.Kendo().Grid<FaqCategoryViewModel>()
+            .Name("CategoriesGrid")
+            .Pageable(p => p.Enabled(true).PageSizes(new List<object> { 10 }).PreviousNext(true).ButtonCount(5))
+            .DataSource(d =>
+            {
+                d.Ajax()
+                .Read(r => r.Action("SearchFaqCategories", "Faq"))
+                .Model(m =>
+                {
+                    m.Id(p => p.Id);
+                })
+                .PageSize(10);
+            })
+            .Editable(e => e.Mode(GridEditMode.PopUp).TemplateName("FaqCategory"))
+            .Columns(c =>
+            {
+                c.Bound(b => b.Names)
+                .Title(Localizer["Name"])
+                .ClientTemplate("#: data.Name #");
+                c.Bound(b => b.UniqueId)
+                .Title(Localizer["Actions"])
+                .ClientTemplate(
+                $"<div class='flex'><a href='\\#' class='k-button k-small edit-category-js'><span class='k-i-pencil k-icon k-font-icon k-button-icon'></span></a>" +
+                $"<a href='\\#' data-id='#: data.Id #' class='k-button k-small remove-category-js'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a></div>");
+            }))
+    </div>
+    <div class="clear"><br></div>
+    <div class="text-right">
+        <a href="#" class="bttn add-category-js">@Localizer["Add"]</a>
+    </div>
+</div>

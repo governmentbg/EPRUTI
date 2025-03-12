@@ -1,0 +1,254 @@
+﻿@using Ais.Office.Areas.OutAdministrativeAct.Controllers
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.OutAdmAct.OutAdmActObject.ActObject
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+
+    var provinceElementId = Guid.NewGuid().ToString();
+    var municipalityElementId = Guid.NewGuid().ToString();
+    var settlementElementId = Guid.NewGuid().ToString();
+    var regionElementId = Guid.NewGuid().ToString();
+    var postCodeElementId = Guid.NewGuid().ToString();
+    var descriptionElementId = Guid.NewGuid().ToString();
+
+    var successCallback = "core.onKendoWindowSuccessCallback";
+    var id = Guid.NewGuid().ToString();
+    var url = Url.DynamicAction("AddObject", typeof(OutApplicationController));
+}
+<form method="post" action="@url"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="@successCallback"
+      id="@id">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.Hidden("applicationUniqueId", ViewBag.ApplicationUniqueId as string)
+    @Html.Hidden("objectUniqueId", ViewBag.AdmObjectUniqueId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.UniqueId)
+
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["Object"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["Province"], "Province")
+                    @(Html.Kendo().DropDownList()
+                        .Name("Province.Id")
+                        .HtmlAttributes(new { id = provinceElementId })
+                        .OptionLabel(Localizer["Choose"].ToString())
+                        .Value(Model?.Province?.Id.HasValue == true ? Model.Province.Id.ToString() : string.Empty)
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .ValueTemplate(
+                        $"<input type='hidden' name='Province.Name' value='#:Name#'/>" +
+                        "<span>#:Name#</span>")
+                        .Filter(FilterType.Contains)
+                        .DataSource(d => d.Read(r => r.Action("GetProvinces", "Address", new { area = string.Empty })))
+                        .Deferred(deferred))
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["Municipality"], "Municipality")
+                    @(Html.Kendo().DropDownList()
+                        .Name("Municipality.Id")
+                        .HtmlAttributes(new { id = municipalityElementId })
+                        .OptionLabel(Localizer["Choose"].ToString())
+                        .Value(Model?.Municipality?.Id.HasValue == true ? Model.Municipality.Id.ToString() : string.Empty)
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .ValueTemplate(
+                        $"<input type='hidden' name='Municipality.Name' value='#:Name#'/>" +
+                        "<span>#:Name#</span>")
+                        .Filter(FilterType.Contains)
+                        .CascadeFrom(provinceElementId)
+                        .CascadeFromField("provinceId")
+                        .DataSource(d => d.Read(r => r.Action("GetMunicipalities", "Address", new { area = string.Empty }).Data("core.filterData"))
+                        .ServerFiltering(true))
+                        .Deferred(deferred))
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["Settlement"], "Settlement")
+                    @(Html.Kendo().DropDownList()
+                        .Name("Settlement.Id")
+                        .HtmlAttributes(new { id = settlementElementId })
+                        .OptionLabel(Localizer["Choose"].ToString())
+                        .Value(Model?.Settlement?.Id.HasValue == true ? Model.Settlement.Id.ToString() : string.Empty)
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .ValueTemplate(
+                        $"<input type='hidden' name='Settlement.Name' value='#:Name#'/>" +
+                        "<span>#:Name#</span>")
+                        .Filter(FilterType.Contains)
+                        .CascadeFrom(municipalityElementId)
+                        .CascadeFromField("municipalityId")
+                        .DataSource(d => d.Read(r => r.Action("GetEkattes", "Address", new { area = string.Empty }).Data("core.filterData"))
+                        .ServerFiltering(true))
+                        .Events(e => e.Change("core.onSettlementChange"))
+                        .Deferred(deferred))
+                </div>
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["Region"], "Region")
+                    @(Html.Kendo().DropDownList()
+                        .Name("Region.Id")
+                        .HtmlAttributes(new { id = regionElementId })
+                        .OptionLabel(Localizer["Choose"]?.ToString())
+                        .Value(Model?.Region?.Id.HasValue == true ? Model.Region.Id.ToString() : string.Empty)
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .ValueTemplate(
+                        $"<input type='hidden' name='Region.Name' value='#:Name#'/>" +
+                        "<span>#:Name#</span>")
+                        .Filter(FilterType.Contains)
+                        .CascadeFrom(settlementElementId)
+                        .CascadeFromField("ekatteId")
+                        .DataSource(d => d.Read(r => r.Action("GetRegions", "Address", new { area = string.Empty }).Data("core.filterData"))
+                        .ServerFiltering(true))
+                        .Deferred(deferred))
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["CadData"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input quad">
+                    @Html.InfoLabel(Localizer["CadIdentifier"], "CadIdentifier")
+                    @Html.EditorFor(m => m.CadIdentifier, null, "CadIdentifier")
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="step-box form-input column">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["RegPlanData"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input third">
+                        @Html.InfoLabel(Localizer["RegPlace"], "RegPlace")
+                        @Html.EditorFor(m => m.RegPlace, null, "RegPlace")
+                    </div>
+                    <div class="form-input third">
+                        @Html.InfoLabel(Localizer["RegQuarter"], "RegQuarter")
+                        @Html.EditorFor(m => m.RegQuarter, null, "RegQuarter")
+                    </div>
+                    <div class="form-input third">
+                        @Html.InfoLabel(Localizer["RegUpi"], "RegUpi")
+                        @Html.EditorFor(m => m.RegUpi, null, "RegUpi")
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box form-input column">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["CadPlanData"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input column">
+                        @Html.InfoLabel(Localizer["CadPlanRegion"], "CadPlanRegion")
+                        @Html.EditorFor(m => m.CadPlanRegion, null, "CadPlanRegion")
+                    </div>
+                    <div class="form-input column">
+                        @Html.InfoLabel(Localizer["CadPlanNumber"], "CadPlanNumber")
+                        @Html.EditorFor(m => m.CadPlanNumber, null, "CadPlanNumber")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="step-box form-input column">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["KVSData"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input column">
+                        @Html.InfoLabel(Localizer["KVSPlace"], "KVSPlace")
+                        @Html.EditorFor(m => m.KVSPlace, null, "KVSPlace")
+                    </div>
+                    <div class="form-input column">
+                        @Html.InfoLabel(Localizer["KVSNumber"], "KVSNumber")
+                        @Html.EditorFor(m => m.KVSNumber, null, "KVSNumber")
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="step-box form-input column">
+            <div class="step-box-head">
+                <h3 class="step-box-title">
+                    @Localizer["TerritoryData"]
+                </h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input column">
+                        @Html.InfoLabel(Localizer["TerritoryType"], "TerritoryType")
+                        @(Html.Kendo().DropDownList()
+                            .Name("TerritoryType.Id")
+                            .OptionLabel(Localizer["Choose"].ToString())
+                            .Value(Model?.TerritoryType?.Id.HasValue == true ? Model.TerritoryType.Id.ToString() : string.Empty)
+                            .DataValueField("Id")
+                            .DataTextField("Name")
+                            .ValueTemplate(
+                            $"<input type='hidden' name='TerritoryType.Name' value='#:Name#'/>" +
+                            "<span>#:Name#</span>")
+                            .Filter(FilterType.Contains)
+                            .DataSource(d => d.Read(r => r.Action("Index", "Nomenclature", new { area = string.Empty, name = "nterritorytype" })))
+                            .Deferred(deferred))
+                    </div>
+                    <div class="form-input column">
+                        @Html.InfoLabel(Localizer["ProtectedTerritory"], "ProtectedTerritory")
+                        @Html.EditorFor(m => m.ProtectedTerritory, null, "ProtectedTerritory")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["AdditionalDescription"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input fullwidth">
+                    @Html.InfoLabel(Localizer["AdditionalDescription"], "AdditionalDescription")
+                    @Html.TextAreaFor(x => x.AdditionalDescription, new { @class = "mb-0" })
+                    @Html.ValidationMessage("AdditionalDescription")
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

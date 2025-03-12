@@ -1,0 +1,10 @@
+﻿@using Ais.Office.ViewModels.Clients
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model ClientUpsertModel
+<div class="form-input quad datapicker privacy">
+    @Html.EditorFor(m => m.IsDead, null, new { label = $"{Localizer["IsDead"]}/{Localizer["DateOfDeath"].ToString().ToLower()}" })
+    @Html.Kendo().DatePickerFor(m => m.DateOfDeath).Enable(Model?.IsDead == true).HtmlAttributes(new { id = Guid.NewGuid().ToString() })
+    @Html.ValidationMessageFor(m => m.IsDead)
+    @Html.ValidationMessageFor(m => m.DateOfDeath)
+</div>

@@ -1,0 +1,27 @@
+﻿@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.TariffTemplate
+@using Ais.WebUtilities.Extensions
+@inject IStringLocalizer Localizer;
+@model List<Ais.Data.Models.TariffTemplate.TariffTemplate>
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().Grid(Model ?? new List<TariffTemplate>())
+      .Name("tariffTemplatesResultGrid")
+      .Pageable()
+      .Columns(
+          column =>
+          {
+              column.Bound(c => c.Title)
+                    .Title(Localizer["Title"])
+                    .Width("60%");
+              column.Bound(c => c.RegDate)
+                    .Title(Localizer["RegisterDate"])
+                    .Format("{0:G}")
+                    .Width("20%");
+              column.Template("<a href='\\#' class='k-button k-small add-tariff-template-js'><span class='k-i-plus k-icon k-font-icon k-button-icon'></span></a>")
+                    .Title(Localizer["Actions"])
+                    .Width("20%");
+          })
+      .DataSource(d => d.Ajax().PageSize(10))
+      .Deferred(deferred))

@@ -1,0 +1,20 @@
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers;
+@model decimal?
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+            { "style", "width:100%"},
+        });
+}
+@(Html.Kendo().NumericTextBoxFor(m => m)
+      .HtmlAttributes(attributes)
+      .Format("n2")
+      .Deferred(!Context.Request.IsAjaxRequest()))

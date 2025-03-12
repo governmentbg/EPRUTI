@@ -1,0 +1,111 @@
+﻿@using Ais.Data.Models.Attachment
+@using Ais.Office.Controllers
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Document.OutAdmAct
+@inject IStringLocalizer Localizer;
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var optionLabel = Localizer["Choose"].Value;
+}
+<div class="step-box">
+    <div class="step-box-head">
+        <h3 class="step-box-title">@Localizer["StateData"]</h3>
+    </div>
+    <div class="step-box-body">
+        <div class="form-row">
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["ValidByDate"], "ValidByDate")
+                @Html.Kendo().DatePickerFor(m => m.StateUpsertModel.ValidByDate).Deferred(deferred)
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["AnnouncementDate"], "AnnouncementDate")
+                @Html.Kendo().DatePickerFor(m => m.StateUpsertModel.AnnouncementDate).Deferred(deferred)
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["EffectiveDate"], "EffectiveDate")
+                @Html.Kendo().DatePickerFor(m => m.StateUpsertModel.EffectiveDate).Deferred(deferred)
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["AnnouncementType"], "AnnouncementType")
+                @(
+                Html.Kendo().DropDownListFor(x => x.StateUpsertModel.AnnouncementType.Id)
+                    .DataSource(d => d.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nannouncementtype" }))))
+                    .DataValueField("Id")
+                    .DataTextField("Name")
+                    .OptionLabel(optionLabel)
+                    .Deferred(deferred))
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["State"], "State")
+                @(
+                Html.Kendo().DropDownListFor(x => x.StateUpsertModel.State.Id)
+                    .DataSource(d => d.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nstatus", flag = 32 }))))
+                    .Events(ev => ev.Change(deferred ? "outapplication.onAdmActStateChange" : "outAdministrativeAct_admact.onAdmActStateChange"))
+                    .DataValueField("Id")
+                    .DataTextField("Name")
+                    .Deferred(deferred))
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["ChangeDate"], "ChangeDate")
+                @Html.Kendo().DatePickerFor(m => m.StateUpsertModel.ChangeDate).Deferred(deferred)
+            </div>
+            <div class="form-input">
+                <label class="empty"></label>
+                <button class="bttn main add-admact-state">@Localizer["Add"]</button>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-input fg-1">
+                <fieldset id="disputeContainer" class="hidden">
+                    <legend>@Localizer["DisputeData"]</legend>
+                    <div class="form-row fullwidth no-wrap">
+                        <div class="form-input double">
+                            @Html.InfoLabel(Localizer["Description"], "Description")
+                            @Html.Kendo().TextAreaFor(m => m.StateUpsertModel.Dispute.Description).HtmlAttributes(new { style = "resize: vertical;", placeholder = Localizer["AddDescription"] }).Deferred(deferred)
+                        </div>
+                        <div class="fg-1">
+                            @{
+                                await Html.RenderPartialAsync("AdmActState/_Attachment", ViewBag.AttachmentType as AttachmentType ?? new AttachmentType());
+                            }
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div>
+            @(
+            Html.Kendo().Grid(Model.StateUpsertModel.StateHistory)
+                .Name("grid")
+                .Columns(
+                    columns =>
+                    {
+                        columns.Bound(m => m.State.Name).Title(Localizer["State"]).Filterable(filter => filter.Multi(true).Search(true)).Sortable(true).Width("20%");
+                        columns.Bound(m => m.Date).ClientTemplate("#= Date ? kendo.toString(Date, 'dd.MM.yyyy') : '' #").Title(Localizer["Date"]).Filterable(filter => filter.Operators(ops => ops.ForDate(d => d.IsEqualTo("Equals").IsGreaterThan("After").IsLessThan("Before")))).Sortable(true).Width("20%");
+                        columns.Bound(m => m.Dispute).ClientTemplate(
+                            "# if (Dispute) { #" +
+                            "    # if (Dispute.Attachment) { #" +
+                            "        # if (Dispute.Attachment.Url) { #" +
+                            $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?urls=#= Dispute.Attachment.Url #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
+                            "        # } else if (Dispute.Attachment.Id) { #" +
+                            $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?ids=#= Dispute.Attachment.Id #' target='_blank' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
+                            "        # } #" +
+                            "    # } #" +
+                            "    # if (Dispute.Description) { #" +
+                            "        <span>#= Dispute.Description #</span>" +
+                            "    # } #" +
+                            "# } #").Title(Localizer["Details"]).Filterable(false).Sortable(false);
+                        columns.Template(
+                            @<text><button class='bttn small cancel delete-admact-history-row-js' data-id='#=Id#'>X</button></text>).Title(" ").Width("50px");
+                    })
+                .Filterable(filter => filter.Mode(GridFilterMode.Row))
+                .Sortable(true)
+                .Pageable(pager => pager.Refresh(true).PageSizes(new[] { 10, 20, 50 }).ButtonCount(5))
+                .DataSource(ds => ds.Ajax().PageSize(10).Read("AdmActStateHistoryGetData", "OutApplication", new { area = "OutAdministrativeAct" }))
+                .Deferred(deferred))
+        </div>
+    </div>
+</div>

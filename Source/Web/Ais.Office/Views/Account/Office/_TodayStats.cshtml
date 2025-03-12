@@ -1,0 +1,146 @@
+﻿@using Ais.Data.Models.Account;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer
+@model DashboardTodayStatsOffice
+
+<div class="three">
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["PriorityServices"]:</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="big-blocks-wrap flex flex-gap-20 first-queue">
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-red">
+                            <strong> @Localizer["DistributedTasks"]</strong>
+                            <h3>@Model.PriorityServices.Distributed</h3>
+                        </div>
+                    </a>
+                </div>
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-red2">
+                            <strong> @Localizer["TasksInExecution"]</strong>
+                            <h3>@Model.PriorityServices.InExecution</h3>
+                        </div>
+
+                    </a>
+                </div>
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-red3">
+                            <strong> @Localizer["CompletedTasks"]</strong>
+                            <h3>@Model.PriorityServices.Completed</h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["ExpiringServices"]:</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="big-blocks-wrap flex flex-gap-20 first-queue">
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-orange">
+                            <strong> @Localizer["DistributedTasks"]</strong>
+                            <h3>@Model.ExpiringServices.Distributed</h3>
+                        </div>
+
+                    </a>
+                </div>
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-orange2">
+                            <strong> @Localizer["TasksInExecution"]</strong>
+                            <h3>@Model.ExpiringServices.InExecution</h3>
+                        </div>
+
+                    </a>
+                </div>
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-orange3">
+                            <strong>@Localizer["CompletedTasks"]</strong>
+                            <h3>@Model.ExpiringServices.Completed</h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["FastQueueServices"]:</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="big-blocks-wrap flex flex-gap-20 first-queue">
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-yellow">
+                            <strong> @Localizer["DistributedTasks"]</strong>
+                            <h3>@Model.FastQueueServices.Distributed</h3>
+                        </div>
+
+                    </a>
+                </div>
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-yellow2">
+                            <strong> @Localizer["TasksInExecution"]</strong>
+                            <h3>@Model.FastQueueServices.InExecution</h3>
+                        </div>
+
+                    </a>
+                </div>
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-yellow3">
+                            <strong> @Localizer["CompletedTasks"]</strong>
+                            <h3>@Model.FastQueueServices.Completed</h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["CommonServices"]:</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="big-blocks-wrap flex flex-gap-20 first-queue">
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-blue">
+                            <strong>  @Localizer["DistributedTasks"]</strong>
+                            <h3>@Model.CommonServices.Distributed</h3>
+                        </div>
+
+                    </a>
+                </div>
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-blue2">
+                            <strong> @Localizer["TasksInExecution"]</strong>
+                            <h3>@Model.CommonServices.InExecution</h3>
+                        </div>
+
+                    </a>
+                </div>
+                <div class="three">
+                    <a class="bigblock">
+                        <div class="bg-blue3">
+                            <strong> @Localizer["CompletedTasks"]</strong>
+                            <h3>@Model.CommonServices.Completed</h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

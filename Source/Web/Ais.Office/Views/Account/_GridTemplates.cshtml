@@ -1,0 +1,27 @@
+﻿@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer
+
+<script id="office-template" type="text/x-kendo-template">
+<a href='@Url.Action(nameof(AccountController.DashOffice), "Account")?officeId=#:OfficeId#'>#: OfficeName #</a>
+</script>
+
+<script id="distributed-tasks-template" type="text/x-kendo-template">
+    <span class="minicircle bg-red" title='@Localizer["TaskPriorityCount"]'>#: data.DistributedTasks.PriorityCount #</span>
+    <span class="minicircle bg-orange"  title='@Localizer["TaskDeadlineTodayCount"]'>#: DistributedTasks.DeadlineTodayCount #</span>
+    <span class="minicircle bg-yellow" title='@Localizer["TaskFastCount"]'>#: DistributedTasks.FastCount #</span>
+    <span class="minicircle bg-blue" title='@Localizer["TaskRegularCount"]'>#: DistributedTasks.RegularCount #</span>
+</script>
+
+<script id="tasks-execution-template" type="text/x-kendo-template">
+    <span class="minicircle bg-red"  title='@Localizer["TaskPriorityCount"]'>#: TasksInExecution.PriorityCount #</span>
+    <span class="minicircle bg-orange"  title='@Localizer["TaskDeadlineTodayCount"]'>#: TasksInExecution.DeadlineTodayCount #</span>
+    <span class="minicircle bg-yellow" title='@Localizer["TaskFastCount"]'>#: TasksInExecution.FastCount #</span>
+    <span class="minicircle bg-blue" title='@Localizer["TaskRegularCount"]'>#: TasksInExecution.RegularCount #</span>
+</script>
+
+<script id="completed-tasks-template" type="text/x-kendo-template">
+    <span class="minicircle bg-red" title='@Localizer["TaskPriorityCount"]'>#: CompletedTasks.PriorityCount #</span>
+    <span class="minicircle bg-orange" title='@Localizer["TaskDeadlineTodayCount"]'>#: CompletedTasks.DeadlineTodayCount #</span>
+    <span class="minicircle bg-yellow" title='@Localizer["TaskFastCount"]'>#: CompletedTasks.FastCount #</span>
+    <span class="minicircle bg-blue" title='@Localizer["TaskRegularCount"]'>#: CompletedTasks.RegularCount #</span>
+</script>

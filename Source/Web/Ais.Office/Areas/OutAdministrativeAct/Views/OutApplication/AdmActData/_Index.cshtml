@@ -1,0 +1,58 @@
+﻿@using Ais.Office.ViewModels.Application
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Document.OutAdmAct
+@inject IStringLocalizer Localizer;
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+
+<div class="steps-body k-flex-column">
+    @{
+        ViewBag.ApplicationUniqueId = Model.UniqueId;
+    }
+    <div class="step-box fg-1">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["AdministrativeAct"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row no-wrap">
+                <div class="form-input">
+                    @Html.InfoLabel(Localizer["RegNumber"], "RegNumber")
+                    @Html.EditorFor(m => m.RegNumber, null, "RegNumber")
+                    @Html.ValidationMessage("RegNumber")
+                </div>
+                <div class="form-input">
+                    @Html.InfoLabel(Localizer["RegDate"], "RegDate")
+                    @(Html.Kendo().DatePickerFor(m => m.RegDate).Deferred(deferred))
+                    @Html.ValidationMessage("RegDate")
+                </div>
+                <div class="form-input fg-1">
+                    @Html.InfoLabel(Localizer["FactGrounds"], "FactGrounds")
+                    @Html.EditorFor(m => m.Note, null, "Note")
+                    @Html.ValidationMessage("FactGrounds")
+                </div>
+                <div class="form-input fg-1">
+                    @Html.InfoLabel(Localizer["LegalGrounds"], "LegalGrounds")
+                    @Html.EditorFor(m => m.LegalGrounds, null, "LegalGrounds")
+                    @Html.ValidationMessage("LegalGrounds")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("AdmActState/_State", Model);
+}
+
+<div class="form-row fullwidth">
+    <div class="form-input k-ml-auto">
+        @* @* <button type='button' class='bttn third fullwidth bttn-icon autosize add-admatdata-js' title='@Localizer["Save"]'>@Localizer["Save"]</button> *@
+        @* Must be added Later -> the button below *@
+        @* <button type='button' class='bttn third small bttn-icon autosize search-admact-js' data-uniqueid="@Model.UniqueId" title='@Localizer["SearchAdmAct"]'><i class='k-icon k-font-icon k-i-search'></i></button> *@
+    </div>
+</div>

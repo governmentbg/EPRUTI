@@ -1,0 +1,51 @@
+﻿@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Options
+@using Ais.Infrastructure.Options
+@using Ais.Data.Models.Attachment
+@inject IOptions<AttachmentOptions> ApplicationOption
+@inject IStringLocalizer Localizer
+@model Guid
+@{
+    var prefix = "file.";
+    await Html.RenderPartialAsync("_FileTemplate");
+    var type = ViewBag.AttachmentType as AttachmentType;
+}
+<form action="@Url.Action("Scan", "OutDocuments", new { id = Model })" method="post" data-ajax="true" data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="form-input fullwidth file">
+        @Html.InfoLabel(Localizer["UploadFile"], key: "UploadFile")
+        @(Html.Kendo().Upload()
+              .Name($"{prefix}Url")
+              .Messages(x => x.Select(Localizer["SelectFiles"])
+              .DropFilesHere(Localizer["DropFilesHere"])
+              .InvalidFileExtension(Localizer["InvalidFileExtension"])
+              .Cancel(Localizer["Cancel"]))
+              .HtmlAttributes(new { accept = type.Extensions, id = Guid.NewGuid().ToString(), data_prefix = prefix, name = string.Empty })
+              .Async(a => a
+                         .Save("Upload", "Attachment", new { area = string.Empty })
+                         .Remove("Remove", "Attachment", new { area = string.Empty })
+                         .AutoUpload(true)
+                         .ChunkSize(ApplicationOption.Value.AsyncUploadChunkSize)
+                         .Concurrent(false))
+              .ShowFileList(true)
+              .Multiple(false)
+              .TemplateId("fileTemplate")
+              .Validation(validation =>
+              {
+                  validation.AllowedExtensions(type.ExtensionsCollection);
+                  validation.MaxFileSize(type.MaxSizeInBytes);
+                  validation.MinFileSize(1);
+              })
+              .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess")))
+        <small>
+            @($"{Localizer["AllowExtensions"]}: {type?.Extensions}, {Localizer["MaxFileSize"]}: {type?.MaxSize} MB.")
+        </small>
+    </div>
+    <div class="button-wrap fullwidth">
+        <button type="submit" class="right bttn main">
+            @Localizer["Submit"]
+        </button>
+    </div>
+</form>

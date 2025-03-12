@@ -1,0 +1,97 @@
+﻿@using Ais.Data.Models.Task;
+@using Ais.WebUtilities.Extensions;
+@using Microsoft.Extensions.Localization;
+@using Ais.Data.Models.Notice;
+@using System.Web;
+@using Ais.Utilities.Extensions
+@model NoticeInfo
+@inject IStringLocalizer Localizer;
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var concernedPersonsInfo = ViewBag.ConcernedPersonsInfo as List<Notice>;
+    var attachment = Model?.Attachments?.FirstOrDefault(x => x.RelDocType == Ais.Data.Models.Attachment.RelDocType.Attachment);
+}
+<div class="steps-body">
+    <div class="step-box fullwidth">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["BaseData"]</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row fullwidth">
+                <div class="fullwidth form-input notification">
+                    <b> @Model?.OutDoc?.Name</b>  
+                    @{
+                        var downloadData = attachment?.GetDownloadData();
+                        var downloadLink = downloadData != null
+                            ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                            : null;
+                        if (downloadLink.IsNotNullOrEmpty())
+                        {
+                            <a href="@downloadLink" target="_blank">
+                                @(attachment?.Name ?? Localizer["Download"])
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="form-row fullwidth">
+                <div class="form-input">
+                    @Html.LabelFor(m => m.NoticePublishBeginDate, Localizer["NoticePublishBeginDate"])
+                    @(Model?.NoticePublishBeginDate?.ToString("d"))
+                </div>
+                <div class="form-input">
+                    @Html.LabelFor(m => m.NoticePublishEndDate, Localizer["NoticePublishEndDate"])
+                    @(Model?.NoticePublishEndDate?.ToString("d"))
+                </div>
+                <div class="form-input">
+                    @Html.LabelFor(m => m.OutDocRegDate, Localizer["RegDate"])
+                    @(Model?.OutDocRegDate)
+                </div>
+                <div class="form-input ">
+                    @Html.LabelFor(m => m.ProvinceName, Localizer["Office"])
+                    @(Model?.ProvinceName)
+                </div>
+                @if (Model?.InDocRegNum != null)
+                {
+                    <div class="form-input ">
+                        @Html.LabelFor(m => m.InDocRegNum, Localizer["InDocRegNum"])
+                        <a class="info-indoc-js" data-id="@Model.InDocId">@Model.InDocRegNum </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="step-box fullwidth">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["InterestedPersons"]</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input fullwidth">
+                    @(Html.Kendo().Grid(concernedPersonsInfo ?? new List<Notice>())
+                        .Name("InterestedPersonsGrid")
+                        .Columns(column =>
+                        {
+                            column.Bound(c => c.ConcernPerson.Number).Title(Localizer["EgnBulstat"]);
+                            column.Bound(c => c.ConcernPerson.FullName).Title(Localizer["Recipient"]);
+                            column.Bound(c => c.Channel).Title(Localizer["Channel"]);
+                            column.Bound(c => c.Status).Title(Localizer["Status"]);
+                            column.Bound(c => c.SendDate).Title(Localizer["SendDate"]).Format("{0:g}");
+                            column.Bound(c => c.DeliveryDate).Title(Localizer["DeliveryDate"]).Format("{0:g}");
+                            column.Bound(c => c.ResponseDate).Title(Localizer["ResponseDate"]).Format("{0:g}");
+                        }).HtmlAttributes(new { @class = "fullwidth" })
+                        .Deferred(deferred))
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="step-box fullwidth">
+        <div class="step-box-head collapsible">
+            <h3 class="step-box-title">@Localizer["Notice"]</h3>
+        </div>
+        <div class="step-box-body notice-wrap">
+            @Html.Raw(HttpUtility.HtmlDecode(Model?.Description))
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,22 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@model Ais.Data.Models.Document.MissingDocumentData
+@if (Model?.MissingDocuments.IsNotNullOrEmpty() == true)
+{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    <script id="applicationMissingDocumentsTemplate" type="text/kendo-ui-template">
+        <div class="k-notification-warning doc-notification">
+                <span class="k-icon k-font-icon k-i-warning"></span>
+                <b>#:Type && Type.Name ? Type.Name : ''#:</b>
+                <span>#:Note ? Note : ''#!</span>
+        </div>
+    </script>
+    <h4>@($"{Localizer["MissingDocuments"]}: {Model.MissingDocuments.Count}, {Localizer["Addressee"]}: {Model.AddresseeType?.Name}, {Localizer["Deadline"]}: {Model.Deadline:d}, {Localizer["Note"]}: {Model.Note}")</h4>
+    @(Html.Kendo().ListView(Model.MissingDocuments)
+                    .Name(Guid.NewGuid().ToString())
+                    .ClientTemplateId("applicationMissingDocumentsTemplate")
+                    .TagName("div").Bordered(false)
+                    .Deferred(deferred))
+}

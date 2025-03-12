@@ -1,0 +1,9 @@
+﻿@model ErrorViewModel
+@{
+	ViewBag.IsNotCenterContent = true;
+}
+<div class="error404 text-center">
+	<div>404</div>
+	<p>Страницата не е намерена</p>
+	<a href="@Url.RouteUrl("Default")">Начало</a>
+</div>

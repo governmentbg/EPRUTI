@@ -1,0 +1,103 @@
+﻿@using Ais.Office.ViewModels.Clients
+@model ClientUpsertModel
+@{
+    var namesAndEgnBulstatShouldBeReadOnly = ViewBag.NamesAndEgnBulstatShouldBeReadOnly is bool && (bool)ViewBag.NamesAndEgnBulstatShouldBeReadOnly;
+    var requiredFields = ViewBag.RequiredFields as ICollection<string> ?? Array.Empty<string>();
+}
+<div class="form-row">
+    <div class="form-input quad">
+        @Html.LabelFor(m => m.FirstNames, requiredFields.Contains("FirstNames") ? new { @class = "required" } : null)
+        @{
+            ViewData.TemplateInfo.HtmlFieldPrefix = string.Empty;
+        }
+        <div class="action-input">
+            @Html.EditorFor(m => m.FirstNames, "StringArray", "FirstNames", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+            @{
+                RenderButtons(Model?.FirstNames?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
+            }
+        </div>
+        @Html.ValidationMessageFor(m => m.FirstNames)
+    </div>
+    <div class="form-input quad">
+        @Html.LabelFor(m => m.SurNames)
+        <div class="action-input">
+            @Html.EditorFor(m => m.SurNames, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+            @{
+                RenderButtons(Model?.SurNames?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
+            }
+        </div>
+        @Html.ValidationMessageFor(m => m.SurNames)
+    </div>
+    <div class="form-input quad">
+        @Html.LabelFor(m => m.FamilyNames, requiredFields.Contains("FamilyNames") ? new { @class = "required" } : null)
+        <div class="action-input">
+            @Html.EditorFor(m => m.FamilyNames, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+            @{
+                RenderButtons(Model?.FamilyNames?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
+            }
+        </div>
+        @Html.ValidationMessageFor(m => m.FamilyNames)
+    </div>
+    <div class="form-input quad">
+        @Html.LabelFor(m => m.Alias)
+        @Html.EditorFor(m => m.Alias)
+        @Html.ValidationMessageFor(m => m.Alias)
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-input quad">
+        @Html.LabelFor(m => m.FirstNamesLatin, requiredFields.Contains("FirstNamesLatin") ? new { @class = "required" } : null)
+        <div class="action-input">
+            @Html.EditorFor(m => m.FirstNamesLatin, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+            @{
+                RenderButtons(Model?.FirstNamesLatin?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
+            }
+        </div>
+        @Html.ValidationMessageFor(m => m.FirstNamesLatin)
+    </div>
+    <div class="form-input quad">
+        @Html.LabelFor(m => m.SurNamesLatin)
+        <div class="action-input">
+            @Html.EditorFor(m => m.SurNamesLatin, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+            @{
+                RenderButtons(Model?.SurNamesLatin?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
+            }
+        </div>
+        @Html.ValidationMessageFor(m => m.SurNamesLatin)
+    </div>
+    <div class="form-input quad">
+        @Html.LabelFor(m => m.FamilyNamesLatin, requiredFields.Contains("FamilyNamesLatin") ? new { @class = "required" } : null)
+        <div class="action-input">
+            @Html.EditorFor(m => m.FamilyNamesLatin, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+            @{
+                RenderButtons(Model?.FamilyNamesLatin?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
+            }
+        </div>
+        @Html.ValidationMessageFor(m => m.FamilyNamesLatin)
+    </div>
+    <div class="form-input quad">
+        @Html.LabelFor(m => m.AliasLatin)
+        @Html.EditorFor(m => m.AliasLatin)
+        @Html.ValidationMessageFor(m => m.AliasLatin)
+    </div>
+</div>
+
+@functions {
+    void RenderButtons(int removeButtonsCount, bool disableButton)
+    {
+        <div class="actions">
+            @if (disableButton)
+            {
+                <button class="k-button k-small names-button add-name-js" disabled><i class="k-i-plus k-icon k-font-icon"></i></button>
+            }
+            else
+            {
+                <button class="k-button k-small names-button add-name-js"><i class="k-i-plus k-icon k-font-icon"></i></button>
+                @for (var i = 1; i < removeButtonsCount; i++)
+                {
+                    <button class="k-button k-small names-button remove-name-js"><i class="k-i-trash k-icon k-font-icon"></i></button>
+                }
+            }
+        </div>
+    }
+}

@@ -1,0 +1,174 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Data.Models.Service.Object
+@using Ais.WebUtilities.Extensions
+@model Ais.Data.Models.Document.OutDocument
+@{
+    var isOverview = ViewBag.IsOverview is bool && (bool)ViewBag.IsOverview;
+}
+<div class="step-box">
+    @if (!Model.IsNew)
+    {
+        <div class="doctitle">
+            <div class="regnumber" title="@Localizer["OutDocumentStatusTitle"]">
+                @Model.RegNumber
+                <span title="@Localizer["Copy"]" class="k-icon k-font-icon k-i-copy copy-regNumber-js"></span>
+            </div>
+            <h5 title="@Model.Type.Name">@Model.Type.Name</h5>
+        </div>
+    }
+    <div class="step-box-body">
+        @{
+            if (Model.Status?.Name?.Trim().IsNotNullOrEmpty() == true)
+            {
+                <div class="status-indicator status@(Model.StatusType)" title="@Localizer["OutDocumentStatusTitle"]">@(Model.Status.Name)</div>
+            }
+
+            if (Model.RegDate.HasValue)
+            {
+                <div>@Localizer["RegDate"]: <strong>@(Model.RegDate.Value.ToString("G"))</strong></div>
+            }
+
+            if (Model.ReceiveMethod?.Name != null)
+            {
+                <div>@Localizer["ReceiveMethod"]: <strong>@(Model.ReceiveMethod.Name)</strong></div>
+            }
+
+            if (Model.Note.IsNotNullOrEmpty())
+            {
+                <div>@Localizer["Note"]: <strong>@(Model.Note)</strong></div>
+            }
+
+            if (Model.Task?.Type?.Name != null)
+            {
+                <div>@Localizer["TaskType"]: <strong>@(Model.Task?.Type?.Name)</strong></div>
+            }
+
+            if (Model.Objects.IsNotNullOrEmpty())
+            {
+                <div class="form-row">
+                    <ul class="simplelist flex wrap gap-5">
+                        @{
+                            var visibleCount = 20;
+                            var hasMoreObjects = Model.Objects.Count > visibleCount;
+                            var count = hasMoreObjects ? visibleCount : Model.Objects.Count;
+                            for (var j = 0; j < count; j++)
+                            {
+                                var current = Model.Objects[j];
+                                var text = $"<b>{current.Title}</b> {current.ShortDescription}".Trim();
+                                <li class="flex align-center gap-5">
+                                    <svg class="icon object-icon">
+                                        <use xlink:href="#icon-lt@(Model.Objects[j].Type.GetHashCode())"></use>
+                                    </svg>
+                                    <span>
+                                        @Html.Raw(text)
+                                    </span>
+                                </li>
+                            }
+
+                            if (hasMoreObjects)
+                            {
+                                <li class="nodot">
+                                    <a href="#" class="simplelink view-objects-js" data-controllername="@ViewContext.RouteData.Values["Controller"]" data-app-id="@Model.UniqueId" data-type="objects" data-title="@Model.Type?.Name">
+                                        @($"{Localizer["ViewAllObjects"]}({Model.Objects.Count})")
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            }
+
+            if (Model?.AttachedToSpecialDocument?.Id.HasValue == true)
+            {
+                <div>@Localizer["AttachedToSpecialDocument"]: <strong>@(Model.AttachedToSpecialDocument.Name)</strong></div>
+            }
+
+            if (Model.VerificationCode.IsNotNullOrEmpty())
+            {
+                <div>@Localizer["VerificationCode"]: <strong>@(Model.VerificationCode)</strong></div>
+            }
+
+            if (Model.InDocData.IsNotNullOrEmpty())
+            {
+                <div>@Localizer["Generated"]: <strong>@(Model.InDocData)</strong></div>
+            }
+
+            if (Model.SentToSignDate.HasValue)
+            {
+                <div>@Localizer["SentToSignDate"]: <strong>@(Model.SentToSignDate)</strong></div>
+            }
+
+            if (Model.CertifyDate.HasValue)
+            {
+                <div>@Localizer["CertifyDate"]: <strong>@(Model.CertifyDate)</strong></div>
+            }
+
+            if (Model.SendDate.HasValue)
+            {
+                <div>@Localizer["SendDate"]: <strong>@(Model.SendDate)</strong></div>
+            }
+
+            if (Model.WaitToDate.HasValue)
+            {
+                <div>@Localizer["WaitToDate"]: <strong>@(Model.WaitToDate)</strong></div>
+            }
+
+            if (Model.WaitResponseToDate.HasValue)
+            {
+                <div>@Localizer["WaitResponseToDate"]: <strong>@(Model.WaitResponseToDate)</strong></div>
+            }
+
+            if (Model.DeliveryDate != null)
+            {
+                <div>@Localizer["DeliveryDate"]: <strong>@(Model.DeliveryDate.Value.ToString("G"))</strong></div>
+            }
+
+            if (Model.ArchivedDate.HasValue)
+            {
+                <div>@Localizer["ArchivedDate"]: <strong>@(Model.ArchivedDate)</strong></div>
+            }
+
+            if (Model.RegOffice?.Name.IsNotNullOrEmpty() == true)
+            {
+                <div>@Localizer["RegistrationGCCO"]: <strong>@(Model.RegOffice.Name)</strong></div>
+            }
+
+            if (Model.RegUser?.FullName.IsNotNullOrEmpty() == true)
+            {
+                <div>@Localizer["RegisteredByEmployeee"]: <strong>@(Model.RegUser.FullName)</strong></div>
+            }
+
+            if (Model?.SendingOffice?.Id.HasValue == true)
+            {
+                <div class="ib">@Localizer["SendingOffice"]: <strong>@(Model.SendingOffice.Name)</strong></div>
+            }
+
+            if (Model.SendingUser.IsNotNullOrEmpty())
+            {
+                <div>@Localizer["SendingUser"]: <strong>@(Model.SendingUser)</strong></div>
+            }
+
+            if (Model?.ConfirmOffice?.Id.HasValue == true)
+            {
+                <div>@Localizer["ConfirmOffice"]: <strong>@(Model.ConfirmOffice.Name)</strong></div>
+            }
+
+            if (Model.ConfirmUser.IsNotNullOrEmpty())
+            {
+                <div>@Localizer["ConfirmUser"]: <strong>@(Model.ConfirmUser)</strong></div>
+            }
+
+            if (Model.FromDatePortal.HasValue)
+            {
+                <div>@Localizer["FromDatePortal"]: <strong>@(Model.FromDatePortal?.ToString("d"))</strong></div>
+            }
+
+            if (Model.ToDatePortal.HasValue)
+            {
+                <div>@Localizer["ToDatePortal"]: <strong>@(Model.ToDatePortal?.ToString("d"))</strong></div>
+            }
+        }
+    </div>
+</div>

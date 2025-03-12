@@ -1,0 +1,47 @@
+﻿@using Ais.Data.Models.Nomenclature
+@using Ais.Infrastructure.Roles
+@using Ais.Office.Controllers
+@using Ais.Office.ViewModels.Translations
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model TranslationUpsertModel
+<form method="post" class="dirty-check"  action="@Url.ActionLink(Model.IsNew ? "Create" : "Edit", "Translations")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(x => x.Id)
+    <div class="form-group">
+        <div class="form-row">
+            <div class="form-input">
+                @Html.LabelFor(x => x.Module)
+                @(Html.Kendo()
+                    .DropDownList()
+                    .Name("Module.Id")
+                    .OptionLabel(new Nomenclature { Id = null, Name = Localizer["All"].ToString() })
+                    .Value(Model?.Module?.Id.ToString())
+                    .DataValueField("Id")
+                    .DataTextField("Name")
+                    .DataSource(ds => ds.Read(read => read.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nsoftwarecomponent" })))))
+            </div>
+            <div class="form-input ">
+                @Html.LabelFor(x => x.Key)
+                @(Html.Kendo().TextBoxFor(x => x.Key)
+                      .Readonly(!Model.IsNew && User.IsInRole(UserRolesConstants.TranslationsKeyChange)))
+                @Html.ValidationMessageFor(x => x.Key)
+            </div>
+            @Html.EditorFor(model => model.Value, "InternationalizationTextBox", new { wrapperClass = "form-input", requiredForAllCultures = true })
+        </div>
+            @Html.EditorFor(model => model.Description, "InternationalizationEditor", new { wrapperClass = "form-input fullwidth" })
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

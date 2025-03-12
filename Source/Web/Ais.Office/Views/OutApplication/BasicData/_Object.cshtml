@@ -1,0 +1,17 @@
+﻿@using Ais.Data.Models.Service.Object;
+@using Kendo.Mvc.TagHelpers
+@model IServiceObject
+<div class="step-box fullwidth selected object-wrapper-js">
+    <input type="hidden" class="object-id" value="@Model.Id" />
+    <div class="step-box-body objects">
+        <div class="object-wrapper">
+            <div class="objectname">
+                <strong class="fullwidth">@Model.Title</strong>
+                @Model.ShortDescription
+            </div>
+            <div class="cancelelement">
+                <button class="bttn small cancel right remove-object-js">X</button>
+            </div>
+        </div>
+    </div>
+</div>

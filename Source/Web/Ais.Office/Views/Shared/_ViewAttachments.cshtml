@@ -1,0 +1,57 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.Utilities.Extensions
+@using Ais.Office.ViewModels.Application
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model IEnumerable<Ais.Office.ViewModels.Application.AttachmentViewModel>
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    if (Model.IsNotNullOrEmpty())
+    {
+        @(Html.Kendo().ListView<AttachmentViewModel>()
+                      .Name(Guid.NewGuid().ToString())
+                      .BindTo(Model)
+                      .ClientTemplateId("viewDocumentGroupTemplate")
+                      .TagName("div")
+                      .DataSource(
+                          d =>
+                              d.Ajax()
+                               .ServerOperation(false)
+                               .Group(g => g.Add(f => f.Type)))
+                      .Deferred(deferred))
+        <script type="text/x-kendo-template" id="viewDocumentGroupTemplate">
+            <div class="k-listview-item elements">
+                <div class="k-group-title">
+                    #:data.value#(#:data.items.length#)
+                </div>
+                #for (var i = 0; i < data.items.length; i++){#
+                    #var file = {
+                        Size: data.items[i].Size,
+                        Url: data.items[i]["Url"],
+                        Id: data.items[i]["Id"],
+                        Name: data.items[i]["Name"],
+                        ObjectCount: data.items[i]["ObjectCount"],
+                        Description: data.items[i]["Description"],
+                        UniqueId: data.items[i]["UniqueId"]
+                    };#
+                    <div>
+                        #if(file.Url || file.Id){#
+                             <a href="#:core.GetFileUrl(file)#" class="simplelink" target="_blank">
+                               #:file.Name#
+                            </a>
+                             (#:core.getFileSizeMessage(file)#)
+                        #}#
+                        #if(file.ObjectCount > 0){#
+                            <a href="\\#" class="simplelink k-mb-2 k-display-block view-objects-js" data-type="attachment" data-id="#:file.UniqueId#" data-title="#:data.value#" data-app-id="@(ViewBag.ApplicationUniqueId as string)">
+            @(Localizer["ViewAllObjects"])((#:file.ObjectCount#))
+                            </a>
+                        #}#
+                        #if(data.Description){#
+                            #:data.Description#
+                        #}#
+                    </div>
+                #}#
+            </div>
+        </script>
+    }
+}

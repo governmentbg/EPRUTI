@@ -1,0 +1,40 @@
+﻿@using Ais.Office.ViewModels.Employees;
+@using Microsoft.Extensions.Localization
+
+@inject IStringLocalizer Localizer;
+
+<form method="post" action="@Url.ActionLink("EditEmployeeRoles", "RoleChangeOrders")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.Hidden("uniqueSessionId", ViewBag.UniqueSessionId as Guid?)
+    @Html.AntiForgeryToken()
+
+@(Html.Kendo().ListView<EmployeeRoleListViewModel>()
+    .Name("employeeRoles")
+    .TagName("div")
+    .ClientTemplateId("employeeRolesClientTemplateId")
+        .Events(events => events.DataBound("admin_rolechangeorders.onEmployeesRolesListViewDataBound"))
+        .DataSource(x => x.Ajax().Read("ReadEmployeeRolesListView", "RoleChangeOrders", new { Area = "Admin", uniqueSessionId = ViewBag.UniqueSessionId as string })))
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>
+
+<script id="employeeRolesClientTemplateId" type="text/x-kendo-template">
+         # var index = kendo.guid(); #
+           <input type="hidden" name="Roles.Index" value="#:index#" />
+           <input type="hidden" name="Roles[#:index#].Id" value="#:Id#" />
+           <input type="hidden" name="Roles[#:index#].Name" value="#:Name#" />
+           <input type="hidden" name="Roles[#=index#].IsChecked" id="checkbox_#=Id#" value="#:IsChecked#" />
+    <div>
+    @Html.Kendo().CheckBox().Name("#=Id#").Label("#:Name#").Events(ev => ev.Change("admin_rolechangeorders.onEmployeesRolesCheckboxChange")).ToClientTemplate()
+    </div>
+</script>

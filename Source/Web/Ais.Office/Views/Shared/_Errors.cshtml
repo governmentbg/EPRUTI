@@ -1,0 +1,22 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Document.Document
+@if (Model?.ErrorData?.Errors.IsNotNullOrEmpty() == true)
+{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    <script id="applicationErrorTemplate" type="text/kendo-ui-template">
+        <div class="error-notification doc-notification">
+              <span class="k-icon k-font-icon k-i-warning"></span>
+              <b>#:Type && Type.Name ? Type.Name : ''#:</b>
+              <span>#:Note ? Note : ''#!</span>
+        </div>
+    </script>
+    <h4>@($"{Localizer["Errors"]}: {Model.ErrorData.Errors.Count}, {Localizer["Deadline"]}: {Model.ErrorData.Deadline:d}")</h4>
+    @(Html.Kendo().ListView(Model.ErrorData.Errors)
+                   .Name(Guid.NewGuid().ToString())
+                   .ClientTemplateId("applicationErrorTemplate")
+                   .TagName("div").Bordered(false)
+                   .Deferred(deferred))
+}
