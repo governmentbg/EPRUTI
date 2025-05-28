@@ -6,13 +6,7 @@
     using Ais.Office.Areas.OutAdministrativeAct.Controllers;
     using Ais.Office.Areas.Reports.Controllers.Attachments;
     using Ais.Office.Areas.Reports.Controllers.CommonOutDoc;
-    using Ais.Office.Areas.Reports.Controllers.InDocuments;
-    using Ais.Office.Areas.Reports.Controllers.InquieryReports;
-    using Ais.Office.Areas.Reports.Controllers.Notifications;
-    using Ais.Office.Areas.Reports.Controllers.Payments;
     using Ais.Office.Areas.Reports.Controllers.ReportTasks;
-    using Ais.Office.Areas.Reports.Controllers.Services;
-    using Ais.Office.Areas.Reports.Controllers.Tasks;
     using Ais.Office.Areas.Reports.Controllers.Users;
     using Ais.Office.Controllers;
     using Ais.Office.Controllers.Documents;
@@ -147,20 +141,11 @@
                     this.AddToMenu(menu, title: this.localizer["Reports"], children: statisticsMenu);
 
                     var reportsMenu = new List<MenuItem>();
-                    this.AddToMenu(reportsMenu, typeof(EPaymentReportsController), "Index", this.localizer["EPaymentReports"]);
-                    this.AddToMenu(reportsMenu, typeof(PaymentOrderReportsController), "Index", this.localizer["PaymentOrderReports"]);
-                    this.AddToMenu(reportsMenu, typeof(PaymentReportsController), "Index", this.localizer["PaymentReports"]);
                     this.AddToMenu(reportsMenu, typeof(ReportTasksController), "Index", this.localizer["ReportTasks"]);
                     this.AddToMenu(reportsMenu, typeof(CommonOutDocReportsController), "Index", this.localizer["CommonOutDocReports"]);
-                    this.AddToMenu(reportsMenu, typeof(InquiryReportsController), "Index", this.localizer["InquiryReports"]);
                     this.AddToMenu(reportsMenu, typeof(NegativeBallanceClientsController), "Index", this.localizer["NegativeBallanceClients"]);
                     this.AddToMenu(reportsMenu, typeof(UserLoginReportsController), "Index", this.localizer["UserLoginReports"]);
-                    this.AddToMenu(reportsMenu, typeof(NotificationsReportsController), "Index", this.localizer["NotificationsReports"]);
-                    this.AddToMenu(reportsMenu, typeof(ServicesByPeriodReportsController), "Index", this.localizer["ServicesByPeriod"]);
-                    this.AddToMenu(reportsMenu, typeof(ServicesByPriorityReportsController), "Index", this.localizer["ReportPriorityServices"]);
-                    this.AddToMenu(reportsMenu, typeof(InDocumentsReportsController), "Index", this.localizer["InDocumentsReports"]);
                     this.AddToMenu(reportsMenu, typeof(AttachmentReportsController), "Index", this.localizer["AttachmentReports"]);
-                    this.AddToMenu(reportsMenu, typeof(TasksByPeriodReportsController), "Index", this.localizer["TasksByPeriodReports"]);
                     this.AddToMenu(reportsMenu, typeof(AdmActIssuedForPeriodReportsController), "Index", this.localizer["AAIssuedForPeriodReportsSearch"]);
                     this.AddToMenu(reportsMenu, typeof(AdmActIssuedByAdministrationForPeriodReportsController), "Index", this.localizer["AAIssuedByAdminForPeriodReportsSearch"]);
                     this.AddToMenu(reportsMenu, typeof(AdmActIssuedByAdministrationForPeriodByTypeReportsController), "Index", this.localizer["AAIssuedByAdminForPeriodByTypeReportsSearch"]);

@@ -4,7 +4,6 @@
     using System.Text.Unicode;
 
     using Ais.Common.Logger;
-    using Ais.EsriBg.Data.Services;
     using Ais.Infrastructure.Extensions;
     using Ais.Infrastructure.KendoExt;
     using Ais.Infrastructure.Localization;
@@ -135,9 +134,6 @@
 
             services.ConfigFormOptions();
 
-            services.AddEsriBgConfigOptions(this.configuration);
-            services.AddEsriBgApplicationServices();
-            services.AddEsriBgApplicationHttpClients();
             services.AddIoSignServices(this.configuration, this.webHostEnvironment);
 
             services.AddCors(this.configuration);

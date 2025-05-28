@@ -18,8 +18,14 @@
 	<ItemGroup>
 		<AdditionalFiles Include="..\..\stylecop.json" />
 		<None Include="..\..\.editorconfig" Link=".editorconfig" />
+		<Compile Remove="Properties\PublishProfiles\**" />
 		<TypeScriptCompile Remove="node_modules\**" />
+		<TypeScriptCompile Remove="Properties\PublishProfiles\**" />
+		<Content Remove="Properties\PublishProfiles\**" />
 		<Content Remove="wwwroot\scripts\**" />
+		<EmbeddedResource Remove="Properties\PublishProfiles\**" />
+		<None Remove="Properties\PublishProfiles\**" />
+		<_WebToolingArtifacts Remove="Properties\PublishProfiles\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -76,7 +82,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Areas\OutAdministrativeAct\Scripts\" />
-	  <Folder Include="Properties\PublishProfiles\" />
 	</ItemGroup>
 
 	<ItemGroup>

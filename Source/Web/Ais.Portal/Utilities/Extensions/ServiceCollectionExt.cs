@@ -385,25 +385,6 @@
                                 ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
                             })
                     .AddHttpMessageHandler<AisApiDelegatingHandler>();
-
-            services.AddHttpClient("EsriMapAccessCredits")
-               .ConfigureHttpClient(
-                   (serviceProvider, httpClient) =>
-                   {
-                       var config = serviceProvider.GetRequiredService<IOptions<MapAccessCreditsOptions>>()!.Value;
-                       httpClient.BaseAddress = new Uri(config.Url);
-                       httpClient.Timeout = TimeSpan.FromSeconds(config.Timeout);
-                       httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-                   })
-               .ConfigurePrimaryHttpMessageHandler(
-                   _ =>
-                       new HttpClientHandler
-                       {
-                           AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-                           UseCookies = false,
-                           AllowAutoRedirect = false,
-                           ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
-                       });
         }
 
         /// <summary>

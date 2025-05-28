@@ -17,7 +17,7 @@ const regex = {
 const isDevMode = process.env.NODE_ENV === 'development' ? 'development' : 'production';
 
 const systemStyle = () => {
-    const pathModule = path.resolve(`./appsettings.${isDevMode ? "Development" : "AgccProd"}.json`);
+    const pathModule = path.resolve(`./appsettings.${"Development"}.json`);
     const data = fs.readFileSync(pathModule, 'utf8');
     const appSettings = JSON.parse(data);
     return appSettings.SystemStyle.IsNullOrEmpty() ? null : "-" + appSettings.SystemStyle
@@ -58,7 +58,6 @@ const bundleConfig = [
     {
         "outputFileName": "wwwroot/bundles/common.min.js",
         "inputFiles": [
-            ////"node_modules/@microsoft/signalr/dist/browser/signalr.min.js",
             "wwwroot/js/kendo-ui-license.js",
             "wwwroot/js/jquery.magnific-popup.min.js",
             "wwwroot/js/owl.carousel.min.js",
@@ -71,7 +70,6 @@ const bundleConfig = [
             "wwwroot/bundles/core.min.js",
             "wwwroot/bundles/notification.min.js",
             "wwwroot/bundles/searchTable.min.js",
-            ////"wwwroot/bundles/signalr.min.js",
             "wwwroot/bundles/sessionTimeOut.min.js",
             "wwwroot/bundles/signing.min.js",
             "wwwroot/bundles/cart.min.js",

@@ -21,10 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <_WebToolingArtifacts Remove="Properties\PublishProfiles\AgccProd.pubxml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <AdditionalFiles Include="..\..\stylecop.json" />
     <None Include="..\..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>

@@ -118,9 +118,6 @@
 	  <Reference Include="Ais.Data.Models">
 	    <HintPath>..\..\Libs\Ais.Data.Models.dll</HintPath>
 	  </Reference>
-	  <Reference Include="Ais.EsriBg.Data">
-	    <HintPath>..\..\Libs\Ais.EsriBg.Data.dll</HintPath>
-	  </Reference>
 	  <Reference Include="Ais.GrpcContracts">
 	    <HintPath>..\..\Libs\Ais.GrpcContracts.dll</HintPath>
 	  </Reference>
