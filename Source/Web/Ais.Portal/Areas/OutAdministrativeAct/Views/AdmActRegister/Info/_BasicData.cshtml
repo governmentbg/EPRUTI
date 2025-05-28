@@ -1,0 +1,82 @@
+﻿@using Ais.Data.Models.OutAdmAct
+@using global::Ais.Data.Models.DynamicValidation
+@using global::Ais.Data.Models.OutAdmAct.OutAdmActState
+@using Ais.Portal.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebServices.Services.SessionStorage
+@using Microsoft.Extensions.Localization
+@using global::Ais.Data.Models.Service.Object
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Kendo.Mvc.TagHelpers
+@inject IStringLocalizer Localizer
+@inject ISessionStorageService sessionStorageService
+@model OutAdmAct
+@{
+    var isOverview = ViewBag.IsOverview is bool && (bool)ViewBag.IsOverview;
+    var model = Model;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var validations = ViewBag.Validations as List<DynamicValidation>;
+}
+<div class="step-box">
+    <div class="step-box-head-unordered">
+        <h3 class="step-box-title">
+            @Localizer["AdministrativeAct"]
+        </h3>
+    </div>
+    <div class="step-box-body">
+        <div class="doctitle flex align-center">
+            <div class="regnumber" title="@Localizer["OutDocumentStatusTitle"]">
+                @Model.RegNumber
+                <span title="@Localizer["Copy"]" class="k-icon k-font-icon k-i-copy copy-regNumber-js"></span>
+            </div>
+            <h5>@(Html.RenderInfoIfVisible(Model, m => m.Type.Name, validations, Localizer["AAType"]))</h5>
+        </div>
+        <div class="doc-basic-info k-mt-1">
+            @{
+                @(Html.RenderInfoIfVisible(Model, m => m.Issuer.AdministrativeBody.Id, validations, Localizer["Issuer"]))
+                @(Html.RenderInfoIfVisible(Model, m => m.RegisterType.Name, validations, Localizer["ААRegisterType"]))
+                <div class="ib">@Localizer["RegDate"]: <strong>@(Model.RegDate.Value.ToString("d"))</strong></div>
+                @(Html.RenderInfoIfVisible(Model, m => m.RegOffice.Name, validations, Localizer["Office"]))
+                @(Html.RenderInfoIfVisible(Model, m => m.Note, validations, Localizer["FactGrounds"]))
+                @(Html.RenderInfoIfVisible(Model, m => m.LegalGrounds, validations, Localizer["LegalGrounds"]))
+                @(Html.RenderDateTimeIfVisible(Model, m => m.StateUpsertModel.ValidByDate, validations, Localizer["ValidByDate"]))
+                @(Html.RenderDateTimeIfVisible(Model, m => m.StateUpsertModel.AnnouncementDate, validations, Localizer["AnnouncementDate"]))
+                @(Html.RenderDateTimeIfVisible(Model, m => m.StateUpsertModel.EffectiveDate, validations, Localizer["EffectiveDate"]))
+                @(Html.RenderInfoIfVisible(Model, m => m.StateUpsertModel.AnnouncementType.Id, validations, Localizer["AnnouncementType"]))
+                @(Html.RenderInfoIfVisible(Model, m => m.StateUpsertModel.State.Name, validations, Localizer["State"]))
+                @(Html.RenderDateTimeIfVisible(Model, m => m.StateUpsertModel.ChangeDate, validations, Localizer["ChangeDate"]))
+                @(Html.RenderInfoIfVisible(Model, m => m.StateUpsertModel.Dispute.Description, validations, Localizer["Description"]))
+            }
+        </div>
+        @if (Model?.StateUpsertModel?.StateHistory != null && Html.RenderIfVisible(m => m.StateUpsertModel.StateHistory, validations))
+        {
+            @(
+                Html.Kendo().Grid<AdmActStateHistoryModel>(Model.StateUpsertModel.StateHistory)
+                .Name("grid")
+                .Columns(columns =>
+                {
+                columns.Bound(m => m.State.Name).Title(Localizer["State"]).Filterable(filter => filter.Multi(true).Search(true)).Sortable(true).Width("20%");
+                    columns.Bound(m => m.Date).ClientTemplate("#= Date ? kendo.toString(Date, 'dd.MM.yyyy') : '' #").Title(Localizer["Date"]).Filterable(filter => filter.Operators(ops => ops.ForDate(d => d.IsEqualTo("Equals").IsGreaterThan("After").IsLessThan("Before")))).Sortable(true).Width("20%");
+                    columns.Bound(m => m.Dispute).ClientTemplate(
+                    "# if (Dispute) { #" +
+                    "    # if (Dispute.Attachment) { #" +
+                    "        # if (Dispute.Attachment.Url) { #" +
+                    $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?urls=#= Dispute.Attachment.Url #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
+                    "        # } else if (Dispute.Attachment.Id) { #" +
+                    $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?ids=#= Dispute.Attachment.Id #' target='_blank' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
+                    "        # } #" +
+                    "    # } #" +
+                    "    # if (Dispute.Description) { #" +
+                    "      <span>#= Dispute.Description #</span>" +
+                    "    # } #" +
+                    "# } #"
+                    ).Title(Localizer["Details"]).Filterable(false).Sortable(false).Title(" ").Width("50px");
+                })
+                .Sortable(false)
+                .HtmlAttributes(new { @class = "k-mt-2" })
+                .Deferred(deferred)
+                )
+        }
+    </div>
+</div>

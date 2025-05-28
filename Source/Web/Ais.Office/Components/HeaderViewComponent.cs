@@ -4,11 +4,22 @@
     using Ais.Office.Areas.Admin.Controllers;
     using Ais.Office.Areas.Admin.Controllers.Employees;
     using Ais.Office.Areas.OutAdministrativeAct.Controllers;
+    using Ais.Office.Areas.Reports.Controllers.Attachments;
+    using Ais.Office.Areas.Reports.Controllers.CommonOutDoc;
+    using Ais.Office.Areas.Reports.Controllers.InDocuments;
+    using Ais.Office.Areas.Reports.Controllers.InquieryReports;
+    using Ais.Office.Areas.Reports.Controllers.Notifications;
+    using Ais.Office.Areas.Reports.Controllers.Payments;
+    using Ais.Office.Areas.Reports.Controllers.ReportTasks;
+    using Ais.Office.Areas.Reports.Controllers.Services;
+    using Ais.Office.Areas.Reports.Controllers.Tasks;
+    using Ais.Office.Areas.Reports.Controllers.Users;
     using Ais.Office.Controllers;
     using Ais.Office.Controllers.Documents;
     using Ais.Office.ViewModels.Menu;
     using Ais.Resources.Office;
     using Ais.Utilities.Extensions;
+
     using Ais.WebUtilities.Extensions;
 
     using Microsoft.Extensions.Localization;
@@ -127,18 +138,43 @@
                     var menu = new List<MenuItem>();
                     this.AddToMenu(menu, typeof(DocumentsController), "Index", this.localizer["Registration"]);
                     this.AddToMenu(menu, typeof(OutDocumentsController), "Index", this.localizer["OutDocuments"]);
+                    this.AddToMenu(menu, typeof(AdmActController), nameof(AdmActController.Index), this.localizer["AdmAct"]);
+                    this.AddToMenu(menu, typeof(AdmActRegisterController), nameof(AdmActRegisterController.Index), this.localizer["AdmActRegister"]);
 
-                    var registersMenu = new List<MenuItem>();
+                    this.AddToMenu(menu, typeof(ClientsController), nameof(ClientsController.Index), this.localizer["Clients"]);
 
-                    this.AddToMenu(registersMenu, typeof(QualifiedPersonsRegisterController), "Index", this.localizer["QualifiedPersons"]);
-                    this.AddToMenu(registersMenu, typeof(NoticesController), "Index", this.localizer["Notices"]);
-                    this.AddToMenu(registersMenu, typeof(AdmActRegisterController), nameof(AdmActRegisterController.Index), this.localizer["OutDocuments"]);
+                    var statisticsMenu = new List<MenuItem>();
+                    this.AddToMenu(menu, title: this.localizer["Reports"], children: statisticsMenu);
 
+                    var reportsMenu = new List<MenuItem>();
+                    this.AddToMenu(reportsMenu, typeof(EPaymentReportsController), "Index", this.localizer["EPaymentReports"]);
+                    this.AddToMenu(reportsMenu, typeof(PaymentOrderReportsController), "Index", this.localizer["PaymentOrderReports"]);
+                    this.AddToMenu(reportsMenu, typeof(PaymentReportsController), "Index", this.localizer["PaymentReports"]);
+                    this.AddToMenu(reportsMenu, typeof(ReportTasksController), "Index", this.localizer["ReportTasks"]);
+                    this.AddToMenu(reportsMenu, typeof(CommonOutDocReportsController), "Index", this.localizer["CommonOutDocReports"]);
+                    this.AddToMenu(reportsMenu, typeof(InquiryReportsController), "Index", this.localizer["InquiryReports"]);
+                    this.AddToMenu(reportsMenu, typeof(NegativeBallanceClientsController), "Index", this.localizer["NegativeBallanceClients"]);
+                    this.AddToMenu(reportsMenu, typeof(UserLoginReportsController), "Index", this.localizer["UserLoginReports"]);
+                    this.AddToMenu(reportsMenu, typeof(NotificationsReportsController), "Index", this.localizer["NotificationsReports"]);
+                    this.AddToMenu(reportsMenu, typeof(ServicesByPeriodReportsController), "Index", this.localizer["ServicesByPeriod"]);
+                    this.AddToMenu(reportsMenu, typeof(ServicesByPriorityReportsController), "Index", this.localizer["ReportPriorityServices"]);
+                    this.AddToMenu(reportsMenu, typeof(InDocumentsReportsController), "Index", this.localizer["InDocumentsReports"]);
+                    this.AddToMenu(reportsMenu, typeof(AttachmentReportsController), "Index", this.localizer["AttachmentReports"]);
+                    this.AddToMenu(reportsMenu, typeof(TasksByPeriodReportsController), "Index", this.localizer["TasksByPeriodReports"]);
+                    this.AddToMenu(reportsMenu, typeof(AdmActIssuedForPeriodReportsController), "Index", this.localizer["AAIssuedForPeriodReportsSearch"]);
+                    this.AddToMenu(reportsMenu, typeof(AdmActIssuedByAdministrationForPeriodReportsController), "Index", this.localizer["AAIssuedByAdminForPeriodReportsSearch"]);
+                    this.AddToMenu(reportsMenu, typeof(AdmActIssuedByAdministrationForPeriodByTypeReportsController), "Index", this.localizer["AAIssuedByAdminForPeriodByTypeReportsSearch"]);
+                    this.AddToMenu(reportsMenu, typeof(AdmActPublishedInTermReportsController), "Index", this.localizer["AAPublishedInTermReportsSearch"]);
+                    this.AddToMenu(reportsMenu, typeof(AdmActByTypeOfBuildingReportsController), "Index", this.localizer["AAByTypeOfBuildingSearch"]);
                     ////Root
-                    this.AddToMenu(menu, title: this.localizer["Registers"], children: registersMenu);
+                    this.AddToMenu(menu, title: this.localizer["Inquiries"], children: reportsMenu);
 
-                    this.AddToMenu(menu, typeof(FoldersController), "Index", this.localizer["Folders"]);
-                    this.AddToMenu(menu, typeof(ClientsController), "Index", this.localizer["Clients"]);
+                    var archivesMenu = new List<MenuItem>();
+                    this.AddToMenu(archivesMenu, typeof(AdmActLostLegalEffectForPeriodArchivesController), "Index", this.localizer["AALostEffectForPeriodArchivesSearch"]);
+                    this.AddToMenu(archivesMenu, typeof(AdmActLostLegalEffectByAdministrationForPeriodArchivesController), "Index", this.localizer["AALostEffectByAdminForPeriodArchivesSearch"]);
+                    this.AddToMenu(archivesMenu, typeof(AdmActLostLegalEffectByAdministrationForPeriodByTypeArchivesController), "Index", this.localizer["AALostEffectByAdminForPeriodByTypeArchivesSearch"]);
+                    ////Root
+                    this.AddToMenu(menu, title: this.localizer["Archives"], children: archivesMenu);
 
                     var adminMenu = new List<MenuItem>();
 
@@ -151,7 +187,17 @@
                     this.AddToMenu(adminMenu, typeof(HelpController), "Upsert", this.localizer["Help"]);
                     this.AddToMenu(adminMenu, typeof(FaqController), "Index", this.localizer["FAQ"]);
                     this.AddToMenu(adminMenu, typeof(LogsController), "Index", this.localizer["Logs"]);
+                    this.AddToMenu(adminMenu, typeof(IntegrationLogsController), "Index", this.localizer["IntegrationLogs"]);
                     this.AddToMenu(adminMenu, typeof(JournalController), "Index", this.localizer["Journal"]);
+                    this.AddToMenu(adminMenu, typeof(RegistrationRequestsController), nameof(RegistrationRequestsController.Index), this.localizer["RegistrationRequests"]);
+                    this.AddToMenu(adminMenu, typeof(RegistrationEmployeesController), nameof(RegistrationEmployeesController.Index), this.localizer["RegistrationEmployeesController"]);
+                    this.AddToMenu(adminMenu, typeof(RegistrationEmployeesAdminController), nameof(RegistrationEmployeesAdminController.Index), this.localizer["RegistrationEmployeesAdminController"]);
+
+                    ////Root
+                    this.AddToMenu(menu, typeof(IntegrationController), nameof(IntegrationController.GIS), this.localizer["GISLink"]);
+
+                    ////Root
+                    this.AddToMenu(menu, typeof(IntegrationController), nameof(IntegrationController.Integration), this.localizer["IntegrationLink"]);
 
                     ////Root
                     this.AddToMenu(menu, typeof(HelpController), "Index", this.localizer["Help"]);

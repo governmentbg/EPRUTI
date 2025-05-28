@@ -1,8 +1,9 @@
 ﻿@inject IStringLocalizer Localizer
+@using Ais.Office.ViewModels
 @using Microsoft.Extensions.Localization
 @using Ais.WebUtilities.Extensions
 @using Ais.Utilities.Extensions
-@model Ais.Office.ViewModels.ErrorViewModel
+@model ErrorViewModel
 @{
     var corrId = Context.GetOrSetCorrelationId();
     var flag = Model.Code >= 500 && corrId.IsNotNullOrEmpty();

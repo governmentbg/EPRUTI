@@ -1,0 +1,1 @@
+﻿How to test service - https://learn.microsoft.com/en-us/aspnet/core/grpc/test-tools?view=aspnetcore-6.0

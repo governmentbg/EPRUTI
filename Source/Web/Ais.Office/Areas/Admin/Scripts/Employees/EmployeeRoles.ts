@@ -67,7 +67,7 @@ function onDeleteRole(e: JQuery.EventBase): void {
                 "Delete",
                 "EmployeeRoles",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     area: "Admin",
                     data: {
                         id: item.get("Id"),

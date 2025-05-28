@@ -7,6 +7,7 @@
 
     using Ais.Common.Context;
     using Ais.Data.Base.Ais;
+    using Ais.Data.Common.Base;
     using Ais.Data.Models;
     using Ais.Data.Models.Attachment;
     using Ais.Data.Models.Base;

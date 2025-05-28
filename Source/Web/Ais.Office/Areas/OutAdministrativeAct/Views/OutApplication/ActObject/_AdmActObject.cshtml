@@ -2,22 +2,40 @@
 @using Ais.Utilities.Extensions
 @using Ais.WebUtilities.Extensions
 @using Microsoft.Extensions.Localization
-@using Ais.Data.Models.OutAdmAct.OutAdmActObject
+@using global::Ais.Data.Models.OutAdmAct.OutAdmActObject
 @model Ais.Data.Models.OutAdmAct.OutAdmActObject.ActObject
 @{
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var objectIndex = ViewBag.ItemIndex;
 }
+
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].Province.Id" value="@Model.Province?.Id" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].Municipality.Id" value="@Model.Municipality?.Id" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].Settlement.Id" value="@Model.Settlement?.Id" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].Region.Id" value="@Model.Region?.Id" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].TerritoryType.Id" value="@Model.TerritoryType?.Id" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].CadIdentifier" value="@Model.CadIdentifier" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].RegPlace" value="@Model.RegPlace" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].RegQuarter" value="@Model.RegQuarter" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].RegUpi" value="@Model.RegUpi" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].CadPlanRegion" value="@Model.CadPlanRegion" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].CadPlanNumber" value="@Model.CadPlanNumber" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].KVSPlace" value="@Model.KVSPlace" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].KVSNumber" value="@Model.KVSNumber" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].ProtectedTerritory" value="@Model.ProtectedTerritory" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AdditionalDescription" value="@Model.AdditionalDescription" />
 
 @if (Model != null)
 {
     <div class="admact-object-js">
         <div class="flex info-row align-center">
-            @* <div class="number">@(ViewBag.ItemIndex).</div> *@
             <i class="@(Model?.AddressList.IsNotNullOrEmpty() == true ? "k-i-caret-alt-down" : "k-i-sarrow-e") k-font-icon arrow-icon"></i>
             <div class="left">
                 @{
                     @Html.Raw(Model.FullDescriptionHtml)
                 }
+                <br />
+                @(Model.AdditionalDescription.IsNotNullOrEmpty() ? (Localizer["ObjectDescAdditionalDescription"] + ": "  + Model.AdditionalDescription) : string.Empty)
             </div>
             <div class="bttn-wrap w-auto flex gap-5">
                 <button type="button" class="bttn bttn-icon small autosize k-ml-auto add-admact-object-address-js" title="@Localizer["AddAddress"]" data-admobjectuniqueid="@(Model.UniqueId)">
@@ -38,6 +56,8 @@
                 foreach (var objectAddress in Model.AddressList!)
                 {
                     ViewBag.ItemIndex = index;
+                    ViewBag.AddressObjectIndex = objectIndex;
+                    ViewBag.AdmObjectUniqueId = Model.UniqueId;
                     await Html.RenderPartialAsync("_AdmObjectAddress.cshtml", objectAddress);
                     index++;
                 }

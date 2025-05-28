@@ -1,0 +1,151 @@
+﻿@using global::Ais.Data.Models.Employee
+@using global::Ais.Data.Models.Helpers
+@using global::Ais.Data.Models.RegistrationRequest
+@using Ais.Utilities.Extensions
+@using Ais.Infrastructure.KendoExt
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile
+@model Ais.Data.Models.RegistrationRequest.RegistrationRequest
+@{
+}
+<div class="steps-body registration-wrap" id="RegistrationEgnWrapper">
+    <div class="registrationWrapper-js">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <strong class="role-name">
+                    @Localizer["RequestBaseData"]
+                </strong>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth ib">
+                        @Localizer["Role"]:
+                        <strong>@Model.Role.Name</strong>
+                    </div>
+                    <div class="form-input fullwidth ib">
+                        @Localizer["Type"]:
+                        <strong>@Model?.Type?.Name</strong>
+                    </div>
+                    <div class="form-input fullwidth ib">
+                        @Localizer["Status"]:
+                        <span class="reg-status status@(Model.Status.Code)">@Model.Status.Name</span>
+                    </div>
+                    @if (Model.File != null)
+                    {
+                        var downloadData = Model.File?.GetDownloadData();
+                        var downloadLink = downloadData != null
+                        ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                        : null;
+                        if (downloadLink.IsNotNullOrEmpty())
+                        {
+                            <div class="form-input fullwidth ib">
+                                @Localizer["AttachedRequestFile"]:
+                                <a class="simplelink" href="@downloadLink" target="_blank">
+                                    @(Model.File?.Name ?? Localizer["Download"])
+                                </a>
+                            </div>
+                        }
+                    }
+                    @if (Model.User.Egn.IsNotNullOrEmpty())
+                    {
+                        <div class="form-input fullwidth ib">
+                            @Localizer["Egn"]:
+                            <strong>@Model.User.Egn</strong>
+                        </div>
+                    }
+                    @if (Model.User.FirstName.IsNotNullOrEmpty())
+                    {
+                        <div class="form-input fullwidth ib">
+                            @Localizer["FirstName"]:
+                            <strong>@Model.FirstName</strong>
+                        </div>
+                    }
+                    @if (Model.User.SurName.IsNotNullOrEmpty())
+                    {
+                        <div class="form-input fullwidth ib">
+                            @Localizer["SurName"]:
+                            <strong>@Model.SurName</strong>
+                        </div>
+                    }
+                    @if (Model.User.LastName.IsNotNullOrEmpty())
+                    {
+                        <div class="form-input fullwidth ib">
+                            @Localizer["LastName"]:
+                            <strong>@Model.LastName</strong>
+                        </div>
+                    }
+                    @if (EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalAdministrator ||
+                    EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalOperator)
+                    {
+                        if (Model.Office != null)
+                        {
+                            <div class="form-input fullwidth ib">
+                                @Localizer["Administration"]:
+                                <strong>@Model.Office.Name</strong>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        @if (Model.Administration.IsNotNullOrEmpty())
+                        {
+                            <div class="form-input fullwidth ib">
+                                @Localizer["Organization"]:
+                                <strong>@Model.Administration</strong>
+                            </div>
+                        }
+                    }
+                    @if (Model.Department.IsNotNullOrEmpty())
+                    {
+                        <div class="form-input fullwidth ib">
+                            @Localizer["Department"]:
+                            <strong>@Model.Department</strong>
+                        </div>
+                    }
+                    @if (Model.Position.IsNotNullOrEmpty())
+                    {
+                        <div class="form-input fullwidth ib">
+                            @Localizer["Position"]:
+                            <strong>@Model.Position</strong>
+                        </div>
+                    }
+                    @if (Model.Email.IsNotNullOrEmpty())
+                    {
+                        <div class="form-input fullwidth ib">
+                            @Localizer["Email"]:
+                            <strong>@Model.Email</strong>
+                        </div>
+                    }
+                    @if (Model.ContactPhone.IsNotNullOrEmpty())
+                    {
+                        <div class="form-input fullwidth ib">
+                            @Localizer["ContactPhone"]:
+                            <strong>@Model.ContactPhone</strong>
+                        </div>
+                    }
+                    @if (Model.Description.IsNotNullOrEmpty())
+                    {
+                        <div class="form-input fullwidth ib">
+                            @Localizer["RequestDenialDescription"]:
+                            <strong>@Model.Description</strong>
+                        </div>
+                    }
+                </div>
+                @if (EnumHelper.GetRequestStatus(Model.Status.Id.Value) == RequestStatus.Denied)
+                {
+                    <a class="bttn main fullwidth k-mb-2" href="@Url.Action("RegistrationChange", "Registration",new { egn = Model.User.Egn, isNewRequest = true})">
+                        @Localizer["SendNewRegistrationRequest"]
+                    </a>
+                }
+                <a href="@Url.Action("Login", "Authentication")" class="bttn third fullwidth">
+                    @Localizer["BackToLoginPage"]
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

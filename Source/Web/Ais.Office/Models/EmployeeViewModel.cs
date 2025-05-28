@@ -25,5 +25,7 @@
         public EmployeeUserViewModel User { get; set; }
 
         public Nomenclature Office { get; set; }
+
+        public string Egn { get; set; }
     }
 }

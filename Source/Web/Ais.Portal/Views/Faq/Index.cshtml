@@ -1,0 +1,29 @@
+﻿@using Ais.Utilities.Extensions
+@model List<Ais.Data.Models.Faq.FaqCategory>
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+@section Scripts {
+    <script src="~/bundles/faq.min.js" asp-append-version="true"></script>
+}
+
+@if (Model.IsNotNullOrEmpty())
+{
+    @(Html.Kendo().TabStrip()
+                  .Name("FaqTabs")
+                  .Items(
+                      tabstrip =>
+                      {
+                         foreach (var item in Model)
+                         {
+                             tabstrip.Add().Text(item.Names.ToString())
+                                     .Selected(Model.IndexOf(item) == 0)
+                                     .LoadContentFrom("Get", "Faq", new { categoryId = item.Id })
+                                     .ContentHtmlAttributes(new { @class = "faq-tab-wrapper" });
+                         }                                        
+                      }).Deferred())
+}   

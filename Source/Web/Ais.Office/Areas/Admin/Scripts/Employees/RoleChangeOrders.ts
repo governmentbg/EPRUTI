@@ -214,7 +214,7 @@ function onDeleteOrder(e: JQuery.EventBase): void {
                 "Delete",
                 "RoleChangeOrders",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     area: "Admin",
                     data: {
                         id: item.get("Id"),

@@ -3,16 +3,19 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
     using Ais.Infrastructure.Roles;
     using Ais.Office.ViewModels.Journal;
     using Ais.Services.Ais;
     using Ais.Table.Mvc.Utilities;
     using Ais.WebServices.Services.SessionStorage;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
 
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -71,10 +74,10 @@
             if (query == null || !ReflectionUtils.HasNonNullProperty(query))
             {
                 query = new JournalQueryViewModel
-                        {
-                            RegDateFrom = DateTime.Now.AddMonths(-1),
-                            RegDateTo = DateTime.Now
-                        };
+                {
+                    RegDateFrom = DateTime.Now.AddMonths(-1),
+                    RegDateTo = DateTime.Now
+                };
             }
 
             return base.Index(query);

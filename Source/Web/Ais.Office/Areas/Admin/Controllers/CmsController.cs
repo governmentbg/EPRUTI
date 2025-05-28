@@ -4,13 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Cms;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.QueryModels;
     using Ais.Infrastructure.BaseTypes;
     using Ais.Infrastructure.Roles;
     using Ais.Office.ViewModels.Cms;
@@ -18,11 +11,23 @@
     using Ais.Utilities.Exception;
     using Ais.Utilities.Extensions;
     using Ais.WebServices.Services.SessionStorage;
+    using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Cms;
+    using global::Ais.Data.Models.Helpers;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.QueryModels;
 
     using Kendo.Mvc.Extensions;
     using Kendo.Mvc.UI;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Localization;
@@ -180,7 +185,7 @@
                     await this.cmsService.UpsertAsync(dbModel);
                     await transaction.CommitAsync();
 
-                    this.ShowMessage(WebUtilities.Enums.MessageType.Success, this.localizer["ChangesSuccessfullySaved"]);
+                    this.ShowMessage(MessageType.Success, this.localizer["ChangesSuccessfullySaved"]);
 
                     var redirectUrl = this.Url.Action("Index");
                     return this.RedirectToUrl(redirectUrl!);
@@ -226,7 +231,7 @@
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <returns>System.Threading.Tasks.Task.</returns>
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.CmsDelete)]
         public async Task Delete(Guid id)
         {

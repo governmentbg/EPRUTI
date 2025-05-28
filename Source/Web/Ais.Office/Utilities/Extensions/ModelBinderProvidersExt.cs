@@ -1,6 +1,7 @@
 ﻿namespace Ais.Office.Utilities.Extensions
 {
     using Ais.Infrastructure.ModelBinder;
+
     using Microsoft.AspNetCore.Mvc.ModelBinding;
 
     /// <summary>

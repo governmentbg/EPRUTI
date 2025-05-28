@@ -1,6 +1,6 @@
-﻿@using Ais.Data.Models.Attachment
-@using Ais.Data.Models.Helpers
-@using Ais.Data.Models.Publication
+﻿@using global::Ais.Data.Models.Attachment
+@using global::Ais.Data.Models.Helpers
+@using global::Ais.Data.Models.Publication
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer Localizer;
 @using Microsoft.Extensions.Configuration
@@ -11,6 +11,7 @@
     var isNewsOrEvent = Model.Type.Id == EnumHelper.GetPublicationType(PublicationType.News) || Model.Type.Id == EnumHelper.GetPublicationType(PublicationType.Event);
     var isNotMessage = Model.Type.Id != EnumHelper.GetPublicationType(PublicationType.Message);
     var asyncUploadChunkSize = Configuration.GetValue<double>("Attachment:AsyncUploadChunkSize");
+    var isMrrb = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
 }
 
 @section Breadcrumbs
@@ -94,7 +95,7 @@
                 <label class="empty"></label>
                 @Html.Kendo().CheckBoxFor(m => m.IsVisibleInWeb).Label(Localizer["VisibilityInPublicPart"]).Deferred()
             </div>
-            if (!isNotMessage)
+            if (!isNotMessage && !isMrrb)
             {
                 <div class="form-input w-auto">
                     <label class="empty"></label>

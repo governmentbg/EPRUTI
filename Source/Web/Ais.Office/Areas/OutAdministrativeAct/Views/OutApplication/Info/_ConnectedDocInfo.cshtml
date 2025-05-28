@@ -1,0 +1,42 @@
+﻿@using global::Ais.Data.Models.OutAdmAct
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using global::Ais.Data.Models.Client
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@inject IStringLocalizer Localizer
+@model ConnectedAdmAct
+@if (Model != null)
+{
+    RenderDocument(Model);
+
+    void RenderDocument(ConnectedAdmAct doc)
+    {
+        <div class="flex info-row">
+            @if (doc != null)
+            {
+                if (!string.IsNullOrEmpty(doc?.RegNumber))
+                {
+                    <div class="ib">
+                        <a class="simplelink"><strong class="info-admact-js" data-id='@Model.Id' data-regnum='@Model.RegNumber'>@Localizer["RegNumber"]: @doc.RegNumber</strong></a>
+                    </div>
+                }
+
+                if (!string.IsNullOrEmpty(doc?.Type?.Name))
+                {
+                    <div class="ib">@Localizer["AAType"]: <strong class="">@doc?.Type?.Name</strong></div>
+                }
+
+                if (doc?.RegDate != null)
+                {
+                    <div class="ib">@Localizer["RegDate"]: <strong class="">@doc.RegDate.ToShortDateString()</strong></div>
+                }
+
+                if (doc?.Administration != null)
+                {
+                    <div class="ib">@Localizer["Administration"]: <strong class="">@doc.Administration</strong></div>
+                }
+            }
+        </div>
+    }
+}

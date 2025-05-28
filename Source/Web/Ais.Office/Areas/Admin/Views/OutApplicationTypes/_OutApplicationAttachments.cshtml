@@ -1,0 +1,66 @@
+﻿@using global::Ais.Data.Models.Attachment
+@using Ais.Office.ViewModels.OutDocAttachment
+@using Microsoft.Extensions.Localization;
+
+@inject IStringLocalizer Localizer;
+
+@model OutDocAttachmetUpsertViewModel
+
+@{
+    var isRequired = $"<span>#: IsWebVisible != null && IsWebVisible ? '{Localizer["Yes"]}' : '{Localizer["No"]}' #</span>";
+}
+
+<div id="ServiceAttachmentsWrapper">
+    <form method="post" action="@Url.ActionLink("UpsertOutDocAttachments", "OutApplicationTypes")"
+          data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-update="#ServiceAttachmentsWrapper">
+        @Html.ValidationSummary(true)
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.DocumentId)
+
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["ServiceAttachments"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="form-input fullwidth">
+                        @(Html.Kendo().Grid<OutDocAttachment>(Model.Attachments ?? new List<OutDocAttachment>())
+                            .HtmlAttributes(new { data_serviceid = Model.DocumentId })
+                            .Name("OutDocAttachmentsGrid")
+                            .Columns(column =>
+                            {
+                                column.Bound(c => c.Id).Hidden();
+                                column.Bound(c => c.Name)
+                                .ClientTemplate("<span>#: Name && Name ? Name: '' #</span>")
+                                .Title(Localizer["Type"])
+                                .Width("20%");
+                                column.Bound(c => c.IsRequired.Name)
+                                .ClientTemplate("<span>#: IsRequired?.Name != null ? IsRequired.Name : '' #</span>")
+                                .Title(Localizer["IsRequired"])
+                                .Width("20%");
+                                column.Bound(c => c.IsWebVisible)
+                                .ClientTemplate(isRequired)
+                                .Title(Localizer["IsWebVisible"])
+                                .Width("20%");
+                                column.Bound(c => c.GroupRelDocContent)
+                                .ClientTemplate("<span>#: GroupRelDocContent ? GroupRelDocContent : '' #</span>")
+                                .Title(Localizer["Group"])
+                                .Width("40%");
+                                column.Bound(c => c.DocumentId)
+                                .Title(Localizer["Actions"])
+                                .Width("20%")
+                                .ClientTemplate(
+                                "<div class='text-center'><a href='\\#' class='k-button k-small edit-outdoc-attachment' data-name='#: Name && Name ? Name: '' #' data-docid='#: DocumentId #' data-attachmentid='#: Id #'><span class='k-i-edit k-icon k-font-icon k-button-icon'></span></a></div>");
+                            })
+                            .DataSource(d => d.Ajax().Model(m => m.Id("Id"))))
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="k-dialog-buttongroup">
+            <a href="@Url.Action("Index")" class="bttn right">@Localizer["Close"]</a>
+        </div>
+    </form>
+</div>

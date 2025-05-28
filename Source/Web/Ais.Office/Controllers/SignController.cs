@@ -1,11 +1,5 @@
 ﻿namespace Ais.Office.Controllers
 {
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Document;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.Reporting;
-    using Ais.Data.Models.Signature;
     using Ais.Infrastructure.BaseTypes;
     using Ais.Infrastructure.KendoExt;
     using Ais.Office.Controllers.Documents;
@@ -18,6 +12,15 @@
     using Ais.WebServices.Services.Storage;
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Document;
+    using global::Ais.Data.Models.Helpers;
+    using global::Ais.Data.Models.Reporting;
+    using global::Ais.Data.Models.Signature;
+
     using IO.SignTools.Contracts;
     using IO.SignTools.Models;
 
@@ -302,12 +305,14 @@
                 string url = null;
                 switch (model.EntryType)
                 {
+                    case EntryType.InDocument:
                     case EntryType.OutDocument:
                         {
                             url = this.Url.DynamicAction(
                                         nameof(OutDocumentsController.Info),
                                         typeof(OutDocumentsController),
                                         new { id = model.Id });
+
                             await this.documentStatusService.SetDocumentStatusAsync(
                                 model.Id,
                                 Guid.Empty,

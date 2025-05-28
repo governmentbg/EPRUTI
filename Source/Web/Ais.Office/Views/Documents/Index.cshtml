@@ -2,7 +2,7 @@
 @using Ais.Utilities.Extensions
 @using Ais.WebUtilities.Extensions;
 @using Microsoft.Extensions.Localization
-@using Ais.Data.Models.Document
+@using global::Ais.Data.Models.Document
 @using Ais.Infrastructure.Roles
 @model List<Ais.Data.Models.ApplicationType.ApplicationType>
 @inject IStringLocalizer Localizer
@@ -62,7 +62,7 @@
                             <div class="step-box-body">
                                 <div class="center">
                                     <ul class="docs">
-                                        <dli>
+                                        <li>
                                             @foreach (var type in groups[EntryType.OutDocument].OrderBy(item => item.RegisterIndex.Name))
                                             {
                                                 <li>
@@ -74,7 +74,7 @@
                                                 <div class="name"> <a href="@Url.Action("Index", "OutApplication", new { type = type.Id, name = type.Name, groupType = type.DocGroupTypeId })" title="@type.Name">@type.ShortNames</a></div>
                                             </li>
                                             }
-                                        </dli>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>

@@ -1,15 +1,23 @@
 ﻿@using Ais.Utilities.Extensions
+@using global::Ais.Data.Models.OutAdmAct
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer Localizer;
-@model Ais.Data.Models.Document.OutAdmAct
+@model OutAdmAct
 
 <div class="step-box">
-    <div class="step-box-head">
+    <div class="step-box-head-unordered">
         <h3 class="step-box-title">
             @Localizer["ActObject"]
         </h3>
     </div>
     <div class="step-box-body">
+        @if (!string.IsNullOrEmpty(Model?.Object?.NameDesc))
+        {
+            <div class="form-row">
+                <div class="form-input fullwidth ib">@Localizer["ObjectsDescription"]: <strong>@(Model.Object.NameDesc)</strong></div>
+            </div>
+        }
+
         @if (Model?.Object?.AdmActObjects != null)
         {
             @foreach (var item in Model.Object.AdmActObjects)
@@ -22,6 +30,8 @@
                             @{
                                 @Html.Raw(item.FullDescriptionHtml)
                             }
+                            <br />
+                            @(item.AdditionalDescription.IsNotNullOrEmpty() ? (Localizer["ObjectDescAdditionalDescription"] + ": " + @item.AdditionalDescription) : string.Empty)
                         </div>
                     </div>
                     <div class="admact-object-addresses-js">

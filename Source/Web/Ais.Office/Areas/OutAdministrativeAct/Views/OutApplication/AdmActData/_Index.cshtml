@@ -1,17 +1,49 @@
-﻿@using Ais.Office.ViewModels.Application
+﻿@using global::Ais.Data.Models.DynamicValidation
+@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Office.Controllers
+@using Ais.Office.ViewModels.Application
 @using Ais.WebUtilities.Extensions
 @using Ais.WebUtilities.Helpers
 @using Microsoft.Extensions.Localization
-@model Ais.Data.Models.Document.OutAdmAct
+@using Ais.Office.Utilities.Helpers
+@using global::Ais.Data.Models.Document;
+@using global::Ais.Data.Models.OutAdmAct;
+@model OutAdmAct
 @inject IStringLocalizer Localizer;
 @{
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
 }
-
 <div class="steps-body k-flex-column">
     @{
         ViewBag.ApplicationUniqueId = Model.UniqueId;
+        var docTypeId = Model?.Type?.Id;
     }
+    @Html.HiddenFor(m => m.Type.Id)
+    <div class="step-box fg-1">
+        <div class="step-box-head">
+            <h3 class="step-box-title">
+                @Localizer["AARegisterType"]
+            </h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row no-wrap">
+                <div class="form-input half">
+                    @Html.InfoLabel(Localizer["AARegisterType"], "AARegisterType")
+                    @(Html.Kendo().DropDownListFor(m => m.RegisterType.Id)
+                        .DataTextField("Name")
+                        .DataValueField("Id")
+                        .Enable(Model?.Id != null ? false : true)
+                        .ValueTemplate("<input type='hidden' id='Registery_Name' name='RegisterType.Name' value='#: Name #'>" +
+                        "<span>#= Name #</span>")
+                        .DataSource(d => d.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.GetAdmActRegisterTypes), typeof(NomenclatureController),
+                        new { docType = docTypeId, Area = string.Empty }))))
+                        .Deferred(deferred))
+
+                    @Html.ValidationMessage("RegisterType")
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="step-box fg-1">
         <div class="step-box-head">
             <h3 class="step-box-title">
@@ -48,11 +80,16 @@
 @{
     await Html.RenderPartialAsync("AdmActState/_State", Model);
 }
-
+<div id="connected-docs-info" class="step-box">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["ConnectedDocs"]
+        </h3>
+    </div>
+    @await Html.PartialAsync("Info/_ConnectedDocsInfo", Model?.ConnectedDocuments)
+</div>
 <div class="form-row fullwidth">
     <div class="form-input k-ml-auto">
-        @* @* <button type='button' class='bttn third fullwidth bttn-icon autosize add-admatdata-js' title='@Localizer["Save"]'>@Localizer["Save"]</button> *@
-        @* Must be added Later -> the button below *@
-        @* <button type='button' class='bttn third small bttn-icon autosize search-admact-js' data-uniqueid="@Model.UniqueId" title='@Localizer["SearchAdmAct"]'><i class='k-icon k-font-icon k-i-search'></i></button> *@
+        <button type='button' class='center bttn big main search-admact-js' data-uniqueid="@Model.UniqueId" title='@Localizer["SearchAdmAct"]'>@Localizer["SearchAndConnectAdmAct"]</button>
     </div>
 </div>

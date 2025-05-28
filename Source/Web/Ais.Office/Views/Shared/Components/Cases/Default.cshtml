@@ -1,0 +1,376 @@
+﻿@using Ais.Office.ViewModels.Documents.InDocuments;
+@using global::Ais.Data.Models.Case;
+@using Ais.Office.ViewModels.Cases;
+@using Ais.Office.ViewModels.Clients;
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions;
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer;
+@model Ais.Office.ViewModels.Cases.CaseUpsertViewModel
+@{
+    ViewBag.IsNotCenterContent = true;
+    ViewBag.ContentClass = "index";
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var isDocumentInfo = ViewBag.IsDocumentInfo is bool && (bool)ViewBag.IsDocumentInfo;
+    void RenderLeftSide()
+    {
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["BasicData"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="ib">
+                        @Localizer["CaseNumber"]: <strong>@Model.Number</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["Status"]: <strong>@Model.CaseStatus?.Name</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["RegisteredOn"]: <strong> @(Model.FromDate.HasValue ? Model.FromDate.Value.ToString("G") : "-")</strong>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="ib">
+                        @Localizer["Court"]: <strong>@Model.Court?.Name</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["GCCO"]: <strong>@Model.ExecutionOffice?.Name</strong>
+                    </div>
+                </div>
+                <div class="form-row">
+                    @Localizer["CommentCase"]: <strong>@Model.Comment</strong>
+                </div>
+                <div class="form-row">
+                    @Localizer["TotalPaid"]: <strong>@($"{Model.TotalPaid:c2}") @*TODO - format to euro*@</strong>
+                </div>
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["ExecutionSheet"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="ib">
+                        @Localizer["Name"]: <strong>@Model.ExecutionSheet?.Name</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["IssueDate"]: <strong>@(Model.ExecutionSheet?.IssuedDate != null ? Model.ExecutionSheet.IssuedDate.Value.ToShortDateString() : "-")</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["InFavorFor"]: <strong>@Model.InFavorFor?.Name</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["PaymentDueDate"]: <strong>@(Model.ResponseDueDate.HasValue ? Model.ResponseDueDate.Value.ToString("G") : "-")</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["ExecListPaidDate"]: <strong>@Model.ExecutionSheet?.PaidDate</strong>
+                    </div>
+                </div>
+                <div>
+                    @Localizer["Expenses"]: <strong>@Model.ExecutionSheet?.Expenses?.ToString()</strong>
+                </div>
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["InvitationForVoluntaryExecution"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="ib">
+                        @Localizer["InvitationNumber"]: <strong>@Model.Invitation?.Number</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["InvitationDate"]: <strong> @(Model.Invitation?.Date != null ? Model.Invitation.Date.Value.ToShortDateString() : "-")</strong>
+                    </div>
+                    @{
+                        var downloadData = Model?.Invitation?.File?.GetDownloadData();
+                        var link = downloadData != null
+                            ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                            : null;
+                        if (link.IsNotNullOrEmpty())
+                        {
+                            <a href="@link" class="bttn bttn-icon third" title="@(Model?.Invitation?.File?.Name ?? Localizer["Download"])"><i class="k-icon k-font-icon k-i-download"></i></a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["ExecutionCase"]</h3>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row">
+                    <div class="ib">
+                        @Localizer["ExecutionCaseNumber"]: <strong>@Model.ExecutionCase?.Number</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["ExecutionCaseDate"]: <strong>@(Model.ExecutionCase?.Date != null ? Model.ExecutionCase.Date.Value.ToShortDateString() : "-")</strong>
+                    </div>
+                    @{
+                        downloadData = Model?.ExecutionCase?.File?.GetDownloadData();
+                        link = downloadData != null
+                            ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                            : null;
+                        if (link.IsNotNullOrEmpty())
+                        {
+                            <a href="@link" class="bttn bttn-icon third" title="@(Model?.ExecutionCase?.File?.Name ?? Localizer["Download"])"><i class="k-icon k-font-icon k-i-download"></i></a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    void RenderRightSide()
+    {
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["AppealedDocuments"]</h3>
+            </div>
+            <div class="step-box-body">
+                @(Html.Kendo().ListView<DocShortViewModel>()
+                .Name("appealeddocuments")
+                .ClientTemplateId("inDocTemplateId")
+                .TagName("div")
+                .DataSource(x => x.Ajax().Read("GetCaseAppealedDocuments", "Cases", new { caseSessionId = Model.UniqueId, Area = string.Empty })).Deferred(deferred))
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["FilledComplaints"]</h3>
+            </div>
+            <div class="step-box-body">
+                @(Html.Kendo().ListView<DocShortViewModel>()
+                .Name("complaint")
+                .ClientTemplateId("inDocTemplateId")
+                .TagName("div")
+                .DataSource(x => x.Ajax().Read("GetCaseComplaints", "Cases", new { caseSessionId = Model.UniqueId, Area = string.Empty })).Deferred(deferred))
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["Senders"]</h3>
+            </div>
+            <div class="step-box-body">
+                @(Html.Kendo().ListView<ClientShortViewModel>()
+                .Name("clients")
+                .ClientTemplateId("clientsTemplateId")
+                .TagName("div")
+                .DataSource(x => x.Ajax().Read("GetCaseClients", "Cases", new { caseSessionId = Model.UniqueId, Area = string.Empty })).Deferred(deferred))
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["ScheduledFor"]</h3>
+                <a href="#" class="k-ml-auto k-mr-2 k-button k-small open-calendar-js" data-case-id="@Model.Id"><i class="k-icon k-font-icon k-i-calendar"></i></a>
+            </div>
+            <div class="step-box-body">
+                @(Html.Kendo().ListView<ScheduledFor>()
+                .Name("scheduledDates")
+                .ClientTemplateId("scheduledDatesTemplateId")
+                .TagName("div")
+                .DataSource(x => x.Ajax().Read("GetScheduledDates", "Cases", new { caseSessionId = Model.UniqueId, Area = string.Empty })).Deferred(deferred))
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head">
+                <h3 class="step-box-title">@Localizer["Attorney"]</h3>
+            </div>
+            <div class="step-box-body">
+                @(Html.Kendo().ListView<CaseAttorneyViewModel>()
+                .Name("attorneys")
+                .TagName("div")
+                .ClientTemplateId("attorneysDataTemaplateId")
+                .DataSource(x => x.Ajax().Read("GetAttorneysData", "Cases", new { caseSessionId = Model.UniqueId, Area = string.Empty }))
+                .Deferred(deferred))
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head bg-yellow">
+                <h3 class="step-box-title">@Localizer["CourtResult"]</h3>
+            </div>
+            <div class="step-box-body">
+                @(Html.Kendo().ListView<DocShortViewModel>()
+                .Name("courtresult")
+                .ClientTemplateId("inDocTemplateId")
+                .TagName("div")
+                .DataSource(x => x.Ajax().Read("GetCaseCourtResults", "Cases", new { caseSessionId = Model.UniqueId, Area = string.Empty })).Deferred(deferred))
+                <div class="form-row">
+                    <div class="ib">
+                        @Localizer["ActNumber"]: <strong>@Model.CourtAdditionalData?.ActNumber</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["ResponseDueDate"]: <strong> @Model.CourtAdditionalData?.ResponseDueDate</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["AppealDeadline"]: <strong>@Model.CourtAdditionalData?.AppealDeadline</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["FromDate"]: <strong>@Model.CourtAdditionalData?.FromDate</strong>
+                    </div>
+                </div>
+                <div>
+                    @Localizer["CaseComment"]: <strong>@Model.CourtAdditionalData?.Comment</strong>
+                </div>
+            </div>
+        </div>
+        <div class="step-box">
+            <div class="step-box-head bg-red">
+                <h3 class="step-box-title">@Localizer["SacResult"]</h3>
+            </div>
+            <div class="step-box-body">
+                @(Html.Kendo().ListView<DocShortViewModel>()
+                .Name("sacresult")
+                .ClientTemplateId("inDocTemplateId")
+                .TagName("div")
+                .DataSource(x => x.Ajax().Read("GetCaseSacResults", "Cases", new { caseSessionId = Model.UniqueId, Area = string.Empty })).Deferred(deferred))
+                <div class="form-row">
+                    <div class="ib">
+                        @Localizer["Number"]: <strong>@Model.SacAdditionalData?.Number</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["FromDate"]: <strong> @Model.SacAdditionalData?.FromDate</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["ActmentDate"]: <strong>@Model.SacAdditionalData?.ActmentDate</strong>
+                    </div>
+                    <div class="ib">
+                        @Localizer["Status"]: <strong>@Model.SacAdditionalData?.ResultStatus?.Name</strong>
+                    </div>
+                </div>
+                <div>
+                    @Localizer["Comment"]: <strong>@Model.SacAdditionalData?.Comment</strong>
+                </div>
+            </div>
+        </div>
+    }
+
+    if (isDocumentInfo)
+    {
+        RenderLeftSide();
+        RenderRightSide();
+    }
+    else
+    {
+        <section id="zaqvlenie" class="flex cases">
+            <div class="k-window-split-wrap task-execution">
+                <div class="k-window-left-wrap">
+                    <div class="split-content-wrap">
+                        @{
+                            RenderLeftSide();
+                        }
+                    </div>
+                </div>
+                <div class="k-window-right-wrap">
+                    <div class="split-content-wrap">
+                        @{
+                            RenderRightSide();
+                        }
+                    </div>
+                </div>
+            </div><!-- end split -->
+        </section>
+
+        <script>
+            $(function () {
+                $(".k-window-split-wrap").kendoSplitter({
+                    orientation: "horizontal"
+                }).data("kendoSplitter").size(".k-pane:first", "49%");
+            })
+        </script>
+    }
+    await Html.RenderPartialAsync("_FileTemplate");
+}
+
+<script src="~/bundles/cases.min.js" asp-append-version="true"></script>
+
+<script type="text/x-kendo-template" id="inDocTemplateId">
+     <div class="form-row">
+        <div class="ib"><strong><a class="info-link open-doc-info-js" data-regnum="#:RegNumber#" data-entry-type-id = "#:EntryType.Id#" data-id = #: Id #>#: Type.Name # #: RegNumber != null ? RegNumber : '' # </a></strong></div>
+        <div class="ib">@Localizer["Date"]: <strong>#: RegDate != null ? kendo.toString(RegDate, 'G') : '' #</strong></div>
+    @* <div class="ib">@Localizer["SenderName"]: <strong>#: SenderName != null ? SenderName : '' #</strong></div>*@
+     </div>
+</script>
+<script type="text/x-kendo-template" id="clientsTemplateId">
+    <div class="form-row">
+        <div class="ib"><strong><a class="info-link open-client-info-js" data-id="#: Id #" data-name="#: FullName #"> #: FullName != null ? FullName : '' #</a></strong></div>
+        <div class="ib">@Localizer["EGN"]: <strong>#: EgnBulstat != null ? EgnBulstat : '' #</strong></div>
+        <div class="ib">@Localizer["Phone"]: <strong>#: Phone != null ? Phone : '' #</strong></div>
+    </div>
+</script>
+<script type="text/x-kendo-template" id="scheduledDatesTemplateId">
+    <div class="form-row">
+        <div class="ib">
+    @Localizer["Date"]:&nbsp;<strong> #: kendo.toString(data.Date, 'G') #</strong>
+        </div>
+    </div>
+</script>
+<script type="text/x-kendo-template" id="attorneysDataTemaplateId">
+        # var index = kendo.guid(); #
+    <div class="steps-body p-0">
+        <div class="step-box">
+             <div class="step-box-head">
+                 <h3 class="step-box-title">#: Attorney.Type.Name != null ? Attorney.Type.Name : '' #: <strong>#: Attorney.FullName #</strong></h3>
+             </div>
+             <div class="step-box-body attorney-box">
+                  <div class="step-box">
+                       <div class="step-box-head">
+                           <h3 class="step-box-title">@Localizer["LegalReport"]</h3>
+                       </div>
+                       <div class="step-box-body">
+                         <div class="form-row">
+                             <div class="ib">@Localizer["LegalReportNumber"]: <strong>#: LegalReportNumber != null ? LegalReportNumber : '-' #</strong></div>
+                             <div class="ib">@Localizer["LegalReportDate"]: <strong>#: LegalReportDate != null ?  kendo.toString(data.LegalReportDate, 'd') : '-' #</strong></div>
+                         </div>
+                       </div>
+                   </div>
+                   <div class="step-box">
+                       <div class="step-box-head">
+                           <h3 class="step-box-title">@Localizer["ReportOnLegealOtherData"]</h3>
+                       </div>
+                       <div class="step-box-body">
+                         <div class="form-row">
+                            <div class="ib">@Localizer["ReportOnLegealRepresantationNumber"]: <strong>#: ReportOnLegealRepresantationNumber != null ? data.ReportOnLegealRepresantationNumber : '-' #</strong></div>
+                            <div class="ib">@Localizer["ReportOnLegealRepresantationDate"]: <strong>#: ReportOnLegealRepresantationDate != null ?  kendo.toString(data.ReportOnLegealRepresantationDate, 'd') : '-' #</strong></div>
+                            <div class="ib">
+                                 #if(FirstInstance)  {#
+                                     <strong>@Localizer["FirstInstance"]</strong>
+                                  #}#
+                                 #if(SecondInstance) { #
+                                     <strong> | @Localizer["SecondInstance"]</strong>
+                                 #}#
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                   <div class="step-box">
+                       <div class="step-box-head">
+                             <h3 class="step-box-title">@Localizer["ReportOnLegealRepresantation"]</h3>
+                       </div>
+                       <div class="step-box-body">
+                         <div class="form-row">
+                            <div class="ib">@Localizer["LawAttorneyLetter"]: <strong>#: LawAttorneyLetter != null ? LawAttorneyLetter : '-' #</strong></div>
+                            <div class="ib">@Localizer["LawReportDate"]: <strong>#: LawReportDate != null ?  kendo.toString(data.LawReportDate, 'd') : '-' #</strong></div>
+                         </div>
+                       </div>
+                   </div>
+                   <div class="step-box m-0">
+                       <div class="step-box-head">
+                             <h3 class="step-box-title">@Localizer["LegalProtectionAgreement"]</h3>
+                       </div>
+                       <div class="step-box-body">
+                         <div class="form-row">
+                            <div class="ib">@Localizer["LegalProtectionAgreementNumber"]: <strong>#:LegalProtectionAgreementNumber != null ? LegalProtectionAgreementNumber  : '-' #</strong></div>
+                            <div class="ib">@Localizer["LegalProtectionAgreementDate"]: <strong>#: LegalProtectionAgreementDate != null ?  kendo.toString(data.LegalProtectionAgreementDate, 'd')  : '-' #</strong></div>
+                            <div class="ib">@Localizer["LegalProtectionAgreementPrice"]: <strong>#: LegalProtectionAgreementPrice != null ? kendo.toString(data.LegalProtectionAgreementPrice, 'c2') : '-' #</strong></div>
+                         </div>
+                       </div>
+                   </div>
+         </div>
+       </div>
+    </div>
+</script>

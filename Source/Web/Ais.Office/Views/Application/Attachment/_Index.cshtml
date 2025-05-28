@@ -1,0 +1,56 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.Office.Utilities.Helpers;
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using global::Ais.Data.Models.Attachment
+@model Ais.Data.Models.Document.InDocument
+@{
+    async Task RenderAttachmentAsync(AttachmentType type, IEnumerable<Attachment> attachments = null, bool required = false)
+    {
+        if (attachments.IsNotNullOrEmpty() && ViewBag.IsTaskProcessing is true)
+        {
+            attachments = attachments.Where(x => x.IsAdditional).ToList();
+        }
+
+        if (attachments.IsNullOrEmpty())
+        {
+            attachments = new Attachment[] { null };
+        }
+
+        foreach (var attachment in attachments)
+        {
+            ViewBag.Attachment = attachment;
+            ViewBag.Required = required;
+            await Html.RenderPartialAsync("~/Views/Application/Attachment/_Attachment.cshtml", type);
+        }
+    }
+    var types = ViewBag.AttachmentTypes as HashSet<AttachmentType>;
+    <div class="steps-body">
+        @{
+            if (types.IsNotNullOrEmpty())
+            {
+                var group = Model.Attachments?
+                    .GroupBy(item => item.Type.Id)
+                    .ToDictionary(k => k.Key, v => v);
+                foreach (var type in types!)
+                {
+                    var required = ApplicationHelper.IsAttachmentTypeRequired(type, Model);
+                    var titleClass = required ? "required" : string.Empty;
+                    <div class="step-box">
+                        <div class="step-box-head">
+                            <h3 class="step-box-title fullwidth @titleClass">
+                                @(type.Title.ToString())
+                            </h3>
+                            <button type="button" class="bttn main small right add-attachment-js" data-unique-id="@ViewBag.ApplicationUniqueId" data-dont-show-relate="@(ViewBag.DontShowRelateObject is true)" value="@type.Id">
+                                @Localizer["Add"]
+                            </button>
+                        </div>
+                        @{
+                            await RenderAttachmentAsync(type, group?.ContainsKey(type.Id!.Value) == true ? group[type.Id.Value] : null, required);
+                        }
+                    </div>
+                }
+            }
+        }
+    </div>
+}

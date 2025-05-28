@@ -28,7 +28,7 @@ function onRemovePublicationClick(e: JQuery.EventBase): void {
                 "Delete",
                 "Publications",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     useArea: true,
                     area: "admin",
                     data: {

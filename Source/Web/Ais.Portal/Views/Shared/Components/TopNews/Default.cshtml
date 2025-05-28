@@ -1,0 +1,45 @@
+﻿@using global::Ais.Data.Models.Publication
+@using Ais.Portal.ViewModels.Publication
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model List<PublicationListViewModel>
+@if (Model.IsNotNullOrEmpty())
+{
+    <section id="news" class="index-news">
+        <h2 class="sectitle">
+            @Localizer["News"]
+            <a href="@Url.Action("Index", "Publication", new { type = PublicationType.News })" class="rm right w-auto">
+                @Localizer["AllNews"]
+            </a>
+        </h2>
+        <div class=" news-wrap">
+            <ul class="itemlist">
+                    @foreach (var item in Model)
+                    {
+                        <li class="four">
+                            <a href="@Url.Action("Preview", "Publication", new { id = item.Id, type = item.Type })">
+                                <span class="img-wrap">
+                                    <img src="@item.MainPictureUrl" alt="@item.Title" />
+                                </span>
+                                <span class="info-wrap text-left">
+                                    <span class="n-date">
+                                        @if (item.StartDate.HasValue)
+                                        {
+                                            @item.StartDate.Value.ToShortDateString()
+                                        }
+                                    </span>
+                                    <strong class="n-title" title="@item.Title">
+                                        @item.Title
+                                    </strong>
+                                    <span class="n-text">
+                                        @Html.Raw(item.Content)
+                                    </span>
+                                </span>
+                            </a>
+                        </li>
+                    }
+            </ul>
+        </div>
+    </section>
+}

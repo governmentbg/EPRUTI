@@ -1,0 +1,44 @@
+﻿@using System.Net
+@using Ais.Portal.Utilities.Extensions
+@using Ais.Portal.ViewModels
+@using Ais.WebUtilities.Extensions
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model ErrorViewModel
+@{
+    var corrId = Context.GetOrSetCorrelationId();
+    var flag = Model.Code >= 500 && corrId.IsNotNullOrEmpty();
+    var isAjax = ViewContext.HttpContext.Request.IsAjaxRequest();
+    var message = Model.Message;
+    if (Model.Code == HttpStatusCode.Forbidden.GetHashCode() && User.IsLegalOzlUser())
+    {
+        message = Localizer["LegalOzlForbiddenMessage"];
+    }
+    if (isAjax)
+    {
+        @message
+        @if (flag)
+        {
+            <br />@Html.Raw($"{Localizer["ErrorId"]} - <div id=\"identificator\">{corrId}<span class=\"k-icon k-font-icon k-i-copy copy-ident-js\"></span></div>")
+        }
+    }
+    else
+    {
+        var defaultUrl = Url.RouteUrl("default", new { controller = string.Empty, action = string.Empty });
+        <div class="error404 text-center">
+            @if (Model.Code != HttpStatusCode.Forbidden.GetHashCode())
+            {
+                <div>@Model.Code</div>
+            }
+            <p>@message</p>
+            @{
+                if (flag)
+                {
+                    <p>@($"{Localizer["ErrorId"]} - {corrId}")</p>
+                }
+            }
+            <a href="@defaultUrl">@Localizer["Home"]</a>
+        </div>
+    }
+}

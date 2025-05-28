@@ -1,13 +1,19 @@
-﻿@using Ais.Data.Models.AdmActAttachment
-@using Ais.Data.Models.Attachment;
+﻿@using global::Ais.Data.Models.AdmActAttachment
+@using global::Ais.Data.Models.Attachment;
+@using global::Ais.Data.Models.Helpers
+@using global::Ais.Data.Models.Service
 @using Ais.Utilities.Extensions;
 @using Microsoft.Extensions.Localization;
 @inject IStringLocalizer Localizer
 @model Ais.Data.Models.Document.OutDocument
-@{
-    async Task RenderUploadAsync(AttachmentType type, Guid? typeId, ICollection<Attachment> attachments = null)
+
+@functions
+{
+    async Task RenderUploadAsync(AttachmentType type, Guid? typeId, bool isOnlyChild, ICollection<Attachment> attachments = null)
     {
-        <div class="attachment-group-wrapper">
+
+        <div class="attachment-group-wrapper @(isOnlyChild ? "main" : null)">
+
             @foreach (var attachment in attachments!)
             {
                 ViewBag.DontShowRelateObject = true;
@@ -18,6 +24,7 @@
                         @Localizer["Add"]
                     </button>
                 </div>
+
             }
         </div>
 
@@ -25,28 +32,47 @@
 
     async Task RenderAttachmentAsync(AttachmentGroup group)
     {
-        if (group.Attachments.IsNotNullOrEmpty())
+        if (group.Attachments != null && group.Attachments.Count() > 0)
         {
-            var i = 1;
             foreach (var attachmentType in group.Attachments)
             {
-                <label>@i. @attachmentType.Type.Title</label>
-                ++i;
+                var isOnlyChild = false;
+                @if (group?.Children != null && group.Children.Count == 0 && group?.Attachments?.Count > 0)
+                {
+                    isOnlyChild = true;
 
-                var filteredAttachments = Model?.Attachments?.Where(x => x.Type.Id == attachmentType.Id).ToList();
+                    if (attachmentType.Type.Title.ToString() != group.Name.ToString())
+                    {
+                        <label>@attachmentType.Type.Title</label>
+                    }
+                }
+                else
+                {
+                    <label>@attachmentType.Type.Title</label>
+                }
+
+    if (EnumHelper.GetServiceAttachmentTypeIdByType(ServiceAttachmentType.AlwaysRequired) == attachmentType?.Required?.Id)
+                {
+                    ViewBag.Required = true;
+                }
+
+                var filteredAttachments = Model?.Attachments?.Where(x => x.Type.Id == attachmentType.Id)?.ToList();
+
                 ViewBag.GroupRelDocId = attachmentType.Id;
                 if (filteredAttachments.IsNullOrEmpty())
                 {
-                    filteredAttachments = new List<Attachment> { null };
+                    filteredAttachments = new List<Attachment>() { null };
                 }
 
                 var type = new AttachmentType
                     {
                         Id = attachmentType.Id,
-                        Title = attachmentType.Type.Title
+                        Title = attachmentType.Type.Title,
+                        Extensions = attachmentType.Type.Extensions,
+                        MaxSize = attachmentType.Type.MaxSize
                     };
 
-                await RenderUploadAsync(type, attachmentType.Type.Id, filteredAttachments);
+                await RenderUploadAsync(type, attachmentType.Type.Id, isOnlyChild, filteredAttachments);
             }
         }
     }
@@ -56,12 +82,14 @@
         <fieldset>
             <legend class="attachment-group-name">@group.Name</legend>
             <div class="attachments-wrap">
-                @if (group.HasChildren)
+                @if (group.HasChildren == true)
                 {
-                     @if (group.Attachments.IsNotNullOrEmpty())
-                     {
-                         await RenderAttachmentAsync(group);
-                     }
+                    @if (group.Attachments != null && group.Attachments.Count() > 0)
+                    {
+                        group.HasChildren = false;
+                        await this.RenderAttachmentAsync(group);
+                        group.HasChildren = true;
+                    }
 
                     @foreach (var child in group.Children)
                     {
@@ -70,19 +98,17 @@
                 }
                 else
                 {
-                    if (group.Attachments.IsNotNullOrEmpty())
+                    if (group.Attachments != null && group.Attachments.Count() > 0)
                     {
-                        await RenderAttachmentAsync(group);
+                        await this.RenderAttachmentAsync(group);
                     }
                 }
             </div>
         </fieldset>
     }
-
+}
+@{
     var group = ViewBag.Group as AttachmentGroup;
-    <div class="steps-body">
-        @{
-            await RenderAttachmentGroupsAsync(group);
-        }
-    </div>
+    // // var type = ViewBag.AttachmentType as AttachmentType;
+    await RenderAttachmentGroupsAsync(group);
 }

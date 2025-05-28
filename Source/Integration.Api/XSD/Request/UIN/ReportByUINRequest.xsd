@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:common="http://egov.bg/RegiX/MRRB"
+           xmlns="http://egov.bg/RegiX/MRRB/ReportByUINRequest"
+           targetNamespace="http://egov.bg/RegiX/MRRB/ReportByUINRequest"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+  <xs:import namespace="http://egov.bg/RegiX/MRRB" schemaLocation="../../MRRBCommon.xsd"/>
+  <xs:element name="ReportByUINRequest" type="ReportByUINRequestype">
+    <xs:annotation>
+      <xs:documentation>ЕГН (категория Заявител)</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="ReportByUINRequestype">
+    <xs:annotation>
+      <xs:documentation>Справка за издадени адмминистративни актове</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="UIN" type="common:UIN" nillable="false" />
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

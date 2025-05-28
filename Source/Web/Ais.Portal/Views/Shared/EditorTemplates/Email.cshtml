@@ -1,0 +1,17 @@
+﻿@model object
+
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = Ais.WebUtilities.Helpers.HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+            { "class", "k-textbox" },
+        });
+}
+
+@Html.TextBoxFor(model => model, attributes)

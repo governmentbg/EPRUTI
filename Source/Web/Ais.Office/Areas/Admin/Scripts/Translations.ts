@@ -66,7 +66,7 @@ function onDeleteTranslation(e: JQuery.EventBase): void {
                 "Delete",
                 "Translations",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     area: "Admin",
                     data: {
                         id: item.get("Id"),

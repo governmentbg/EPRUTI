@@ -18,10 +18,6 @@ function init() {
     rebindEvent("click", ".archive-outdoc-js", onArchiveOutdoc);
     rebindEvent("click", ".change-outdocs-office-js", onChangeOutDocsOffice);
     rebindEvent("click", ".edit-applicant-js", onEditApplicantClick);
-    rebindEvent("click", ".edit-admact-state-js", onEditAdmActState);
-    rebindEvent("click", ".delete-admact-history-row-js", OnDeleteAdmActState);
-    rebindEvent("click", ".remove-attachment-js", removeStateAttachment)
-    rebindEvent("click", ".add-adm-act-state", addAdmActStateRow)
 }
 function onEditApplicantClick(e: JQuery.EventBase): void {
     e.preventDefault();
@@ -160,7 +156,7 @@ function onDeleteOutdoc(e: JQuery.EventBase): void {
                 "Delete",
                 "OutDocuments",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     data: {
                         id: item.get("Id"),
                         searchQueryId: searchQueryId
@@ -370,124 +366,6 @@ function onRemoveProofDoc(e: JQuery.EventBase): void {
     grid.dataSource.data([]);
 }
 
-function onEditAdmActState(e: JQuery.EventBase): void {
-    e.preventDefault();
-    let sender = $(e.currentTarget);
-    let grid = getGrid(sender);
-    let selectedItem = getSelectedItemByGrid(grid);
-
-    openKendoWindow(
-        "AdmActStateUpsert",
-        "OutApplication",
-        {
-            type: "GET",
-            area: "OutAdministrativeAct",
-            data: {
-                admActId: selectedItem.get("Id")
-            }
-        },
-        {
-            modal: true,
-            title: `${getResource("EditOf")} ${getResource("AdmActStatus")}`,
-            open: (e) => {
-                e.sender.wrapper.css({
-                    top: 100
-                });
-            },
-            close: (e) => {
-                if (e.userTriggered) {
-                    return;
-                }
-
-                let success = e.sender.element.data("success");
-                if (success === true) {
-                    let form = sender.closest("form");
-                    let grid = kendo.widgetInstance(form.find("#recipients")) as kendo.ui.Grid;
-                    if (grid) {
-                        grid.dataSource.read();
-                    }
-
-                    displayMessage(getResource("Success"), messageType.success);
-                }
-            }
-        });
-}
-
-function removeStateAttachment(e: JQuery.EventBase): void {
-    onFileUploadRemove(e);
-}
-function OnDeleteAdmActState(e: JQuery.EventBase): void {
-    e.preventDefault();
-    let sender = $(e.currentTarget);
-    let grid = getGrid(sender) as kendo.ui.Grid;
-    if (!grid) return;
-    let row = sender.closest("tr");
-    let rowData = grid.dataItem(row);
-    let rowId = rowData.get("Id");
-    if (rowId) {
-        requestOptional(
-            "AdmActStateHistoryDeleteRow",
-            "OutApplication",
-            {
-                area: "OutAdministrativeAct",
-                type: "POST",
-                data: {
-                    rowId: rowId
-                },
-                success: (data) => {
-                    if (data.success) {
-                        grid.dataSource.read()
-                    }
-                }
-            });
-    }
-}
-
-function addAdmActStateRow(e: JQuery.EventBase): void {
-    e.preventDefault();
-
-    let stateDropDownId = $("#State_Id").data("kendoDropDownList").value();
-    let data = {
-        State: {
-            Id: stateDropDownId,
-            Name: $("#State_Id").data("kendoDropDownList").text()
-        },
-        Date: $("#ChangeDate").val(),
-    };
-
-    if (String(stateDropDownId).trim() === getDisputedGUID()) {
-        data["Dispute"] = {
-            Description: $("#Dispute_Description").val(),
-            Attachment: {
-                Url: $(".k-file-success").find("input[name$='Url']").val(),
-                Name: $(".k-file-success").find("input[name$='Name']").val(),
-                Size: $(".k-file-success").find("input[name$='Size']").val()
-            }
-        }
-    }
-
-    requestOptional(
-        "AdmActStateHistoryAddRow",
-        "OutApplication",
-        {
-            area: "OutAdministrativeAct",
-            type: "POST",
-            data: data,
-            success: (data) => {
-                if (data.success) {
-                    let grid = $("#grid").data("kendoGrid") as kendo.ui.Grid;
-                    grid.dataSource.read();
-                    onFileUploadRemove(e, false);
-                    $("#Dispute_Description").val('');
-                }
-            }
-        });
-}
-
-function getDisputedGUID() {
-    return "c87aa861-856f-4763-a8ab-b9f74faa1302";
-}
-
 init();
 
 export function onRecipientCellEdit(e: kendo.ui.GridCellCloseEvent) {
@@ -584,17 +462,5 @@ export function onDeliveryStatusChange(e: kendo.ui.DropDownListChangeEvent): voi
                 waitResponseToDateDatePicker.value(new Date(deliveryDateDatePicker.value().getTime() + waitresponsedays * 24 * 60 * 60 * 1000));
             }
         }
-    }
-}
-
-export function onAdmActStateChange(e: kendo.ui.DropDownListSelectEvent): void {
-    e.preventDefault();
-    let selectedValue = e.sender.value();
-    let disputeContainer = $("#disputeContainer");
-
-    if (String(selectedValue).trim() === getDisputedGUID()) {
-        disputeContainer.show();
-    } else {
-        disputeContainer.hide();
     }
 }

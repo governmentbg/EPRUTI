@@ -3,6 +3,9 @@
     using System.Diagnostics;
 
     using Ais.Infrastructure.BaseTypes;
+
+    using Ais.Office.ViewModels;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
 
@@ -35,33 +38,33 @@
         {
             code = code is >= 400 and < 600 ? code : StatusCodes.Status500InternalServerError;
             var model = new ErrorViewModel
-                        {
-                            RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier,
-                            Code = code,
-                        };
+            {
+                RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier,
+                Code = code,
+            };
 
             switch (code)
             {
                 case StatusCodes.Status403Forbidden:
-                {
-                    model.Title = this.Localizer["ForbiddenError"];
-                    model.Message = this.Localizer["ForbiddenErrorMessage"];
-                    break;
-                }
+                    {
+                        model.Title = this.Localizer["ForbiddenError"];
+                        model.Message = this.Localizer["ForbiddenErrorMessage"];
+                        break;
+                    }
 
                 case StatusCodes.Status404NotFound:
-                {
-                    model.Title = this.Localizer["NotFoundError"];
-                    model.Message = this.Localizer["NotFoundErrorMessage"];
-                    break;
-                }
+                    {
+                        model.Title = this.Localizer["NotFoundError"];
+                        model.Message = this.Localizer["NotFoundErrorMessage"];
+                        break;
+                    }
 
                 default:
-                {
-                    model.Title = this.Localizer["InternalServerError"];
-                    model.Message = this.Localizer["InternalServerErrorMessage"];
-                    break;
-                }
+                    {
+                        model.Title = this.Localizer["InternalServerError"];
+                        model.Message = this.Localizer["InternalServerErrorMessage"];
+                        break;
+                    }
             }
 
             return this.ReturnView("Index", model);

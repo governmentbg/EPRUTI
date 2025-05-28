@@ -1,0 +1,46 @@
+﻿@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Breadcrumb = Ais.Data.Models.Breadcrumb;
+@{
+    var items = TempData.Get<IEnumerable<Breadcrumb>>("Breadcrumbs");
+    var breadcrumbs = items as Breadcrumb[] ?? items?.ToArray();
+    var title = ViewBag.Title as string;
+}
+@if (breadcrumbs!.IsNotNullOrEmpty())
+{
+    <div class="page-top">
+        <div class="center @ViewBag.BreadcrumbsClass">
+            <div class="pagetitle">
+                <div class="breadcrumbs">
+                    @{
+                        var data = breadcrumbs!.Where(entry => entry.Title.IsNotNullOrEmpty()).ToArray();
+                        for (var index = 0; index < data.Length; index++)
+                        {
+                            var item = data[index];
+                            if (item.Url.IsNotNullOrEmpty())
+                            {
+                                <a href="@item.Url">@item.Title</a>
+                            }
+                            else
+                            {
+                                <span>
+                                    @item.Title
+                                </span>
+                            }
+                            if (index + 1 != data.Length)
+                            {
+                                <svg class="icon">
+                                    <use xlink:href="#icon-navarrow"></use>
+                                </svg>
+                            }
+                        }
+                    }
+                </div>
+                @if (title.IsNotNullOrEmpty())
+                {
+                    <h1>@title</h1>
+                }
+            </div>
+        </div>
+    </div>
+}

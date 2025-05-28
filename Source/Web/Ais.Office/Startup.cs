@@ -4,6 +4,7 @@
     using System.Text.Unicode;
 
     using Ais.Common.Logger;
+    using Ais.EsriBg.Data.Services;
     using Ais.Infrastructure.Extensions;
     using Ais.Infrastructure.KendoExt;
     using Ais.Infrastructure.Localization;
@@ -78,6 +79,15 @@
                             options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) => StringLocalizer.Instance["AttemptedValueIsInvalidAccessor", x, y]);
                             options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor((x) => StringLocalizer.Instance["ValueMustNotBeNullAccessor", x]);
                         })
+                    .AddMvcOptions(
+                        options =>
+                            options.Filters.Add(
+                                new ResponseCacheAttribute
+                                {
+                                    NoStore = true,
+                                    Location = ResponseCacheLocation.None,
+                                    Duration = 0
+                                }))
                     .AddJsonOptions(
                         options =>
                         {
@@ -108,10 +118,12 @@
             services.AddHttpClients();
 
             services.AddCache(this.configuration);
-            ////services.AddDataProtection(this.configuration);
+            services.AddDataProtection(this.configuration);
             services.AddSession(this.configuration);
 
             services.AddAuthentication(this.configuration);
+            services.AddEAuthentication(this.configuration);
+
             services.AddAuthorization();
             services.AddAntiForgery();
             services.AddSignalR(this.configuration);
@@ -122,6 +134,11 @@
             services.AddKendo();
 
             services.ConfigFormOptions();
+
+            services.AddEsriBgConfigOptions(this.configuration);
+            services.AddEsriBgApplicationServices();
+            services.AddEsriBgApplicationHttpClients();
+            services.AddIoSignServices(this.configuration, this.webHostEnvironment);
 
             services.AddCors(this.configuration);
 
@@ -171,7 +188,7 @@
             app.UseMiddleware<MessageMiddleware>();
 
             app.UseStaticFiles();
-            app.UseFileServer(this.configuration, new[] { "Attachment" });
+            ////app.UseFileServer(this.configuration, new[] { "Attachment" });
 
             app.UseCookiePolicy();
 

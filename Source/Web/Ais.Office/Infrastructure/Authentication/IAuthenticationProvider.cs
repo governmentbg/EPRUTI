@@ -2,6 +2,8 @@
 {
     using System.Security.Principal;
 
+    using global::Ais.Data.Models.Employee;
+
     using Microsoft.AspNetCore.Authentication.Cookies;
 
     /// <summary>
@@ -26,11 +28,25 @@
         Task SignOutAsync(IPrincipal principal = null);
 
         /// <summary>
+        /// Samls the request to client.
+        /// </summary>
+        /// <returns>Employee.</returns>
+        (Employee Employee, string ReturnUrl) SamlRequestToEmployee();
+
+        /// <summary>
         /// Init client sing in data in session.
         /// </summary>
         /// <param name="userName">The username.</param>
         /// <param name="principal">The authentication principal.</param>
         /// <returns>Task.</returns>
-        Task<(bool Flag, Guid? LoginId, bool ShouldRenew)> TryToInitSingInUserDataAsync(string userName, IPrincipal principal = null);
+        Task<(bool Flag, Guid? LoginId, bool ShouldRenew, string Egn)> TryToInitSingInUserDataAsync(string userName, IPrincipal principal = null);
+
+        /// <summary>
+        /// Creates the saml authn request.
+        /// </summary>
+        /// <param name="assertionUrl">The assertion URL.</param>
+        /// <param name="returnUrl">The return URL.</param>
+        /// <returns>IActionResult.</returns>
+        IActionResult CreateSamlAuthnRequest(string assertionUrl, string returnUrl = null);
     }
 }

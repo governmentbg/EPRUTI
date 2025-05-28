@@ -1,0 +1,9 @@
+﻿@using System.Web
+@model Ais.Data.Models.Cms.Page;
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+@Html.Raw(HttpUtility.HtmlDecode(Model.Contents.ToString()))

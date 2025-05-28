@@ -104,7 +104,7 @@
             <div class="form-row">
                 <div class="form-input fullwidth h50">
                     @Html.InfoLabel(Localizer["AddrIdentifier"], "AddrIdentifier")
-                    @Html.EditorFor(m => m.FullDescription, null, "AddrIdentifier")
+                    @Html.EditorFor(m => m.FullDescription, null, "AddrIdentifier", new { htmlAttributes = new { @readonly = "readonly" } })
                     @Html.ValidationMessage("AddrIdentifier")
                 </div>
             </div>

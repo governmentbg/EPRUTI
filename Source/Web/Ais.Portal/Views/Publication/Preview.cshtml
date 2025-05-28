@@ -1,0 +1,72 @@
+﻿@using EnumHelper = Ais.Data.Models.Helpers.EnumHelper
+@using global::Ais.Data.Models.Publication
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using System.Web
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model Ais.Portal.ViewModels.Publication.PublicationPublicViewModel
+@{
+    Model.StartDate ??= DateTime.Now;
+
+    var shareUrl = Model.Id.HasValue
+        ? Url.AbsoluteAction("Preview", "Publication", new { id = Model.Id, type = Model.Type.Id })
+        : null;
+
+    var typeName = Enum.GetName(typeof(PublicationType), EnumHelper.GetPublicationTypeById(Model.Type.Id!.Value));
+
+    var date = Model.EndDate.HasValue
+                ? $"{Model.StartDate:d} - {Model.EndDate:d}"
+                : $"{Model.StartDate:d}";
+}
+
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $(".images-wrap img").magnificPopup({ type: "image", gallery: { enabled: true } });
+        })
+    </script>
+}
+
+<div class="inner-center @(typeName?.ToLower())">
+    <div class="news-header">
+        <span class="n-date ctrl">
+            @date
+        </span>
+        @if (shareUrl!.IsNotNullOrEmpty())
+        {
+            <div class="share-btns social">
+                @* <strong>@Localizer["ShareIn"]</strong> *@
+                <a class="sharebtn fb" target="_blank" href="http://www.facebook.com/sharer/sharer.php?u=@shareUrl"><svg class="icon"><use xlink:href="#icon-fb"></use></svg></a>
+                <a class="sharebtn in" target="_blank" href="http://www.linkedin.com/shareArticle?url=@shareUrl"><svg class="icon"><use xlink:href="#icon-in"></use></svg></a>
+                <a class="sharebtn tw" target="_blank" href="http://twitter.com/share?url=@shareUrl"><svg class="icon"><use xlink:href="#icon-tw"></use></svg></a>
+            </div>
+        }
+    </div>
+    @if (Model.Pictures.IsNotNullOrEmpty())
+    {
+        <div class="images-wrap cover">
+            @foreach (var image in Model.Pictures)
+            {
+                <a href="@image.Url" class="magnet">
+                    <img src="@image.Url?width=400" alt="@Localizer["NotFound"]" />
+                </a>
+            }
+        </div>
+    }
+    <article class="ctrl">
+        @if (Model.Content.IsNotNullOrEmpty())
+        {
+            @Html.Raw(HttpUtility.HtmlDecode(Model.Content))
+        }
+    </article>
+    <div class="clear"></div>
+</div>

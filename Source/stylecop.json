@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
   "settings": {
     "documentationRules": {
-      "companyName": "Ais",
+      "companyName": "MRRB",
       "copyrightText": "Copyright (c) {companyName}. All Rights Reserved.",
       "documentInterfaces": false,
       "documentInternalElements": false

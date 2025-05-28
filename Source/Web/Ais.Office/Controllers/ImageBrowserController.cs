@@ -1,9 +1,11 @@
 ﻿namespace Ais.Office.Controllers
 {
     using Ais.Data.Models;
+
     using Ais.Infrastructure.KendoExt;
 
     using Kendo.Mvc.UI;
+
     using Microsoft.AspNetCore.Mvc;
 
     using SkiaSharp;
@@ -20,7 +22,7 @@
         private readonly string virtualPrefix;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EditorImageBrowserController"/> class.
+        /// Initializes a new instance of the <see cref="ImageBrowserController"/> class.
         /// </summary>
         /// <param name="directoryBrowser">The directory browser.</param>
         /// <param name="permission">The permission.</param>

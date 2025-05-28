@@ -3,21 +3,26 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Employee;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.NTask;
-    using Ais.Data.Models.QueryModels.Employee;
     using Ais.Infrastructure.Roles;
     using Ais.Office.ViewModels.Employees;
     using Ais.Services.Ais;
     using Ais.Utilities.Extensions;
     using Ais.WebServices.Services.SessionStorage;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Employee;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.NTask;
+    using global::Ais.Data.Models.QueryModels.Employee;
+
     using Kendo.Mvc.Extensions;
     using Kendo.Mvc.UI;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -137,7 +142,7 @@
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <param name="searchQueryId">The search query identifier.</param>
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.EmployeesRolesDelete)]
         public async Task Delete(Guid id, string searchQueryId)
         {

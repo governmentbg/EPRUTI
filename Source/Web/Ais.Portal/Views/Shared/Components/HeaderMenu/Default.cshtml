@@ -1,0 +1,57 @@
+﻿@using Ais.Portal.Controllers
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@model List<Ais.Portal.ViewModels.MenuItem>
+@inject IStringLocalizer Localizer
+@inject IConfiguration Configuration
+@{
+    var currentCulture = Thread.CurrentThread.CurrentCulture;
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+}
+<a title="@Localizer["ForBlinded"]" class="pointer text-link js-trigger-blind transparent">
+    @Localizer["ForBlinded"]
+</a>
+<span class="separator"></span>
+<a id="dn" title="@Localizer["ReguceTextSize"]" class="pointer bttn-link js-trigger-text" data-direction="down">
+    A-
+</a>
+<a id="reset" title="@Localizer["DefaultTextSize"]" class="pointer bttn-link js-trigger-text active" data="normal">
+    A
+</a>
+<a id="up" title="@Localizer["IncreaseTextSize"]" class="pointer bttn-link js-trigger-text" data-direction="up">
+    A+
+</a>
+@{
+    if (mrrbFlag)
+    {
+        <span class="separator"></span>
+        if (currentCulture.TwoLetterISOLanguageName.Equals("bg", StringComparison.InvariantCultureIgnoreCase))
+        {
+            <a href="@Url.DynamicAction("ChangeCulture", typeof(HomeController), new { lang = "en", area = string.Empty, culture = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName })" class="ib lang">
+                <img src="~/images/en.png" alt="@Localizer["EN"]" />
+                <span>@Localizer["EN"]</span>
+            </a>
+        }
+        else if (currentCulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase))
+        {
+            <a href="@Url.DynamicAction("ChangeCulture", typeof(HomeController), new { lang = "bg", area = string.Empty, culture = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName })" class="ib lang">
+                <img src="~/images/bg.png" alt="@Localizer["BG"]" />
+                <span>@Localizer["BG"]</span>
+            </a>
+        }
+    }
+    else
+    {
+        if (Model.IsNotNullOrEmpty())
+        {
+            foreach (var item in Model)
+            {
+                <a href="@item.Url" class="header-menu text-link">@item.Title</a>
+                <span class="separator"></span>
+            }
+        }
+    }
+}

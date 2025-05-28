@@ -74,7 +74,7 @@ function deleteClientAttachment(e: JQuery.EventBase): void {
             requestOptionalUrl(
                 sender.attr("href"),
                 {
-                    type: "DELETE",
+                    type: "POST",
                     data: {
                         searchQueryId: searchQueryId,
                         id: item.get("Id")

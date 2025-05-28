@@ -1,15 +1,17 @@
 ﻿namespace Ais.Office.Services.DocumentStatusService
 {
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Document;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
     using Ais.Services.Ais;
     using Ais.Utilities.Extensions;
     using Ais.WebServices.Services.Storage;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Document;
+    using global::Ais.Data.Models.Helpers;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
 
     public class DocumentStatusService : IDocumentStatusService
     {

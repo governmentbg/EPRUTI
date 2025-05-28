@@ -1,0 +1,43 @@
+﻿@using Ais.Office.ViewModels.AdmAct
+@inject IStringLocalizer Localizer
+@using Ais.Office.ViewModels.RegistrationRequests
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Office.ViewModels.Application
+@model List<RegistrationRequestsTableViewModel>
+
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().Grid<RegistrationRequestsTableViewModel>(Model)
+    .Name("searchUserRequests")
+    .HtmlAttributes(new { data_show_first_details = true, @class = "withoutpager" })
+    .Columns(columns =>
+    {
+        columns.Bound(e => e.RequestDate)
+            .Format("{0:g}")
+        .ClientTemplate("<a class='info-request-js' data-id='#: Id #' title='#:resources.getResource('Open')#'>#: kendo.toString(kendo.parseDate(RequestDate), 'dd.MM.yyyy г. HH:mm:ss') #</а>");
+
+        columns.Bound(e => e.RequestTypeName)
+            .ClientTemplate("#: RequestTypeName ? RequestTypeName : '' #");
+
+        columns.Bound(e => e.RequestStatusName)
+            .ClientTemplate("<span class='reg-status status#: RequestStatus.Code #'>#: RequestStatus.Name ?? '' #</span>");
+
+        columns.Bound(e => e.OfficeName)
+            .ClientTemplate("#: OfficeName ? OfficeName : '' #");
+
+        columns.Bound(e => e.FullName)
+            .ClientTemplate("#: FullName ? FullName : '' #");
+
+        columns.Bound(e => e.RoleName)
+            .ClientTemplate("#: RoleName ? RoleName : '' #");
+    })
+    .Pageable(p => p.Enabled(true).PreviousNext(true).ButtonCount(5))
+    .Width("auto")
+    .Events(e => e.DataBound("searchTable.onGridDataBound"))
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .PageSize(20)
+    .ServerOperation(false)
+    ))

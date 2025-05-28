@@ -1,6 +1,6 @@
 ﻿@using Ais.Office.ViewModels.Clients
 @using Microsoft.Extensions.Localization
-@using Ais.Data.Models.Address
+@using global::Ais.Data.Models.Address
 @model ClientUpsertModel
 @inject IStringLocalizer Localizer;
 @{
@@ -38,7 +38,7 @@
                                 column.Template(
                                           "<div class='flex'>" +
                                           $"<a href='\\#' class='k-button k-small edit-address-js' data-widgetname='{addressesListName}'><span class='k-i-pencil k-icon k-font-icon k-button-icon'></span></a>" +
-                                          $"<a href='\\#' class='k-button k-small remove-address-js' data-widgetname='{addressesListName}'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a>" +
+                                          $"<a href='\\#' class='k-button k-small red remove-address-js' data-widgetname='{addressesListName}'><span class='k-i-delete k-icon k-font-icon k-button-icon'></span></a>" +
                                           "</div>")
                                       .Title(Localizer["Actions"])
                                       .Width(80);

@@ -3,6 +3,7 @@
     using System.ComponentModel;
 
     using Ais.Data.Base.Ais;
+    using Ais.Data.Common.Base;
     using Ais.Data.Models;
     using Ais.Data.Models.Nomenclature;
     using Ais.Data.Models.QualifiedPerson;

@@ -1,0 +1,19 @@
+﻿@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Office.Areas.Reports.Controllers.Services
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+
+@{
+    var updateUrl = Url.DynamicActionWithRightsCheck(nameof(ServicesByPriorityReportsController.UpdatePriorityStatus), typeof(ServicesByPriorityReportsController));
+
+    if (updateUrl.IsNotNullOrEmpty())
+    {
+        <a href="@updateUrl" class="k-small k-button update-priority-status-js" data-searchqueryid="@ViewBag.SearchQueryId" title="@Localizer["UpdateStatus"]">
+            <i class="k-i-edit k-icon k-font-icon"></i>
+        </a>
+    }
+}
+
+

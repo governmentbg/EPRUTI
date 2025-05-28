@@ -1,4 +1,5 @@
 ﻿@using Ais.Office.Areas.Admin.Controllers;
+@using Ais.Office.Areas.Reports.Controllers.Payments;
 @using Ais.Office.Controllers.Documents;
 @using Ais.WebUtilities.Extensions
 @using Kendo.Mvc.TagHelpers
@@ -18,6 +19,12 @@
               tabstrip.Add()
                       .Text(Localizer["UserInfo"])
                       .LoadContentFrom(Url.DynamicAction(nameof(ClientsController.Info), typeof(ClientsController), new { id = Model }));
+              tabstrip.Add()
+                      .Text(Localizer["EPaymentsReports"])
+                      .LoadContentFrom(Url.DynamicAction(nameof(ClientEPaymentReportsController.Index), typeof(ClientEPaymentReportsController), new { ClientId = Model, FromRegDate = DateTime.Now.AddMonths(-1).ToString("d"), ToRegDate = DateTime.Now.ToString("d"), }));
+              tabstrip.Add()
+                      .Text(Localizer["PaymentOrdersReports"])
+                      .LoadContentFrom(Url.DynamicAction(nameof(ClientPaymentOrderReportsController.Index), typeof(ClientPaymentOrderReportsController), new { ClientId = Model, FromRegDate = DateTime.Now.AddMonths(-1).ToString("d"), ToRegDate = DateTime.Now.ToString("d"), }));
               tabstrip.Add()
                       .Text(Localizer["ClientDocuments"])
                       .LoadContentFrom(Url.DynamicAction(nameof(ClientAttachmentsController.Index), typeof(ClientAttachmentsController), new { ClientId = Model }));
@@ -44,6 +51,7 @@
         var titleElement = $("#@id").closest(".k-window").find(".k-window-title:first");
         if (titleElement && titleElement.length == 1) {
             titleElement.html(titleElement.text() + ' @(Localizer["AmountOnAccount"]):<span class="k-ml-1 @(amount < 0 ? "badge-danger" : "")">@(amount.ToString("c2"))</span>');
+
         }
     });
 </script>

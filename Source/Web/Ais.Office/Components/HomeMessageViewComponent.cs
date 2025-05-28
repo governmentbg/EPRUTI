@@ -3,14 +3,17 @@
     using System.Web;
 
     using Ais.Common.Cache;
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.Publication;
     using Ais.Office.ViewModels.Publications;
     using Ais.Resources.Office;
     using Ais.Services.Ais;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Helpers;
+    using global::Ais.Data.Models.Publication;
 
     /// <summary>
     /// Class HomeMessageViewComponent.

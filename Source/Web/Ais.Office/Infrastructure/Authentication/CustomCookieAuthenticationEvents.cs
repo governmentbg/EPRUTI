@@ -4,7 +4,9 @@
 
     using Ais.Utilities.Extensions;
     using Ais.WebUtilities.Extensions;
+
     using AspNet.Security.OAuth.ArcGIS;
+
     using Microsoft.AspNetCore.Authentication.Cookies;
 
     /// <summary>

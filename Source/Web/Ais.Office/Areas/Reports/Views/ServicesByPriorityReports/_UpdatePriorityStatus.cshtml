@@ -1,0 +1,46 @@
+﻿@using global::Ais.Data.Models.Helpers
+@using global::Ais.Data.Models.Nomenclature
+@using global::Ais.Data.Models.Service
+@using Ais.Office.ViewModels.Services
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model UpdateServicePriorityViewModel
+
+@{
+    var statusesList = ViewBag.ConfirmStatuses as List<Nomenclature>;
+    var hidden = Model.ConfirmStatusId.Equals(EnumHelper.GetServiceConfrimStatus(ServiceConfirmStatusEnum.Rejected));
+}
+<form method="post" class="dirty-check" action="@Url.ActionLink("UpdatePriorityStatus", "ServicesByPriorityReports")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    <div class="from-control">
+            @Html.AntiForgeryToken()
+            @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="form-input fullwidth">
+                @Html.LabelFor(m => m.ConfirmStatusId)
+                @(Html.Kendo().DropDownListFor(m => m.ConfirmStatusId)
+                    .DataValueField("Id")
+                    .DataTextField("Name")
+                    .Events(e => e.Change("reports_servicesbypriorityreports.onStatusChange"))
+                    .BindTo(statusesList))
+            </div>
+            <div class="clear"></div>
+            <div class="form-input fullwidth reasonDesc @(hidden == false ? "hidden" : string.Empty)">
+                @Html.LabelFor(m => m.Reason)
+                @Html.Kendo().TextAreaFor(m => m.Reason)
+                @Html.ValidationMessageFor(m => m.Reason)
+            </div>
+            <div class="clear"></div>
+            <div class="k-dialog-buttongroup">
+                <button class="bttn main caps right">@Localizer["Save"]</button>
+                <button class="bttn right third closeKendoWindow-js">
+                    @Localizer["Close"]
+                </button>
+            </div>
+    </div>
+</form>
+

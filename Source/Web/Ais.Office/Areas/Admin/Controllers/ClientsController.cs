@@ -4,34 +4,20 @@
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.ComponentModel.DataAnnotations;
-    using System.Net;
     using System.ServiceModel;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Client;
-    using Ais.Data.Models.CreditNotice;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.Inquiry;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.QueryModels;
-    using Ais.Data.Models.Role;
-    using Ais.Data.Models.User;
     using Ais.Infrastructure.Roles;
     using Ais.Office.Utilities.Extensions;
+    using Ais.Office.Utilities.Helpers;
     using Ais.Office.ViewModels.ClientRoles;
     using Ais.Office.ViewModels.Clients;
     using Ais.Office.ViewModels.CreditNotices;
     using Ais.Office.ViewModels.Inquiries;
-
     using Ais.Regix.Net.Core;
     using Ais.Regix.Net.Core.Services.GRAO;
     using Ais.Regix.Net.Core.Services.PublicRegister;
-
     using Ais.Services.Ais;
     using Ais.Table.Mvc.Models;
     using Ais.Table.Mvc.Utilities;
@@ -44,12 +30,32 @@
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
     using Ais.WebUtilities.Helpers;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Client;
+    using global::Ais.Data.Models.CreditNotice;
+    using global::Ais.Data.Models.Document;
+    using global::Ais.Data.Models.DynamicValidation;
+    using global::Ais.Data.Models.Helpers;
+    using global::Ais.Data.Models.Inquiry;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.QueryModels;
+    using global::Ais.Data.Models.Role;
+    using global::Ais.Data.Models.User;
+
     using Kendo.Mvc.Extensions;
     using Kendo.Mvc.UI;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
+
     using RegixV2;
 
     using Address = Ais.Data.Models.Address.Address;
@@ -64,6 +70,7 @@
     public class ClientsController : SearchTableController<ClientQueryViewModel, ClientTableViewModel>
     {
         public const string ClientCartKey = nameof(ClientCartKey);
+        private const string ValidationsKey = "ValidationsKey";
 
         private readonly IMapper mapper;
         private readonly IDataBaseContextManager<AisDbType> contextManager;
@@ -81,6 +88,7 @@
         private readonly INoticeService noticeService;
         private readonly IGraoService graoService;
         private readonly IPublicRegisterService publicRegisterService;
+        private readonly IFieldControlService fieldControlService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClientsController"/> class.
@@ -104,6 +112,7 @@
         /// <param name="noticeService">The notice service.</param>
         /// <param name="graoService">The grao service.</param>
         /// <param name="publicAgencyService">The public register service.</param>
+        /// <param name="fieldControlService">The field control service.</param>
         public ClientsController(
             ILogger<ClientsController> logger,
             IStringLocalizer localizer,
@@ -123,7 +132,8 @@
             IInquiryService inquiryService,
             INoticeService noticeService,
             IGraoService graoService,
-            IPublicRegisterService publicAgencyService)
+            IPublicRegisterService publicAgencyService,
+            IFieldControlService fieldControlService)
             : base(logger, localizer, sessionStorageService)
         {
             this.mapper = mapper;
@@ -145,6 +155,7 @@
             this.noticeService = noticeService;
             this.graoService = graoService;
             this.publicRegisterService = publicAgencyService;
+            this.fieldControlService = fieldControlService;
         }
 
         [HttpGet]
@@ -184,10 +195,11 @@
         /// </summary>
         /// <param name="searchQueryId">The search query identifier.</param>
         /// <param name="model">The model.</param>
+        /// <param name="docTypeId">The doctypeid.</param>
         /// <returns>IActionResult.</returns>
         [HttpGet]
         [Authorize(Roles = UserRolesConstants.ClientsUpsert)]
-        public async Task<IActionResult> Create(string searchQueryId = null, ClientUpsertModel model = null)
+        public async Task<IActionResult> Create(string searchQueryId = null, ClientUpsertModel model = null, Guid? docTypeId = null)
         {
             this.ModelState.Clear();
             model ??= new ClientUpsertModel();
@@ -199,9 +211,22 @@
             this.ViewBag.RepresentativesKey = representativesKey;
             this.ViewBag.AddressesKey = addressesKey;
 
+            List<DynamicValidation> validations = new();
+            if (docTypeId != null)
+            {
+                await using (await this.contextManager.NewConnectionAsync())
+                {
+                    validations = await this.fieldControlService.GetValidationsAsync(docTypeId);
+                }
+
+                this.ViewBag.Validations = validations;
+            }
+
+            await this.SessionStorageService.SetAsync(ValidationsKey, validations ?? new List<DynamicValidation>());
             await this.SessionStorageService.SetAsync(addressesKey, model.Addresses ?? new List<Address>());
             await this.SessionStorageService.SetAsync(representativesKey, model.Representatives ?? new List<Agent>());
 
+            this.InitClientConfig();
             return this.PartialView("Upsert", model);
         }
 
@@ -224,10 +249,11 @@
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <param name="searchQueryId">The search query identifier.</param>
+        /// <param name="docTypeId">The document type.</param>
         /// <returns>IActionResult.</returns>
         [HttpGet]
         [Authorize(Roles = UserRolesConstants.ClientsEdit)]
-        public async Task<IActionResult> Edit(Guid id, string searchQueryId)
+        public async Task<IActionResult> Edit(Guid id, string searchQueryId, Guid? docTypeId = null)
         {
             ClientUpsertModel model;
             await using (await this.contextManager.NewConnectionAsync())
@@ -238,6 +264,19 @@
             var representativesKey = $"{model.UniqueId}_Representatives";
             var addressesKey = $"{model.UniqueId}_Addresses";
 
+            List<DynamicValidation> validations = new();
+            if (docTypeId != null)
+            {
+                await using (await this.contextManager.NewConnectionAsync())
+                {
+                    validations = await this.fieldControlService.GetValidationsAsync(docTypeId);
+                }
+
+                this.ViewBag.Validations = validations;
+            }
+
+            await this.SessionStorageService.SetAsync(ValidationsKey, validations ?? new List<DynamicValidation>());
+
             this.ViewBag.SearchQueryId = searchQueryId;
             this.ViewBag.RepresentativesKey = representativesKey;
             this.ViewBag.AddressesKey = addressesKey;
@@ -246,6 +285,7 @@
             await this.SessionStorageService.SetAsync(addressesKey, model.Addresses ?? new List<Address>());
             await this.SessionStorageService.SetAsync(representativesKey, model.Representatives ?? new List<Agent>());
 
+            this.InitClientConfig();
             return this.PartialView("Upsert", model);
         }
 
@@ -279,6 +319,8 @@
             }
 
             this.ViewBag.ClientId = clientId;
+            this.ViewBag.Validations = await this.SessionStorageService.GetAsync<List<DynamicValidation>>(ValidationsKey);
+            this.InitClientConfig();
             return this.PartialView("_UpsertAddress", model ?? new Address());
         }
 
@@ -292,10 +334,17 @@
         [Authorize(Roles = UserRolesConstants.ClientsEdit)]
         public async Task<IActionResult> UpsertAddress(Guid clientId, Address model)
         {
-            model?.Validate(this.ModelState, this.Localizer, requiredFields: model.GetRequiredFields(new[] { nameof(Address.Origin) }));
+            var isNotRequiredSystemStyle = this.configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+
+            if (isNotRequiredSystemStyle == false)
+            {
+                model?.Validate(errors: this.ModelState, localizer: this.Localizer, requiredFields: model.GetRequiredFields(new[] { nameof(Address.Origin) }), isNotRequiredSystemStyle: isNotRequiredSystemStyle);
+            }
+
             if (!this.ModelState.IsValid)
             {
                 this.ViewBag.ClientId = clientId;
+                this.InitClientConfig();
                 return this.Json(new { success = false, result = await this.RenderRazorViewToStringAsync("_UpsertAddress", model) });
             }
 
@@ -331,7 +380,7 @@
         /// </summary>
         /// <param name="clientId">The client identifier.</param>
         /// <param name="uniqueId">The unique identifier.</param>
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.ClientsEdit)]
         public async Task DeleteAddress(Guid clientId, Guid uniqueId)
         {
@@ -497,7 +546,7 @@
         /// <param name="clientUniqueId">The client unique identifier.</param>
         /// <param name="representativeUniqueId">The representative unique identifier.</param>
         /// <returns>IActionResult.</returns>
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> DeleteRepresentative(Guid clientUniqueId, Guid representativeUniqueId)
         {
             await this.SessionStorageService.RemoveCollectionItem<Agent>($"{clientUniqueId}_Representatives", x => x.UniqueId == representativeUniqueId.ToString());
@@ -661,7 +710,7 @@
             var role = result.FirstOrDefault(x => x.Id == roleId);
             if (role == null)
             {
-                return this.StatusCode(HttpStatusCode.NotFound.GetHashCode());
+                return this.NotFound();
             }
 
             sessionData.Add(this.mapper.Map<ClientRoleViewModel>(role));
@@ -684,7 +733,7 @@
             var role = sessionData.FirstOrDefault(x => x.Id == roleId);
             if (role == null)
             {
-                return this.StatusCode(HttpStatusCode.NotFound.GetHashCode());
+                return this.NotFound();
             }
 
             sessionData.Remove(role);
@@ -1057,7 +1106,7 @@
             var clientViewModel = this.mapper.Map<ClientUpsertModel>(sessionModel.Client);
             await this.SessionStorageService.RemoveAsync(model.UniqueId);
             this.ShowMessage(MessageType.Success, $"{this.Localizer["DataIsLoadFrom"]} \"{this.Localizer[sessionModel.Client.ClientType == ClientType.Physical ? "GRAO" : "RegisterAgency"]}\"");
-            this.ViewBag.NamesAndEgnBulstatShouldBeReadOnly = true;
+            this.ViewBag.NamesAndEgnBulstatShouldBeReadOnly = this.configuration.GetValue<bool>("GraoNameSpaceReadonly");
             this.ViewBag.SkipCheckBoxCheck = true;
             return this.Json(
                 new
@@ -1462,6 +1511,7 @@
             var representativesKey = $"{model.UniqueId}_Representatives";
             model.Addresses = await this.SessionStorageService.GetAsync<List<Address>>(addressesKey);
             model.Representatives = await this.SessionStorageService.GetAsync<List<Agent>>(representativesKey);
+            var validations = await this.SessionStorageService.GetAsync<List<DynamicValidation>>(ValidationsKey);
             this.InitUpsertModel(model);
 
             // When there is one address,and it is not the default, make it the default
@@ -1472,7 +1522,7 @@
 
             // Try to validate model
             this.ModelState.Clear();
-            if (!this.TryValidateModel(model))
+            if (!this.TryValidateModel(model) || !await this.ValidateApplicant(model, validations))
             {
                 this.ViewBag.SearchQueryId = searchQueryId;
                 this.ViewBag.IsRepresentative = isRepresentative;
@@ -1480,11 +1530,23 @@
                 this.ViewBag.AddressesKey = addressesKey;
                 this.ViewBag.SkipCheckBoxCheck = true;
                 this.ViewBag.ClientUniqueId = clientUniqueId;
+                this.ViewBag.Validations = validations;
 
                 return this.Json(new { success = false, result = await this.RenderRazorViewToStringAsync("Upsert", model) });
             }
 
             var dbClient = this.mapper.Map<Client>(model);
+
+            if (this.configuration.GetValue<bool>("Client:UseSettings"))
+            {
+                dbClient.Division = this.configuration.GetValue<bool>("Client:Division");
+
+                if (this.configuration.GetValue<bool>("Client:AlwaysInsert"))
+                {
+                    dbClient.Id = null;
+                }
+            }
+
             var actionType = dbClient.IsNew ? ActionType.Create : ActionType.Edit;
             if (isRepresentative)
             {
@@ -1544,7 +1606,16 @@
             await this.SessionStorageService.RemoveAsync(representativesKey);
             await this.RefreshGridItemAsync(searchQueryId, this.mapper.Map<ClientTableViewModel>(searchResultModel), x => x.Id == searchResultModel!.Id);
 
-            return this.Json(new { success = true, refreshgrid = true, searchqueryid = searchQueryId, item = dbModel });
+            return this.Json(
+                new
+                {
+                    success = true,
+                    refreshgrid = true,
+                    searchqueryid = searchQueryId,
+                    item = dbModel,
+                    editedApplicant = model.Id,
+                    applicant = await this.RenderRazorViewToStringAsync("_Applicant", new Applicant() { Recipient = dbModel }),
+                });
         }
 
         /// <summary>
@@ -1834,6 +1905,8 @@
                             return new ValueTuple<Client, List<string>>(client, null);
                         }
 
+                    case ClientType.HomeCountry:
+                    case ClientType.Municipality:
                     default:
                         {
                             throw new ArgumentOutOfRangeException();
@@ -1849,6 +1922,131 @@
             {
                 this.Logger.LogError(default, exception: e, e.Message);
                 throw new UserException($"{this.Localizer["CommunicationError"]}: \"{api}\"! {this.Localizer["Message"]}: {e.Message} {this.GetErrorId()}");
+            }
+        }
+
+        private void InitClientConfig()
+        {
+            this.ViewBag.IsChecked =
+                 this.configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase);
+
+            this.ViewBag.IsNotRequiredSystemStyle =
+                 this.configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+        }
+
+        private async Task<bool> ValidateApplicant(ClientUpsertModel model, List<DynamicValidation> validations)
+        {
+            var system = this.configuration.GetValue<string>("SystemStyle");
+            if (system.Equals("mrrb"))
+            {
+                // TODO: must be refactored with better functionality for base forms
+                var type = EnumHelper.GetClientTypeById(model.Type.Id.Value);
+                var filteredValidations = type switch
+                {
+                    ClientType.Physical => validations
+                    .Where(x => x.Step == 0 &&
+                    !new HashSet<string> { "FullName", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
+
+                    ClientType.HomeCountry => validations
+                    .Where(x => x.Step == 0 &&
+                    !new HashSet<string> { "SurNames", "LastNames", "IsLnch", "HomeCountry", "PlaceAbroad", "EgnBulstat" }.Contains(x.PropertyPath)).ToList(),
+
+                    ClientType.Municipality => validations
+                    .Where(x => x.Step == 0 &&
+                    !new HashSet<string> { "RegisterType", "IsLnch", "FirstNames", "SurNames", "LastNames", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
+
+                    ClientType.ForeignPhysical => validations
+                    .Where(x => x.Step == 0 &&
+                    !new HashSet<string> { "IsLnch", "FirstNames", "SurNames", "LastNames", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
+
+                    ClientType.Legal => validations
+                    .Where(x => x.Step == 0 &&
+                    !new HashSet<string> { "IsLnch", "FirstNames", "SurNames", "LastNames", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
+
+                    _ => validations
+                };
+
+                var applicantValidations = filteredValidations
+                    .Where(x => !x.PropertyPath.Contains("Addresses"))
+                    .ToHashSet();
+
+                if (model?.Addresses != null)
+                {
+                    var addressValidations = filteredValidations
+                        .Where(x => x.PropertyPath.Contains("Addresses"))
+                        .ToList();
+
+                    await this.ValidateAddresses(model.Addresses, addressValidations);
+                }
+
+                DynamicValidator.GetModelStateRequiredErrors(this.Localizer, this.ModelState, model, applicantValidations, 0);
+
+                return this.ModelState.IsValid;
+            }
+
+            if (model.FirstNames != null)
+            {
+                if (model.FirstNames.IsNullOrEmpty())
+                {
+                    this.ModelState.AddModelError(
+                      "FirstNames",
+                      string.Format(
+                          this.Localizer["Required"],
+                          this.Localizer["FirstNames"]));
+                }
+
+                if (model.FamilyNames.IsNullOrEmpty())
+                {
+                    this.ModelState.AddModelError(
+                      "FamilyNames",
+                      string.Format(
+                          this.Localizer["Required"],
+                          this.Localizer["FamilyNames"]));
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(model.FullName))
+                {
+                    this.ModelState.AddModelError(
+                       "FullName",
+                       string.Format(
+                           this.Localizer["Required"],
+                           this.Localizer["FullName"]));
+                }
+            }
+
+            return this.ModelState.IsValid;
+        }
+
+        private async Task ValidateAddresses(List<Address> addresses, List<DynamicValidation> dynamicValidations)
+        {
+            if (addresses.IsNotNullOrEmpty())
+            {
+                await using (await this.contextManager.NewConnectionAsync())
+                {
+                    foreach (var address in addresses)
+                    {
+                        HashSet<DynamicValidation> addressValidations = new();
+                        if (address?.Settlement?.Id != null)
+                        {
+                            var regions = await this.addressService.GetRegionsAsync(address.Settlement.Id);
+
+                            if (regions.IsNullOrEmpty())
+                            {
+                                addressValidations = dynamicValidations.Where(x => !x.PropertyPath.Contains("Region")).ToHashSet();
+                            }
+
+                            DynamicValidator.GetModelStateRequiredErrors(
+                                this.Localizer,
+                                this.ModelState,
+                                address,
+                                addressValidations.IsNotNullOrEmpty() ? addressValidations : dynamicValidations,
+                                0,
+                                "Addresses.");
+                        }
+                    }
+                }
             }
         }
     }

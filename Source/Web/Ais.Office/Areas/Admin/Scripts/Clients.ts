@@ -188,7 +188,7 @@ function onLoadClick(e: JQuery.EventBase): void {
     e.preventDefault();
     let sender = $(e.currentTarget);
     let wrapper = $(`#${sender.data("id")}`).closest("form");
-    let number = wrapper.find("input[name='EgnBulstatSearch']:visible").val() as string;
+    let number = wrapper.find("input[name='EgnBulstatSearch']:visible").val() as string || wrapper.find("input[name='EgnBulstat']:visible").val() as string
     let clientTypeDropDown = kendo.widgetInstance(wrapper.find("input[name='Type.Id']")) as kendo.ui.DropDownList;
     var clientType = clientTypeDropDown ? getClientTypeById(clientTypeDropDown.value()) : null;
     if (!number || !clientType) {
@@ -550,7 +550,7 @@ function removeRepresentative(e: JQuery.EventBase): void {
                 "DeleteRepresentative",
                 "Clients",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     area: "Admin",
                     useArea: true,
                     data: {
@@ -828,6 +828,14 @@ function getClientTypeById(id: string): string {
             {
                 return "physicalwithbulstat";
             }
+        case "dc20c044-e45d-4817-86c6-7e6f142aa293":
+            {
+                return "homecountry";
+            }
+        case "abd2cf98-6696-470d-8404-f00d24c416dc":
+            {
+                return "municipality";
+            }
     }
 }
 
@@ -851,7 +859,7 @@ function onRemoveAddressClick(e: JQuery.EventBase): void {
                 "DeleteAddress",
                 "Clients",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     area: "Admin",
                     useArea: true,
                     data: {
@@ -986,8 +994,8 @@ export function onCreditNoticeUpsert(res) {
 export function onClientTypeDropDownDataBound(e: kendo.ui.DropDownListDataBoundEvent): void {
     e.sender.trigger("change");
     if (!(e.sender.element.data("skipcheckboxchange") === 'True')) {
-        e.sender.element.closest("form").find(".without-egnbulstat-legal-js").trigger("change");
-        e.sender.element.closest("form").find(".without-egnbulstat-physical-js").trigger("change");
+        //e.sender.element.closest("form").find(".without-egnbulstat-legal-js").trigger("change");
+        //e.sender.element.closest("form").find(".without-egnbulstat-physical-js").trigger("change");
     }
 }
 

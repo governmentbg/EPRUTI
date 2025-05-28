@@ -1,0 +1,137 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Configurations>Debug;Release</Configurations>
+		<RazorCompileOnPublish>false</RazorCompileOnPublish>
+		<SatelliteResourceLanguages>en-US;bg-BG</SatelliteResourceLanguages>
+		<CodeAnalysisRuleSet>..\..\Rules.ruleset</CodeAnalysisRuleSet>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors>CS8600;CS8602;CS8603</WarningsAsErrors>
+		<NoWarn>NU1608;NU1803</NoWarn>
+		<Version>3.1.28.0</Version>
+		<NuGetAudit>false</NuGetAudit>
+		<AssemblyVersion>3.1.28</AssemblyVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="..\..\stylecop.json" />
+		<None Include="..\..\.editorconfig" Link=".editorconfig" />
+		<TypeScriptCompile Remove="node_modules\**" />
+		<Content Remove="wwwroot\scripts\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="appsettings.MapexMRRBTestInternal.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Ais.Payments" Version="2.0.1" />
+		<PackageReference Include="Ais.Regix.Net.Core" Version="1.0.4" />
+		<PackageReference Include="AutoMapper" Version="13.0.1" />
+		<PackageReference Include="EasyCaching.Redis" Version="1.9.2" />
+		<PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="1.9.2" />
+		<PackageReference Include="Google.Protobuf.Tools" Version="3.31.0" />
+		<PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" Version="2.65.0" />
+		<PackageReference Include="IO.SignTools" Version="6.0.11" />
+		<PackageReference Include="MessagePack" Version="2.5.108" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.7" />
+		<PackageReference Include="ITfoxtec.Identity.Saml2.MvcCore" Version="4.13.2" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="8.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.7" />
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.5.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="MimeKit" Version="4.12.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
+		<PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.1.2" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+		<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
+		<PackageReference Include="Serilog.Sinks.Http" Version="9.1.0" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.8" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.10.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+		<PackageReference Include="System.ServiceModel.Duplex" Version="6.0.0" />
+		<PackageReference Include="System.ServiceModel.Federation" Version="8.0.0" />
+		<PackageReference Include="System.ServiceModel.Http" Version="8.0.0" />
+		<PackageReference Include="System.ServiceModel.NetTcp" Version="8.0.0" />
+		<PackageReference Include="System.ServiceModel.Primitives" Version="8.0.0" />
+		<PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
+		<PackageReference Include="Telerik.Documents.ImageUtils" Version="2024.2.426" />
+		<PackageReference Include="Telerik.Reporting" Version="18.1.24.709" />
+		<PackageReference Include="Gapotchenko.Eazfuscator.NET" Version="2024.2.614">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Telerik.UI.for.AspNet.Core" Version="2024.2.514" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Areas\OutAdministrativeAct\Scripts\" />
+	  <Folder Include="Properties\PublishProfiles\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="Ais.Common">
+	    <HintPath>..\..\Libs\Ais.Common.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Data">
+	    <HintPath>..\..\Libs\Ais.Data.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Data.Common">
+	    <HintPath>..\..\Libs\Ais.Data.Common.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Data.Models">
+	    <HintPath>..\..\Libs\Ais.Data.Models.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.GrpcContracts">
+	    <HintPath>..\..\Libs\Ais.GrpcContracts.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Infrastructure">
+	    <HintPath>..\..\Libs\Ais.Infrastructure.dll</HintPath>
+	  </Reference>
+		<Reference Include="Ais.Portal.ViewModels">
+			<HintPath>..\..\Libs\Ais.Portal.ViewModels.dll</HintPath>
+		</Reference>
+	  <Reference Include="Ais.Resources">
+	    <HintPath>..\..\Libs\Ais.Resources.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Services">
+	    <HintPath>..\..\Libs\Ais.Services.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Services.Data">
+	    <HintPath>..\..\Libs\Ais.Services.Data.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Services.Mapping">
+	    <HintPath>..\..\Libs\Ais.Services.Mapping.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Table.Mvc">
+	    <HintPath>..\..\Libs\Ais.Table.Mvc.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.Utilities">
+	    <HintPath>..\..\Libs\Ais.Utilities.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.WebServices">
+	    <HintPath>..\..\Libs\Ais.WebServices.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Ais.WebUtilities">
+	    <HintPath>..\..\Libs\Ais.WebUtilities.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Kendo.Mvc">
+	    <HintPath>..\..\Libs\Kendo.Mvc.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+	
+	<Target Name="CustomActionsAfterPublish" AfterTargets="AfterPublish">
+		<Exec Command="xcopy.exe /Y &quot;$(TargetDir)bg-BG\Kendo.Mvc.resources.dll&quot; &quot;$(PublishUrl)bg-BG\Kendo.Mvc.resources.dll&quot;" />
+	</Target>
+
+</Project>

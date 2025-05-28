@@ -1,7 +1,7 @@
 ﻿@inject IStringLocalizer Localizer
 @using Ais.Utilities.Extensions
 @using Microsoft.Extensions.Localization
-@using Ais.Data.Models.Service.Object
+@using global::Ais.Data.Models.Service.Object
 @using Ais.WebUtilities.Extensions
 @model Ais.Data.Models.Document.OutDocument
 @{
@@ -38,46 +38,6 @@
             if (Model.Note.IsNotNullOrEmpty())
             {
                 <div>@Localizer["Note"]: <strong>@(Model.Note)</strong></div>
-            }
-
-            if (Model.Task?.Type?.Name != null)
-            {
-                <div>@Localizer["TaskType"]: <strong>@(Model.Task?.Type?.Name)</strong></div>
-            }
-
-            if (Model.Objects.IsNotNullOrEmpty())
-            {
-                <div class="form-row">
-                    <ul class="simplelist flex wrap gap-5">
-                        @{
-                            var visibleCount = 20;
-                            var hasMoreObjects = Model.Objects.Count > visibleCount;
-                            var count = hasMoreObjects ? visibleCount : Model.Objects.Count;
-                            for (var j = 0; j < count; j++)
-                            {
-                                var current = Model.Objects[j];
-                                var text = $"<b>{current.Title}</b> {current.ShortDescription}".Trim();
-                                <li class="flex align-center gap-5">
-                                    <svg class="icon object-icon">
-                                        <use xlink:href="#icon-lt@(Model.Objects[j].Type.GetHashCode())"></use>
-                                    </svg>
-                                    <span>
-                                        @Html.Raw(text)
-                                    </span>
-                                </li>
-                            }
-
-                            if (hasMoreObjects)
-                            {
-                                <li class="nodot">
-                                    <a href="#" class="simplelink view-objects-js" data-controllername="@ViewContext.RouteData.Values["Controller"]" data-app-id="@Model.UniqueId" data-type="objects" data-title="@Model.Type?.Name">
-                                        @($"{Localizer["ViewAllObjects"]}({Model.Objects.Count})")
-                                    </a>
-                                </li>
-                            }
-                        }
-                    </ul>
-                </div>
             }
 
             if (Model?.AttachedToSpecialDocument?.Id.HasValue == true)

@@ -1,0 +1,31 @@
+@using Ais.WebUtilities.Extensions
+@using HtmlHelperExt = Ais.WebUtilities.Helpers.HtmlHelperExt
+@model object
+@{
+    var cascadeFrom = ViewData["CascadeFrom"] as string;
+    var action = ViewData["ActionName"] as string;
+    var controller = ViewData["ControllerName"] as string;
+
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+        ? ViewData["htmlAttributes"]
+        : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() }
+        });
+}
+@(Html.Kendo().DropDownListFor(m => m)
+    .DataValueField("Key")
+    .DataTextField("Value")
+    .HtmlAttributes(attributes)
+    .CascadeFrom(cascadeFrom)
+    .CascadeFromField("Key")
+    .Filter(FilterType.Contains)
+    .MinLength(3)
+    .DataSource(
+        d => d.Read(r => r.Action(action, controller).Data("core.filterData"))
+              .ServerFiltering(true))
+    .Deferred(!Context.Request.IsAjaxRequest()))

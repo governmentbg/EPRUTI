@@ -3,11 +3,12 @@
 @using Microsoft.Extensions.Localization
 
 @inject IStringLocalizer Localizer
-@model Ais.Office.Models.RegisterEmployeeViewModel
+@model Ais.Data.Models.RegistrationRequest.RegistrationRequest
 @{
     // var isEAuthentication = Model.RegistrationType == RegistrationType.EAuthentication;
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
     var isModelStateValid = ViewBag.IsModelStateValid is not bool || (bool)ViewBag.IsModelStateValid;
+    var isNewRegistration = (bool?)ViewBag.IsNewRegistration != null ? (bool)ViewBag.IsNewRegistration : false;
 }
 @section Breadcrumbs
 {
@@ -15,7 +16,7 @@
         await Html.RenderPartialAsync("_Breadcrums");
     }
 }
-<div class="steps-body" id="RegistrationWrapper">
+<div class="steps-body registration-wrap" id="RegistrationWrapper">
     @*  @if (!isEAuthentication)
     {
     <partial name="_CheckExistenceByIdentifier" />
@@ -30,14 +31,57 @@
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.UniqueId)
             @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.Type.Id)
+           @*  @Html.HiddenFor(m => m.FirstName)
+            @Html.HiddenFor(m => m.SurName)
+            @Html.HiddenFor(m => m.LastName) *@
+            @Html.HiddenFor(m => m.Administration)
+            @Html.HiddenFor(m => m.Department)
+            @Html.HiddenFor(m => m.Position)
+            @Html.HiddenFor(m => m.Office.Id)
+            @Html.HiddenFor(m => m.File.Id)
+            @Html.HiddenFor(m => m.Egn)
+            @Html.HiddenFor(m => m.ContactPhone)
+            @Html.HiddenFor(m => m.User.Id)
+            @Html.Hidden("isNewRequest", @isNewRegistration)
 
             <div class="step-box fullwidth">
                 <div class="step-box-head">
-                    <h3 class="step-box-title">
-                        @Localizer["EnterInformationForRegistration"]
-                    </h3>
+                    <strong>@Localizer["EnterInformationForRegistration"]</strong>
+                    <span>1/2</span>
                 </div>
                 <div class="step-box-body">
+                    <div class="form-row">
+                        <div class="form-input fullwidth">
+                            @Html.InfoLabel(Localizer["Role"], "Role")
+                            @(Html.Kendo().DropDownList()
+                                .Name("Role.Id")
+                                .OptionLabel(Localizer["Choose"].ToString())
+                                .Value(Model?.Role?.Id.HasValue == true ? Model.Role.Id.ToString() : string.Empty)
+                                .DataValueField("Id")
+                                .DataTextField("Name")
+                                .ValueTemplate(
+                                $"<input type='hidden' name='Role.Name' value='#:Name#'/>" +
+                                "<span>#:Name#</span>")
+                                .Filter(FilterType.Contains)
+                                .DataSource(d => d.Read(r => r.Action("GetRoles", "Registration", new { area = string.Empty })))
+                                .Deferred(deferred))
+                            @Html.ValidationMessage("Role.Id")
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-input column">
+                            @Html.InfoLabel(Localizer["Egn"], "Egn")
+                            @Html.EditorFor(m => m.Egn, new {
+                                    htmlAttributes =  new { @readonly = "readonly" } })
+                            @Html.ValidationMessage("Egn")
+                        </div>
+                        <div class="form-input column">
+                            @Html.InfoLabel(Localizer["Email"], "Email")
+                            @Html.EditorFor(m => m.Email)
+                            @Html.ValidationMessage("Email")
+                        </div>
+                    </div>
                     <div class="form-row">
                         <div class="form-input third">
                             @Html.InfoLabel(Localizer["FirstName"], "FirstName")
@@ -53,41 +97,9 @@
                             @Html.InfoLabel(Localizer["LastName"], "LastName")
                             @Html.EditorFor(m => m.LastName)
                             @Html.ValidationMessage("LastName")
-                        </div>                        
-                    </div>
-                    <div class="form-row">
-                        <div class="form-input third">
-                            @Html.InfoLabel(Localizer["Egn"], "Egn")
-                            @Html.EditorFor(m => m.Egn)
-                            @Html.ValidationMessage("Egn")
-                        </div>
-                        <div class="form-input third">
-                            @Html.InfoLabel(Localizer["Email"], "Email")
-                            @Html.EditorFor(m => m.Email)
-                            @Html.ValidationMessage("Email")
-                        </div>
-                        <div class="form-input third">
-                            @Html.InfoLabel(Localizer["Role"], "Role")
-                            @(Html.Kendo().DropDownList()
-                                .Name("Role.Id")
-                                .OptionLabel(Localizer["Choose"].ToString())
-                                .Value(Model?.Role?.Id.HasValue == true ? Model.Role.Id.ToString() : string.Empty)
-                                .DataValueField("Id")
-                                .DataTextField("Name")
-                                .ValueTemplate(
-                                $"<input type='hidden' name='Role.Name' value='#:Name#'/>" +
-                                "<span>#:Name#</span>")
-                                .Filter(FilterType.Contains)
-                                .DataSource(d => d.Read(r => r.Action("GetRoles", "Registration", new { area = string.Empty })))
-                                .Deferred(deferred))
-                            @Html.ValidationMessage("Role")
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="step-box-body">
-                <div class="step-box fullwidth">
-                    <button class="bttn warning right proceedtoRequest-js">
+                    <button class="bttn main fullwidth proceedtoRequest-js">
                         @Localizer["ProceedToRequest"]
                     </button>
                 </div>

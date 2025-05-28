@@ -1,0 +1,45 @@
+﻿@using Ais.Portal.ViewModels.Publication
+@model Ais.Data.Models.Publication.PublicationType
+
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+@section Scripts
+{
+    <script id="publicationTemplate" type="text/kendo-ui-template">
+         <li class="four">
+             <a href='@Url.Action("Preview", "Publication")?id=#:Id#&type=#:Type#'>
+                <span class="img-wrap">
+                    <img src="#:MainPictureUrl#" alt="#:Title#" />
+                </span>
+                <span class="info-wrap text-left">
+                    <span class="n-date">
+                        #if(StartDate){#
+                            #:kendo.toString(StartDate, "d")#
+                         #}#
+                    </span>
+                    <strong class="n-title" title="#:Title#">
+                        #:Title#
+                    </strong>
+                    <span class="n-text">
+                        #=Content#
+                    </span>
+                </span>
+            </a>
+        </li>
+    </script>
+}
+<div class="itemlist-wrap news-wrap">
+    @(Html.Kendo().ListView<PublicationListViewModel>()
+          .Name(Guid.NewGuid().ToString())
+          .HtmlAttributes(new { @class = "itemlist" })
+          .ClientTemplateId("publicationTemplate")
+          .TagName("ul")
+          .Pageable()
+        .DataSource(d => d.Ajax().Read(read => read.Action("Read", "Publication", new { type = Model, forDate = ((DateTime?)this.ViewBag.ForDate).ToString() })).PageSize(10).ServerOperation(true))
+          .Deferred())
+</div>

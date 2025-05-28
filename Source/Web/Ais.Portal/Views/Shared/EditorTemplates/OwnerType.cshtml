@@ -1,0 +1,22 @@
+﻿@using global::Ais.Data.Models.QueryModels.Map
+@using Microsoft.Extensions.Localization
+@using HtmlHelperExt = Ais.WebUtilities.Helpers.HtmlHelperExt
+@inject IStringLocalizer Localizer
+@model OwnerType?
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+                {
+                    { "id", Guid.NewGuid().ToString() },
+                });
+
+    var data = Enum.GetNames<OwnerType>().Select(name => new SelectListItem { Text = this.Localizer[$"{nameof(OwnerType)}{name}"].ToString(), Value = name }).ToArray();
+}
+@(Html.Kendo().DropDownListFor(m => m)
+    .HtmlAttributes(attributes)
+    .BindTo(data))

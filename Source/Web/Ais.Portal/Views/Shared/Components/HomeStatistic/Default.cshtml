@@ -1,0 +1,24 @@
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+<section class="statistics">
+    <div class="itemlist-wrap">
+        <div class="itemlist">
+            <div class="stats-box item four">
+                <strong>2389488</strong>
+                <span>@Localizer["ClientCount"]</span>
+            </div>
+            <div class="stats-box item four">
+                <strong>@ViewBag.ImmovableCount.ToString("N0")</strong>
+                <span>@Localizer["ImmovableCount"]</span>
+            </div>
+            <div class="stats-box item four">
+                <strong>@ViewBag.BuildingCount.ToString("N0")</strong>
+                <span>@Localizer["BuildingCount"]</span>
+            </div>
+            <div class="stats-box item four">
+                <strong>683296</strong>
+                <span>@Localizer["ApplicationCountSinceBeginningYear"]</span>
+            </div>
+        </div>
+    </div>
+</section>

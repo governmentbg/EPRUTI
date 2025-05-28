@@ -3,14 +3,17 @@
     using System.ComponentModel;
 
     using Ais.Common.Localization;
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.QueryModels;
     using Ais.Infrastructure.Roles;
     using Ais.Office.ViewModels.Nomenclatures;
     using Ais.Services.Ais;
     using Ais.WebServices.Services.SessionStorage;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.QueryModels;
 
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
@@ -54,7 +57,6 @@
             this.mapper = mapper;
             this.configuration = configuration;
             this.Options.TableHeaderText = localizer["Nomenclatures"];
-            this.Options.ShowFieldToolTip = false;
             this.Options.Breadcrumbs = new[] { new Ais.Data.Models.Breadcrumb { Title = this.Localizer["Settings"] } };
         }
 

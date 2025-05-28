@@ -4,12 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.Role;
-    using Ais.Data.Models.TariffTemplate;
     using Ais.Infrastructure.Roles;
     using Ais.Office.ViewModels.ClientRoles;
     using Ais.Services.Ais;
@@ -17,9 +11,20 @@
     using Ais.WebServices.Services.SessionStorage;
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.Role;
+    using global::Ais.Data.Models.TariffTemplate;
+
     using Kendo.Mvc.Extensions;
     using Kendo.Mvc.UI;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -184,11 +189,11 @@
 
                 data = allRights?.Select(
                     item => new CheckableNomenclature
-                            {
-                                Id = item.Id,
-                                Name = item.Name,
-                                IsChecked = roleRights.IsNotNullOrEmpty() && roleRights!.Any(a => a.Id == item.Id),
-                            }).ToList();
+                    {
+                        Id = item.Id,
+                        Name = item.Name,
+                        IsChecked = roleRights.IsNotNullOrEmpty() && roleRights!.Any(a => a.Id == item.Id),
+                    }).ToList();
 
                 await this.SessionStorageService.SetAsync<IEnumerable<CheckableNomenclature>>($"{uniqueId}_Rights", data);
             }
@@ -345,7 +350,7 @@
         {
             await using (await this.contextManager.NewConnectionAsync())
             {
-                return this.mapper.Map<List<ClientRoleTableViewModel>>(await this.roleService.SearchClientRolesAsync(this.mapper.Map<Data.Models.QueryModels.ClientRoleQueryModel>(query)));
+                return this.mapper.Map<List<ClientRoleTableViewModel>>(await this.roleService.SearchClientRolesAsync(this.mapper.Map<Ais.Data.Models.QueryModels.ClientRoleQueryModel>(query)));
             }
         }
 

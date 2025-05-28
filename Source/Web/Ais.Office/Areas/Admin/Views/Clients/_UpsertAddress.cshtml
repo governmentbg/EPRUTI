@@ -1,7 +1,12 @@
-﻿@using Ais.Data.Models.Address;
+﻿@using global::Ais.Data.Models.Address;
+@using global::Ais.Data.Models.DynamicValidation
 @using Microsoft.Extensions.Localization;
 @inject IStringLocalizer Localizer;
 @model Address
+@{
+    var validations = ViewBag.Validations as List<DynamicValidation>;
+    ViewBag.Validations = validations as List<DynamicValidation>;
+}
 <form method="post" action="@Url.ActionLink("UpsertAddress", "Clients" )"
       data-ajax="true"
       data-ajax-method="POST"

@@ -1,0 +1,32 @@
+﻿@using Ais.Infrastructure.Roles
+@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Ais.Office.Areas.Admin.Controllers
+@inject IStringLocalizer localizer
+
+@{
+    var editUrl = Url.DynamicActionWithRightsCheck(nameof(FieldControlController.Edit), typeof(FieldControlController));
+    var upsertUrl = Url.DynamicActionWithRightsCheck(nameof(FieldControlController.Upsert), typeof(FieldControlController));
+    var deleteUrl = Url.DynamicActionWithRightsCheck(nameof(FieldControlController.Delete), typeof(FieldControlController));
+}
+
+@if (editUrl.IsNotNullOrEmpty())
+{
+    <a class="k-small k-button edit-field-js" href="@editUrl" data-searchqueryid="@ViewBag.SearchQueryId" title="@localizer["Edit"]">
+        <i class="k-i-edit k-icon k-font-icon"></i>
+    </a>
+}
+
+@if (upsertUrl.IsNotNullOrEmpty())
+{
+    <a class="k-small k-button upsert-field-js" href="@upsertUrl" data-searchqueryid="@ViewBag.SearchQueryId" title="@localizer["Upsert"]">
+        <i class="k-i-add k-icon k-font-icon"></i>
+    </a>
+}
+@if (deleteUrl.IsNotNullOrEmpty())
+{
+    <a class="k-small k-button delete-field-js" href="@deleteUrl" data-searchqueryid="@ViewBag.SearchQueryId" title="@localizer["Delete"]">
+        <i class="k-i-delete k-icon k-font-icon"></i>
+    </a>
+}

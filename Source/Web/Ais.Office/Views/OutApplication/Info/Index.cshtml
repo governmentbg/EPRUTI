@@ -20,9 +20,18 @@
             <div class="sticky-container">
                 <div class="k-dialog-buttongroup floading-buttons">
                     @{
+                        var applicationControllerType = typeof(OutApplicationController);
                         var outDocumentsControllerType = typeof(OutDocumentsController);
                         <div class="info-button-group edit-group">
                             @{
+                                var editLink = Url.DynamicActionWithRightsCheck(nameof(OutApplicationController.Edit), applicationControllerType, new { id = Model.Id });
+                                if (editLink.IsNotNullOrEmpty())
+                                {
+                                    <a href="@editLink" class="left bttn third" title="@Localizer["Edit"]">
+                                        <i class="k-i-edit k-font-icon k-icon"></i>
+                                    </a>
+                                }
+
                                 if (Model.HasCustomerSign == true)
                                 {
                                     var signLink = Url.DynamicActionWithRightsCheck(nameof(OutDocumentsController.Sign), outDocumentsControllerType, new { id = Model.Id });

@@ -1,0 +1,68 @@
+﻿@using global::Ais.Data.Models.DynamicValidation
+@using Ais.Portal.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebServices.Services.SessionStorage
+@using Ais.WebUtilities.Extensions
+@using Microsoft.AspNetCore.Mvc.Controllers
+@using Microsoft.Extensions.Localization
+@using global::Ais.Data.Models.OutAdmAct
+@inject IStringLocalizer Localizer;
+@inject ISessionStorageService sessionStorageService
+@model OutAdmAct
+
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var skipScripts = ViewBag.SkipScripts is bool && (bool)ViewBag.SkipScripts;
+    var isOverview = ViewBag.IsOverview is bool && (bool)ViewBag.IsOverview;
+    var validations = await sessionStorageService.GetAsync<List<DynamicValidation>>("DynamicValidations");
+    ViewBag.Validations = validations;
+
+
+    async Task RenderDataAsync()
+    {
+        await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/AdmActRegister/Info/_BasicData.cshtml");
+        await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/AdmActRegister/Info/_Applicants.cshtml");
+        await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/AdmActRegister/Info/_ActObject.cshtml");
+        await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/AdmActRegister/Info/_CopyAdmAct.cshtml");
+        @if (Model?.ConnectedDocuments != null)
+        {
+            <div class="step-box">
+                <div class="step-box-head-unordered">
+                    <h3 class="step-box-title">
+                        @Localizer["ConnectedDocs"]
+                    </h3>
+                </div>
+            </div>
+            @await Html.PartialAsync("~/Areas/OutAdministrativeAct/Views/AdmActRegister/Info/_ConnectedDocsInfo.cshtml", Model?.ConnectedDocuments)
+
+            if (!isOverview)
+            {
+                await Html.RenderPartialAsync("~/Views/Shared/Document/_AttachedDocuments.cshtml", Model);
+            }
+        }
+        if (ViewBag.ShowVersions as bool? == true)
+        {
+            await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/AdmActRegister/Info/_Versions.cshtml");
+        }
+    }
+    <div class="docinfo">
+        @{
+            await RenderDataAsync();
+        }
+    </div>
+}
+
+@if (!skipScripts)
+{
+    if (deferred)
+    {
+        @section Scripts
+        {
+    <script src="~/bundles/applicationInfo.min.js" asp-append-version="true"></script>
+        }
+    }
+    else
+    {
+        <script src="~/bundles/applicationInfo.min.js" asp-append-version="true"></script>
+    }
+}

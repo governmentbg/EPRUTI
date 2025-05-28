@@ -1,13 +1,17 @@
 ﻿@inject IStringLocalizer Localizer
-@using Ais.Office.ViewModels.Application
-@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using global::Ais.Data.Models.OutAdmAct
+@using Ais.Office.ViewModels.Application;
+@using Ais.Office.Controllers;
+@using Ais.WebUtilities.Extensions
 @using Microsoft.Extensions.Localization
-@model Ais.Data.Models.Document.OutDocument
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model OutAdmAct
 <section class="flex" id="zaqvlenie">
     @{
         ViewBag.BodyClass = "application";
         ViewBag.IsNotCenterContent = true;
         ViewBag.ApplicationUniqueId = Model.UniqueId;
+        ViewBag.DocTypeId = Model.Type.Id;
         var step = (Step)ViewBag.Step;
         await Html.RenderPartialAsync("_Steps");
         await Html.RenderPartialAsync("_Errors");
@@ -34,7 +38,7 @@
         await Html.RenderPartialAsync("_Buttons");
     }
 </section>
-
+@(Html.Hidden("docTypeId", Model.Type.Id))
 @section Scripts
 {
     <script src="~/bundles/outapplicationbundle.min.js" asp-append-version="true"></script>
@@ -72,24 +76,21 @@
                 </div>
             </script>
         }
-
         if (step.Current is StepType.Attachments)
         {
             await Html.RenderPartialAsync("_FileTemplate");
         }
-
-        if (step.Current is StepType.CopyAdmAct)
+        if(step.Current is StepType.CopyAdmAct)
         {
             await Html.RenderPartialAsync("_FileTemplate");
-        }
 
+        }
         if (step.Current == StepType.Folder)
         {
             <script src="~/bundles/searchFolders.min.js" asp-append-version="true"></script>
         }
     }
 }
-
 @section Breadcrumbs
 {
     @{

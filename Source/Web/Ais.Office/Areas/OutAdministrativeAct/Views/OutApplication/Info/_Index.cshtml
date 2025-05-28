@@ -1,4 +1,5 @@
-﻿@using Ais.Office.Controllers
+﻿@using global::Ais.Data.Models.OutAdmAct
+@using Ais.Office.Controllers
 @using Ais.Office.Areas.OutAdministrativeAct.Controllers
 @using Ais.Office.Controllers.Documents
 @using Ais.Utilities.Extensions
@@ -6,22 +7,67 @@
 @using Microsoft.AspNetCore.Mvc.Controllers
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer Localizer;
-@model Ais.Data.Models.Document.OutAdmAct
+@model OutAdmAct
 
 @{
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
     var skipScripts = ViewBag.SkipScripts is bool && (bool)ViewBag.SkipScripts;
     var isOverview = ViewBag.IsOverview is bool && (bool)ViewBag.IsOverview;
+    // Get ViewBag for version info and model last for normal info
+    var downloadFileId = (!isOverview && ViewBag.IsVersionFileId as Guid? != null) ? ViewBag.IsVersionFileId as Guid? : Model?.Versions?.LastOrDefault()?.XmlFileId;
 
     async Task RenderDataAsync()
     {
-        await Html.RenderPartialAsync("Info/_BasicData");
-        await Html.RenderPartialAsync("Info/_Applicants");
-        await Html.RenderPartialAsync("Info/_ActObject");
-        await Html.RenderPartialAsync("Info/_CopyAdmAct");
+        // TODO: remove false when project no longer has AIS in it so its removed from xml as well and files can be downloaded without having AIS info in it
+        if (!isOverview && false)
+        {
+            <div>
+                <span>
+                    @Localizer["DownloadXmlFrom"] <a href='@Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))?ids=@downloadFileId' target='_blank' rel='noopener noreferrer' download>@Localizer["Here"]</a>
+                </span>
+            </div>
+        }
+        await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/OutApplication/Info/_BasicData.cshtml");
+        await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/OutApplication/Info/_Applicants.cshtml");
+        await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/OutApplication/Info/_ActObject.cshtml");
+        await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/OutApplication/Info/_CopyAdmAct.cshtml");
+        @if (Model?.ConnectedDocuments != null)
+        {
+            <div class="step-box">
+                <div class="step-box-head-unordered">
+                    <h3 class="step-box-title">
+                        @Localizer["ConnectedDocs"]
+                    </h3>
+                </div>
+            </div>
+            @await Html.PartialAsync("~/Areas/OutAdministrativeAct/Views/OutApplication/Info/_ConnectedDocsInfo.cshtml", Model?.ConnectedDocuments)
+
+            if (!isOverview)
+            {
+                await Html.RenderPartialAsync("~/Views/Shared/Document/_AttachedDocuments.cshtml", Model);
+            }
+        }
+        if (ViewBag.ShowVersions as bool? == true && !isOverview)
+        {
+            await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/OutApplication/Info/_Versions.cshtml");
+        }
         if (!isOverview)
         {
-            await Html.RenderPartialAsync("~/Views/Shared/Document/_AttachedDocuments.cshtml", Model);
+            <div class="step-box">
+                <div class="step-box-head-unordered">
+                    <h3 class="step-box-title">
+                        @Localizer["ESignature"]
+                    </h3>
+                </div>
+                <div class="step-box-body">
+                    @if (!string.IsNullOrEmpty(Model?.ESignature))
+                    {
+                        <div class="doc-basic-info">
+                            @Html.Raw(Model.ESignature)
+                        </div>
+                    }
+                </div>
+            </div>
         }
     }
     <div class="docinfo">
@@ -30,6 +76,7 @@
         }
     </div>
 }
+
 @if (!skipScripts)
 {
     if (deferred)

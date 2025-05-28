@@ -1,0 +1,18 @@
+﻿@using Ais.Portal.ViewModels.UISettings;
+@using Microsoft.Extensions.Localization;
+@using System.Web;
+
+@inject IStringLocalizer Localizer
+@model UISettingsViewModel
+<div class="ib">
+	<strong>@Localizer["TechQuestionsPortal"]</strong>
+	e-mail: <a href="mailto: @(Model?.TechQuestionsMail)" class="js-show-email" data-mail="@(Model?.TechQuestionsMail)">
+		@Localizer["SeeMail"]
+	</a>
+</div>
+<div class="ib">
+	<strong>@Localizer["Feedback"]</strong>
+	e-mail: <a ref="mailto: @(Model?.FeedbackMail)" class="js-show-email" data-mail="@(Model?.FeedbackMail)">
+		@Localizer["SeeMail"]
+	</a>
+</div>

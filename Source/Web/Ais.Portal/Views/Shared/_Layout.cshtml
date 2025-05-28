@@ -1,0 +1,140 @@
+﻿@using System.Globalization
+@using Ais.Portal.Controllers
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
+@inject IStringLocalizer Localizer
+@inject IConfiguration Configuration
+@{
+    var bodyClass = ViewBag.BodyClass as string ?? string.Empty;
+    var contentClass = ViewBag.ContentClass as string ?? "index";
+    var centerClass = ViewBag.CenterClass as string ?? string.Empty;
+    var contentPreWrapClass = ViewBag.ContentPreWrapClass as string ?? string.Empty;
+    var isNotCenterContent = ViewBag.IsNotCenterContent is bool && (bool)ViewBag.IsNotCenterContent;
+    var scheme = Context.Request.Scheme;
+    var host = Context.Request.Host;
+    var culture = CultureInfo.CurrentCulture;
+    var path = $"{scheme}://{host}/{culture.TwoLetterISOLanguageName}/";
+    var area = this.ViewContext.RouteData.Values["area"];
+    var cookiesTerms = Configuration.GetValue<string>("Cms:CookiesPageUrl");
+    var generalTerms = Configuration.GetValue<string>("Cms:TermsPageUrl");
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+
+}
+<!DOCTYPE html>
+<html lang="@culture" currency="@(culture.NumberFormat.CurrencySymbol)" charset="UTF-8">
+<head>
+    <title>@Localizer["Portal"]</title>
+    <meta name="Author" content="" />
+    <meta name="Keywords" content="@(ViewBag.MetaDescription as string ?? Localizer["SystemName"])" />
+    <meta name="Description" content="@(ViewBag.MetaKeywords as string)" />
+    <meta charset="utf-8" />
+
+    <!-- Favicons -->
+    <link rel="shortcut icon" href="~/images/favicon@(mrrbFlag ? "MRRB": null).png">
+
+    <!-- Responsiveness -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    @await RenderSectionAsync("BeforeStyles", required: false)
+
+    <!-- Common styles -->
+    <environment exclude="Development">
+        <link href="~/bundles/common.min.css" rel="stylesheet" asp-append-version="true" />
+    </environment>
+
+    <environment include="Development">
+        <link href="~/css/normalize.css" rel="stylesheet" />
+        <link href="~/css/ais.css" rel="stylesheet" />
+        <link href="~/css/perfect-scrollbar.css" rel="stylesheet" />
+        <link href="~/css/owl.carousel.min.css" rel="stylesheet" />
+        <link href="~/css/magnific-popup.css" rel="stylesheet" />
+    </environment>
+
+    <link href="~/scss/style@(mrrbFlag ?  "-mrrb" : null).css" rel="stylesheet" />
+    <link href="~/css/style.custom@(mrrbFlag ? "-mrrb" : null).css" rel="stylesheet" />
+
+    <script>
+        var globalVariables = this;
+        var BaseUrl = '@path';
+        var area = '@area';
+        var termsUrl = '@path@generalTerms'
+        var cookiesUrl = '@path@cookiesTerms'
+    </script>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="@bodyClass">
+    <noscript> JavaScript is required in order to use this app </noscript>
+    @* Used for ajax requests - always present *@
+    @Html.AntiForgeryToken()
+    <div id="fixed-bgr"></div>
+    <div id="wrap">
+        <div id="main">
+            <!-- Content wrap, holding everything but the footer (closed in footer)-->
+            <input type="checkbox" id="respmenu" class="hidden" />
+            <div class="overlay"></div>
+            <partial name="_Header" />
+            <div class="clear"></div>
+            <div class="content @contentClass">
+                @{
+                    @await RenderSectionAsync("Breadcrumbs", false)
+                    if (isNotCenterContent)
+                    {
+                        @RenderBody()
+                    }
+                    else
+                    {
+                        <div class="content-pre-wrap @contentPreWrapClass">
+                            <div class="center @centerClass">
+                                @RenderBody()
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <partial name="_Notifications" />
+
+    @if (bodyClass != "map")
+    {
+        <partial name="_Footer" />
+    }
+
+    <script src="~/bundles/jquery.min.js" asp-append-version="true"></script>
+    <!--[if lt IE 9]><script src="~/js/html5shiv.js"></script><![endif]-->
+    <script src="https://kendo.cdn.telerik.com/2024.2.514/js/kendo.all.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2024.2.514/js/kendo.aspnetmvc.min.js"></script>
+    <script src="@($"https://kendo.cdn.telerik.com/2024.2.514/js/cultures/kendo.culture.{culture}.min.js")"></script>
+    <script src="@($"https://kendo.cdn.telerik.com/2024.2.514/js/messages/kendo.messages.{culture}.min.js")"></script>
+    @if (culture.TwoLetterISOLanguageName.Equals("bg", StringComparison.InvariantCultureIgnoreCase))
+    {
+        <script src="~/bundles/kendo-custom-messages-bg.min.js" asp-append-version="true"></script>
+    }
+    @Html.RenderCustomScriptsBefore()
+    <script src="~/bundles/common.min.js" asp-append-version="true"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            sessionTimeOut({
+                keepAliveMethod: "POST",
+                keepAliveUrl: "@(Url.DynamicAction(nameof(HomeController.KeepAlive), typeof(HomeController)))",
+                message: '@Localizer["SessionTimeOutMessage"]',
+                stayConnectedBtnText: '@Localizer["SessionTimeOutStayConnectedButtonTitle"]',
+                cancelBtnText: '@Localizer["Cancel"]',
+                timeOutAfter: @(TimeSpan.FromMinutes(Configuration.GetValue<long>("Authentication:Expires")).TotalMilliseconds + 1000),
+                timeOutUrl: "@(Url.Content($"~/{culture.TwoLetterISOLanguageName}"))",
+                titleText: '@Localizer["SessionTimeOutTitle"]',
+                warnAfter: @(TimeSpan.FromMinutes(Configuration.GetValue<long>("Session:WarningTimeout")).TotalMilliseconds - 1000)
+                                    });
+        </script>
+    }
+    @Html.Kendo().DeferredScripts()
+    @await RenderSectionAsync("Scripts", required: false)
+    @Html.RenderCustomScripts()
+</body>
+</html>

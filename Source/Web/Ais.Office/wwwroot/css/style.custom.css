@@ -1042,7 +1042,8 @@ label.checkboxes, .checkboxes label {
     a.info-employeerole-js,
     .info-link,
     a.info-link,
-    a.info-payment-order-js {
+    a.info-payment-order-js,
+    a.info-admact-js {
         color: inherit;
         text-decoration: underline;
         cursor: pointer;
@@ -1594,11 +1595,6 @@ footer {
     height: 25px;
 }
 
-
-
-
-/**esri*/
-
 #coordinate-positioning-2 .c-list-item input {
     border-color: transparent;
     border-radius: 5px;
@@ -2126,10 +2122,6 @@ input[type=text], input[type=email], input[type=password], input[type=data], tex
     padding: 2px 5px;
 }
 
-
-/* END ESRI*/
-
-
 .flex .number {
     padding: 0px 5px 0px 0px;
     font: bold 14px/1.2 Tahoma;
@@ -2151,14 +2143,11 @@ a.left.bttn.third {
 }
 
 
-
 .folder-tree .row-container .title.info-link {
     color: inherit;
     text-decoration: underline;
     cursor: pointer;
 }
-
-
 
 .folder td.k-table-td {
     padding: 5px 0px 0px 0px;
@@ -2503,7 +2492,7 @@ a.info-link {
     text-decoration: underline;
     cursor: pointer;
 }
-/*ESRI STYLES*/
+
 .map-print-loading-indicator {
     top: 0px;
     bottom: 0px;
@@ -2637,8 +2626,6 @@ a.info-link {
 #upload-extent .load-file-label {
     font-size: 12px;
 }
-
-/*END ESRI STYLES*/
 
 .red-cell {
     background-color: orangered;
@@ -5049,3 +5036,7 @@ body.t16 {
         background-color: #238a63;
         transition: background-color 0.3s ease;
     }
+
+.half {
+    width: 50%;
+}

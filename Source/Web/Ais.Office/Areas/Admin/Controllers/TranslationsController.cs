@@ -4,11 +4,6 @@
     using System.Threading.Tasks;
 
     using Ais.Common.Cache;
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.QueryModels;
-    using Ais.Data.Models.Translation;
     using Ais.Infrastructure.Roles;
     using Ais.Office.ViewModels.Translations;
     using Ais.Services.Ais;
@@ -16,7 +11,16 @@
     using Ais.WebServices.Services.SessionStorage;
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.QueryModels;
+    using global::Ais.Data.Models.Translation;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -156,7 +160,7 @@
         /// <param name="id">The identifier.</param>
         /// <param name="searchQueryId">The search query identifier.</param>
         /// <returns>A Task representing the asynchronous operation.</returns>
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.TranslationsDelete)]
         public async Task DeleteAsync(Guid id, string searchQueryId)
         {

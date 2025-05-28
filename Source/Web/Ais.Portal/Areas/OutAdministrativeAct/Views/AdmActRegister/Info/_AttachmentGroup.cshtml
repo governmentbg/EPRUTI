@@ -1,0 +1,89 @@
+﻿@using global::Ais.Data.Models.AdmActAttachment
+@using global::Ais.Data.Models.Attachment;
+@using Ais.Utilities.Extensions;
+@using Microsoft.Extensions.Localization;
+@using System
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.OutDocument
+
+@functions
+{
+
+    async Task RenderAttachmentAsync(AttachmentGroup group)
+    {
+        int i = 1;
+        <fieldset class="open">
+            <legend class="attachment-group-name">@group.Name</legend>
+            @foreach (var attachmentType in group.Attachments)
+            {
+                var filteredAttachments = Model?.Attachments?.Where(x => x.Type.Id == attachmentType.Id)?.ToList();
+                var isOnlyChild = false;
+
+                if (filteredAttachments.Count == 0)
+                {
+                    continue;
+                }
+
+                <div class="attachments-wrap">
+
+                    @if (group?.HasChildren == false && group?.Attachments?.Count() > 1)
+                    {
+                        <label>@(i++). @(attachmentType.Type.Title)</label>
+                    }
+                    else
+                    {
+                        isOnlyChild = true;
+                    }
+
+                    <div class="attachment-group-wrapper @(isOnlyChild ? "main" : null)">
+                        @if (filteredAttachments.IsNotNullOrEmpty())
+                        {
+                            await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/AdmActRegister/Info/_Attachment.cshtml", filteredAttachments);
+                        }
+                    </div>
+                </div>
+            }
+        </fieldset>
+
+    }
+
+    async Task RenderAttachmentGroupsAsync(AttachmentGroup group)
+    {
+        @if (group.HasChildren == true)
+        {
+            <fieldset>
+                <legend class="attachment-group-name">@group.Name</legend>
+                <div class="attachments-wrap">
+
+                    @if (group.Attachments != null && group.Attachments.Count() > 0 && group.HasChildren == true)
+                    {
+                        group.HasChildren = false;
+                        await this.RenderAttachmentAsync(group);
+                        group.HasChildren = true;
+                    }
+
+                    @foreach (var child in group.Children)
+                    {
+                        await RenderAttachmentGroupsAsync(child);
+                    }
+                </div>
+            </fieldset>
+        }
+        else
+        {
+            if (group.Attachments != null && group.Attachments.Count() > 0)
+            {
+                await this.RenderAttachmentAsync(group);
+            }
+        }
+
+    }
+}
+@{
+    var group = ViewBag.Group as AttachmentGroup;
+    <div class="steps-body">
+        @{
+            await RenderAttachmentGroupsAsync(group);
+        }
+    </div>
+}

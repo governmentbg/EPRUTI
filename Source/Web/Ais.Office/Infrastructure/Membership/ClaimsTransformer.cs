@@ -3,7 +3,9 @@
     using System.Security.Claims;
 
     using Ais.Office.Models;
+
     using Ais.WebUtilities.Extensions;
+
     using Microsoft.AspNetCore.Authentication;
 
     /// <summary>
@@ -34,7 +36,7 @@
             ClaimsPrincipal transform = null;
             if (principal.Identity?.IsAuthenticated == true)
             {
-                var employee = await this.httpContextAccessor.HttpContext?.Session.GetAsync<EmployeeViewModel>(Resources.Office.Constants.Employee)!;
+                var employee = await this.httpContextAccessor.HttpContext?.Session.GetAsync<EmployeeViewModel>(Ais.Resources.Office.Constants.Employee)!;
                 transform = new EmployeePrincipal(employee);
                 transform.AddIdentities(principal.Identities);
             }

@@ -354,9 +354,12 @@ function bindEvents() {
         let target = ".step-box-body";
 
         if (groupAttachmentWrapper && $(groupAttachmentWrapper).find(".step-box-body").length == 1) {
+            let attachmentPrefix = "Attachments[" + sender.closest('.step-box-body').find("#Attachments_Index").val() + "].";
+            let uploadWidget = $("[data-prefix='" + attachmentPrefix + "']").data("kendoUpload");
+            uploadWidget.removeAllFiles();
             return;
         }
-        
+
         let actions = [
             {
                 text: getResource("Yes"),
@@ -691,7 +694,7 @@ function bindEvents() {
     rebindEvent("click", ".remove-appication-js", (e: JQuery.EventBase) => {
         let sender = $(e.currentTarget);
         requestOptional("RemoveApplication", "Application", {
-            type: "DELETE",
+            type: "POST",
             data: {
                 id: sender.data("id"),
                 applicationUniqueId: sender.closest("form").find("[name=UniqueId]:first").val(),

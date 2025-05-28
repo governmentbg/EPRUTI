@@ -74,7 +74,7 @@ function DeleteSubstitution(e: JQuery.EventBase): void {
                 "DeleteSubstitution",
                 "Employees",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     area: "Admin",
                     useArea: true,
                     data: {
@@ -104,7 +104,7 @@ function DeleteOverTime(e: JQuery.EventBase): void {
                 "DeleteOverTime",
                 "Employees",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     area: "Admin",
                     useArea: true,
                     data: {
@@ -257,6 +257,7 @@ function onAddEmployee(e: JQuery.EventBase) :void{
             resizable: true,
             scrollable: true,
             modal: true,
+            width: "80%",
         }
     )
 }
@@ -280,6 +281,7 @@ function onEditEmployee(e: JQuery.EventBase): void {
             resizable: true,
             scrollable: true,
             modal: true,
+            width: "80%",
         }
     )
 }

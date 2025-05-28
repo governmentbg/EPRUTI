@@ -1,0 +1,144 @@
+@using System.ComponentModel.DataAnnotations
+@using Ais.Utilities.Attributes
+@using Ais.Utilities.Extensions
+@using Ais.Utilities.Helpers
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.UI.Fluent;
+@using Microsoft.Extensions.Localization
+@using System.Web
+@using HtmlHelperExt = Ais.WebUtilities.Helpers.HtmlHelperExt
+@inject IStringLocalizer Localizer
+@model IDictionary<Guid, string>
+@{
+    var propertyName = ViewData.ModelMetadata.PropertyName;
+    var isRequired = propertyName!.IsNotNullOrEmpty()
+                     && ViewData.ModelMetadata.ContainerType?.GetProperty(propertyName!)
+                                ?.GetCustomAttributes(typeof(RequiredAttribute), true)
+                                 .OfType<RequiredAttribute>()
+                                 .Any() == true;
+
+    var stringLengthAttribute = propertyName!.IsNotNullOrEmpty()
+        ? ViewData.ModelMetadata.ContainerType?.GetProperty(propertyName!)
+                  ?.GetCustomAttributes(typeof(DictionaryStringLengthAttribute), true)
+                   .OfType<DictionaryStringLengthAttribute>().FirstOrDefault()
+        : null;
+
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+        ? ViewData["htmlAttributes"]
+        : null;
+
+    var wrapperClass = ViewData?.ContainsKey("wrapperClass") == true
+        ? ViewData["wrapperClass"] as string
+        : null;
+
+    var tools = ViewData.ContainsKey("tools")
+           ? ViewData["tools"] as Action<EditorToolFactory>
+           : x =>
+       x.Clear()
+        .Bold().Italic().Underline().Strikethrough()
+        .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
+        .InsertUnorderedList().InsertOrderedList()
+        .Outdent().Indent()
+        .CreateLink().Unlink()
+        .InsertImage()
+        .InsertFile()
+        .SubScript()
+        .SuperScript()
+        .TableEditing()
+        .ViewHtml()
+        .Formatting()
+        .CleanFormatting()
+        .FontName()
+        .FontSize()
+        .ForeColor()
+        .BackColor()
+        .Print()
+        .ExportAs();
+}
+
+@foreach (var cultureData in LocalizationHelper.SupportedCultures)
+{
+    var key = cultureData.Id;
+    var language = Localizer[cultureData.Name];
+    var value = Model?.ContainsKey(key) == true ? Model[key] : null;
+    if (Model != null && !Model.ContainsKey(key))
+    {
+        Model.Add(key, string.Empty);
+    }
+
+    var name = $"{Html.DisplayNameForModel().Trim()}({language})";
+    var required = isRequired && cultureData.Required;
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        (required
+            ? new Dictionary<string, object>
+              {
+                  { "data-val", "true" },
+                  { "data-val-required", string.Format(Localizer["Required"], name) }
+              }
+            : null)!,
+        stringLengthAttribute != null
+            ? new Dictionary<string, object>
+              {
+                  { "data-val", "true" },
+                  { "data-rule-minlength", stringLengthAttribute.MinimumLength },
+                  { "data-rule-maxlength", stringLengthAttribute.MaximumLength },
+                  { "data-msg-minlength", string.Format(Localizer["StringLengthAttribute_ValidationErrorIncludingMinimum"], name, stringLengthAttribute.MaximumLength, stringLengthAttribute.MinimumLength) },
+                  { "data-msg-maxlength", string.Format(Localizer["StringLengthAttribute_ValidationErrorIncludingMinimum"], name, stringLengthAttribute.MaximumLength, stringLengthAttribute.MinimumLength) }
+              }
+            : null);
+
+    value = value.IsNotNullOrEmpty()
+        ? HttpUtility.HtmlDecode(value ?? string.Empty)
+        : null;
+
+    if (wrapperClass.IsNotNullOrEmpty())
+    {
+        <div class="@wrapperClass">
+            @Html.Label(propertyName, name, new { @class = required ? "required" : string.Empty })
+            @(Html.Kendo()
+                  .EditorFor(m => m[key])
+                  .Value(value ?? string.Empty)
+                  .HtmlAttributes(attributes)
+                  .Tools(tools)
+                  .ImageBrowser(imageBrowser => imageBrowser
+                  .Image(string.Empty) // TODO - change url
+                                    .Read("Read", "ImageBrowser", new { Area = string.Empty })
+                                    .Create("Create", "ImageBrowser", new { Area = string.Empty })
+                                    .Destroy("Destroy", "ImageBrowser", new { Area = string.Empty })
+                                    .Upload("Upload", "ImageBrowser", new { Area = string.Empty })
+                                    .Thumbnail("Thumbnail", "ImageBrowser", new { Area = string.Empty }))
+                  .FileBrowser(fileBrowser => fileBrowser
+                .File(string.Empty)
+                                   .Read("Read", "FileBrowser", new { Area = string.Empty })
+                                   .Create("Create", "FileBrowser", new { Area = string.Empty })
+                                   .Destroy("Destroy", "FileBrowser", new { Area = string.Empty })
+                                   .Upload("Upload", "FileBrowser", new { Area = string.Empty }))
+                  .Deferred(!Context.Request.IsAjaxRequest()))
+            @Html.ValidationMessageFor(m => m[key])
+        </div>
+    }
+    else
+    {
+        @Html.Label(propertyName, name, new { @class = required ? "required" : string.Empty })
+        @(Html.Kendo().EditorFor(m => m[key])
+              .Value(value ?? string.Empty)
+              .HtmlAttributes(attributes)
+              .Tools(tools)
+              .ImageBrowser(imageBrowser => imageBrowser
+                                        .Image(string.Empty) // TODO - change url
+                                .Read("Read", "ImageBrowser", new { Area = string.Empty })
+                                .Create("Create", "ImageBrowser", new { Area = string.Empty })
+                                .Destroy("Destroy", "ImageBrowser", new { Area = string.Empty })
+                                .Upload("Upload", "ImageBrowser", new { Area = string.Empty })
+                                .Thumbnail("Thumbnail", "ImageBrowser", new { Area = string.Empty }))
+              .FileBrowser(fileBrowser => fileBrowser
+                                   .File(string.Empty)
+                               .Read("Read", "FileBrowser", new { Area = string.Empty })
+                               .Create("Create", "FileBrowser", new { Area = string.Empty })
+                               .Destroy("Destroy", "FileBrowser", new { Area = string.Empty })
+                               .Upload("Upload", "FileBrowser", new { Area = string.Empty }))
+              .Deferred(!Context.Request.IsAjaxRequest()))
+        @Html.ValidationMessageFor(m => m[key])
+    }
+}

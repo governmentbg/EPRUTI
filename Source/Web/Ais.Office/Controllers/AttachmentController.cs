@@ -1,16 +1,18 @@
 ﻿namespace Ais.Office.Controllers
 {
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Text.Json;
 
     using Ais.Data.Models;
-    using Ais.Data.Models.Attachment;
     using Ais.Infrastructure.BaseTypes;
     using Ais.Infrastructure.KendoExt;
     using Ais.Office.Services.StaticFilesStorageService;
     using Ais.Utilities.Extensions;
     using Ais.WebServices.Services.Storage;
+
+    using global::Ais.Data.Models.Attachment;
 
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
@@ -53,6 +55,11 @@
         public async Task<IActionResult> Upload(string metaData = null)
         {
             var form = await this.Request.ReadFormAsync();
+            if (form.Files.Count != 1)
+            {
+                return this.NotFound();
+            }
+
             var file = form.Files.First();
             ChunkMetaData chunk = null;
             if (metaData != null)
@@ -121,40 +128,28 @@
         /// <returns>FileStreamResult.</returns>
         /// <exception cref="System.ArgumentNullException"></exception>
         [HttpGet]
-        public async Task<FileStreamResult> Download(string[] urls, Guid[] ids)
+        public async Task<IActionResult> Download(HashSet<string> urls, HashSet<Guid> ids)
         {
-            urls = urls?.Where(item => item.IsNotNullOrEmpty()).ToArray();
-            ids = ids?.Where(item => item != default).ToArray();
-            if (urls?.IsNotNullOrEmpty() != true && ids?.IsNotNullOrEmpty() != true)
+            var attachments = urls?.Where(url => url.IsNotNullOrEmpty()).Select(url => new Attachment { Url = url }).ToList() ?? new List<Attachment>();
+            attachments.AddRange(ids?.Where(id => id != default).Select(id => new Attachment { Id = id }) ?? new List<Attachment>());
+            if (attachments.IsNotNullOrEmpty())
             {
-                throw new ArgumentNullException();
+                await this.storageService.InitMetadataAsync(attachments);
             }
 
-            var isZip = urls?.Length > 1 || ids?.Length > 1;
-            string name;
-            if (isZip)
+            var validFiles = attachments.Where(file => file.Size > 0).ToArray();
+            if (validFiles.IsNullOrEmpty())
             {
-                name = "archive.zip";
-            }
-            else
-            {
-                var attachment = new Attachment
-                {
-                    Id = ids?.SingleOrDefault(),
-                    Url = urls?.SingleOrDefault()
-                };
-
-                await this.storageService.InitMetadataAsync(new[] { attachment });
-                name = attachment.Name;
+                return this.NotFound();
             }
 
-            if (name.IsNullOrEmpty())
-            {
-                throw new ArgumentNullException();
-            }
-
+            var name = validFiles.Length > 1
+                ? "archive.zip"
+                : validFiles.Single().Name;
             return this.File(
-                await this.storageService.DownloadAsync(urls, ids),
+                await this.storageService.DownloadAsync(
+                    validFiles.Where(f => f.Url.IsNotNullOrEmpty()).Select(f => f.Url).ToArray(),
+                    validFiles.Where(f => f.Id.HasValue).Select(f => f.Id!.Value).ToArray()),
                 MimeTypes.GetMimeType(name!),
                 name);
         }

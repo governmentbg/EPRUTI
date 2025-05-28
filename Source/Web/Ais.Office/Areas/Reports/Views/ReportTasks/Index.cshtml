@@ -1,0 +1,271 @@
+﻿@inject IStringLocalizer Localizer;
+@using FormTagHelper = Microsoft.AspNetCore.Mvc.TagHelpers.FormTagHelper
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using Ais.Office.Areas.Reports.Controllers.ReportTasks
+@model Ais.Office.ViewModels.Reports.Tasks.TaskByPeriodQueryViewModel
+@{
+    var resultsDivId = Guid.NewGuid().ToString();
+    async Task RenderScripts()
+    {
+        <script>
+            $("form[data-ajax-update='#@resultsDivId']").kendoValidator({
+                rules: {
+                    datepicker: function (input) {
+                        if (input.is("[data-role=datetimepicker]")) {
+                            var datePicker = input.data("kendoDateTimePicker");
+                            return datePicker.value() || !datePicker.element.val();
+                        } else if (input.is("[data-role=datepicker]")) {
+                            var datePicker = input.data("kendoDatePicker");
+                            return datePicker.value() || !datePicker.element.val();
+                        } else {
+                            return true;
+                        }
+                    }
+                },
+                messages: {
+                    datepicker: '@Localizer["InvalidDate_ValidationError"]'
+                }
+            }).data("kendoValidator");
+        </script>
+    }
+
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    if (deferred)
+    {
+        @section Breadcrumbs
+        {
+            @{
+                await Html.RenderPartialAsync("_Breadcrums");
+            }
+        }
+
+        @section Scripts
+        {
+            @{
+                await RenderScripts();
+            }
+        }
+    }
+}
+<section id="top-search" class="top-search k-pb-0">
+    <div class="center">
+        <div class="white-box">
+            <form action="@Url.DynamicAction(nameof(ReportTasksController.Search), typeof(ReportTasksController))"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-begin="kendo.ui.progress($('body'), true)"
+                  data-ajax-complete="kendo.ui.progress($('body'), false)"
+                  data-ajax-success="$('#@resultsDivId').show()"
+                  data-ajax-update="#@resultsDivId"
+                  data-ajax-mode="replace">
+                <div class="form-row">
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.FromDocRegistration)
+                        @Html.Kendo().DatePickerFor(x => x.FromDocRegistration).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.ToDocRegistration)
+                        @Html.Kendo().DatePickerFor(x => x.ToDocRegistration).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.FromDocPay)
+                        @Html.Kendo().DatePickerFor(x => x.FromDocPay).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.ToDocPay)
+                        @Html.Kendo().DatePickerFor(x => x.ToDocPay).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.Knik)
+                        @Html.Kendo().TextBoxFor(x => x.Knik).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.DocAmountFrom)
+                        @Html.Kendo().NumericTextBoxFor(x => x.DocAmountFrom).Format("c2").Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.DocAmountTo)
+                        @Html.Kendo().NumericTextBoxFor(x => x.DocAmountTo).Format("c2").Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.FromServicePrice)
+                        @Html.Kendo().NumericTextBoxFor(x => x.FromServicePrice).Format("c2").Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.ToServicePrice)
+                        @Html.Kendo().NumericTextBoxFor(x => x.ToServicePrice).Format("c2").Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.DocActualCompletionDateFrom)
+                        @Html.Kendo().DatePickerFor(x => x.DocActualCompletionDateFrom).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.DocActualCompletionDateTo)
+                        @Html.Kendo().DatePickerFor(x => x.DocActualCompletionDateTo).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.Roles)
+                        @(Html.Kendo().MultiSelectFor(x => x.Roles)
+                              .DataTextField("Value")
+                              .DataValueField("Key")
+                              .DownArrow(true)
+                              .BindTo(Model.RolesDataSource)
+                              .Value(Model.Roles)
+                              .Deferred(deferred))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.DocStatuses)
+                        @(Html.Kendo().MultiSelectFor(x => x.DocStatuses)
+                              .DataTextField("Value")
+                              .DataValueField("Key")
+                              .DownArrow(true)
+                              .BindTo(Model.DocStatusesDataSource)
+                              .Value(Model.DocStatuses)
+                              .Deferred(deferred))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.TariffId)
+                        @(Html.Kendo().MultiSelectFor(x => x.TariffId)
+                            .DataValueField("Key")
+                            .DataTextField("Value")
+                            .DownArrow(true)
+                            .Filter(FilterType.Contains)
+                            .AutoWidth(true)
+                            .DataSource(
+                                source =>
+                                {
+                                    source.Custom()
+                                          .ServerFiltering(true)
+                                          .ServerPaging(true)
+                                          .PageSize(40)
+                                          .Type("GET")
+                                          .Transport(t => t.Read(x => x.Action("GetTariffs", "ReportTasks").Data("searchTable.virtualDdlPrepData")))
+                                          .Schema(
+                                              schema =>
+                                              {
+                                                  schema.Data("Data");
+                                                  schema.Total("Total");
+                                              });
+                                })
+                            .Virtual(v => v.ItemHeight(26).ValueMapper("searchTable.valueMapper"))
+                            .Deferred(!Context.Request.IsAjaxRequest()))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.PlannedServiceStartTime)
+                        @Html.Kendo().DatePickerFor(x => x.PlannedServiceStartTime).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.PlannedServiceEndTime)
+                        @Html.Kendo().DatePickerFor(x => x.PlannedServiceEndTime).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.PlannedServiceCompletionStartTime)
+                        @Html.Kendo().DatePickerFor(x => x.PlannedServiceCompletionStartTime).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.PlannedServiceCompletionEndTime)
+                        @Html.Kendo().DatePickerFor(x => x.PlannedServiceCompletionEndTime).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.DocTypeId)
+                        @(Html.Kendo().DropDownListFor(x => x.DocTypeId)
+                              .DataTextField("Value")
+                              .DataValueField("Key")
+                              .BindTo(Model.DocTypeIdDataSource)
+                              .AutoBind(true)
+                              .Deferred(deferred))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.TaskTypeId)
+                        @(Html.Kendo().DropDownListFor(x => x.TaskTypeId)
+                              .DataTextField("Value")
+                              .DataValueField("Key")
+                              .BindTo(Model.TaskTypeIdDataSource)
+                              .Deferred(deferred))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.ServiceTypeId)
+                        @(Html.Kendo().DropDownListFor(x => x.ServiceTypeId)
+                              .DataTextField("Value")
+                              .DataValueField("Key")
+                              .BindTo(Model.ServiceTypeIdDataSource)
+                              .AutoBind(true)
+                              .Deferred(deferred))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.DocRegNum)
+                        @Html.Kendo().TextBoxFor(x => x.DocRegNum).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.TaskFlag)
+                        @(Html.Kendo().DropDownListFor(x => x.TaskFlag)
+                            .DataTextField("Value")
+                            .DataValueField("Key")
+                            .BindTo(Model.TaskFlagDataSource)
+                            .Deferred(deferred))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.Object)
+                        @Html.Kendo().TextBoxFor(x => x.Object).Deferred(deferred)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.DocExecutionOfficeId)
+                        @(Html.Kendo().DropDownListFor(x => x.DocExecutionOfficeId)
+                              .DataTextField("Value")
+                              .DataValueField("Key")
+                            .BindTo(Model.DocExecutionOfficeIdDataSource)
+                              .Deferred(deferred))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.DocLocationOfficeId)
+                        @(Html.Kendo().DropDownListFor(x => x.DocLocationOfficeId)
+                              .DataTextField("Value")
+                              .DataValueField("Key")
+                              .BindTo(Model.DocLocationOfficeIdDataSource)
+                              .Deferred(deferred))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.TaskExecutionOfficeId)
+                        @(Html.Kendo().DropDownListFor(x => x.TaskExecutionOfficeId)
+                              .DataTextField("Value")
+                              .DataValueField("Key")
+                              .BindTo(Model.TaskExecutionOfficeIdDataSource)
+                              .Deferred(deferred))
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.ServiceIsQuick)
+                        @Html.EditorFor(x => x.ServiceIsQuick)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.ServiceIsPaid)
+                        @Html.EditorFor(x => x.ServiceIsPaid)
+                    </div>
+                    <div class="form-input">
+                        @Html.LabelFor(x => x.ServiceIsStandard)
+                        @Html.EditorFor(x => x.ServiceIsStandard)
+                    </div>
+                    <div class="form-input auto w100">
+                        @Html.LabelFor(x => x.Limit)
+                        @Html.EditorFor(x => x.Limit, "ResultLimit")
+                    </div>
+                    <div class="form-input autosize k-ml-auto nest">
+                        <label class="empty"></label>
+                        <button class="bttn bttn-icon blue" title="@Localizer["Search"]" id="searchReportButton">
+                            <svg class="icon">
+                                <use xlink:href="#icon-search"></use>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<section id="datatable">
+    <div class="center fullwidth">
+        <div class="k-pivotgrid-wrapper" id="@resultsDivId" style="display: none;">
+        </div>
+    </div>
+</section>

@@ -1,0 +1,61 @@
+﻿@inject IStringLocalizer Localizer
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using global::Ais.Data.Models.Document.OutDocuments
+@model string;
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+
+    async Task RenderScriptsAsync()
+    {
+        <script type="text/x-kendo-template" id="itemTemplate">
+            #var status = outdocstatusstatistics.getStatusByTitle(Title) #
+            <div class="tr-container">
+                <div class='row-container docStatusStatistics #: status #'>
+                     <div style='margin-left: -2px;'>
+                        <a class="k-small k-button view-documents-js" title="@Localizer["View"]"><i class="k-i-eye k-font-icon k-icon"></i></a>
+                     </div>
+                    <span class='title' title="@Localizer["Info"]">#:Title ? Title : resources.getResource("NoName")# - <small class="badge">#: DocCount # </small></span>
+                 </div>
+            <div>
+        </script>
+        await Html.RenderPartialAsync("~/Views/OutDocuments/Components/Scripts/Default.cshtml");
+    }
+
+    if (deferred)
+    {
+        @section Scripts
+        {
+            await RenderScriptsAsync();
+        }
+    }
+    else
+    {
+        await RenderScriptsAsync();
+    }
+}
+<div class="folder-tree k-mt-3">
+    @(Html.Kendo().TreeList<OutDocStatusResult>()
+          .Name(Guid.NewGuid().ToString())
+          .Columns(columns => { columns.Add().Field(f => f.Title).Title(" ").TemplateId("itemTemplate"); })
+          .DataSource(
+              d =>
+                  d.Read(
+                       "ReadSearchResult",
+                       "OutDocStatusStatistics",
+                       new
+                       {
+                           key = Model
+                       })
+                   .ServerOperation(false)
+                   .Model(
+                       m =>
+                       {
+                           m.Id(f => f.Id);
+                           m.ParentId(f => f.ParentId).Nullable();
+                           m.Field(f => f.Title).Nullable();
+                       }))
+          .Deferred(deferred))
+</div>
+<br/>
+<div id="documentsWrapper" class="table-wrapper"></div>

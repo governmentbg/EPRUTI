@@ -1,0 +1,90 @@
+﻿@using global::Ais.Data.Models.Helpers
+@using Ais.Office.ViewModels.RegistrationRequests
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Employee.Employee
+
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var requests = ViewBag.Requests as List<RegistrationRequestsTableViewModel>;
+    var disableButtons = requests.Any(x => EnumHelper.GetRequestStatus(x.RequestStatus.Id.Value) == Ais.Data.Models.RegistrationRequest.RequestStatus.Waiting);
+    var isRedirect = this.ViewBag.IsRedirect;
+}
+@if (isRedirect == false)
+{
+    <script src="~/bundles/jquery.min.js" asp-append-version="true"></script>
+    <script src="https://kendo.cdn.telerik.com/2024.2.514/js/kendo.all.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2024.2.514/js/kendo.aspnetmvc.min.js"></script>
+
+    <script src="@Url.Content($"~/bundles/common.min.js")" asp-append-version="true"></script>
+    <script src="@Url.Content($"~/bundles/registration.min.js")" asp-append-version="true"></script>
+}
+
+<div class="steps-body profile-wrap">
+    @Html.HiddenFor(m => m.UniqueId)
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.User.Id)
+
+    <div class="step-box user-data">
+        <div class="step-box-head">
+            <strong class="role-name">@Localizer["UserProfile"]</strong>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="fullwidth ib">
+                    @Localizer["Egn"]:
+                    <strong>@Model.Egn</strong>
+                </div>
+                <div class="fullwidth ib">
+                    @Localizer["Email"]:
+                    <strong>@Model.User.Email</strong>
+                </div>
+                <div class="fullwidth ib">
+                    @Localizer["FullName"]:
+                    <strong>@Model.FullName</strong>
+                </div>
+                @if (Model.Office.Name != null)
+                {
+                    <div class="fullwidth ib">
+                        @Localizer["OfficeName"]:
+                        <strong>@Model.Office.Name</strong>
+                    </div>
+                }
+                @if (Model.Administration != null)
+                {
+                    <div class="fullwidth ib">
+                        @Localizer["Organization"]:
+                        <strong>@Model.Administration</strong>
+                    </div>
+                }
+                <div class="fullwidth ib">
+                    @Localizer["Department"]:
+                    <strong>@Model.Department</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["Position"]:
+                    <strong>@Model.Position</strong>
+                </div>
+                <div class="form-input fullwidth mb-0 @(disableButtons ? "not-allowed" : "")">
+                    <a class="bttn warning fullwidth @(disableButtons ? "disabled" : "")" title="@(disableButtons ? Localizer["YouHaveAWaitingRequest"] : Localizer["MakeRegistrationChange"])" href="@Url.Action("RegistrationChange", "Registration",new { egn = Model.Egn})">
+                        @Localizer["RegistrationChange"]
+                    </a>
+                    <button class="bttn red k-mt-2 fullwidth stop-registration-js @(disableButtons ? "disabled" : "")" title="@(disableButtons ? Localizer["YouHaveAWaitingRequest"] : Localizer["MakeRegistrationStop"])" data-egn="@Model.Egn" href="@Url.Action("Logout","Authentication")">
+                        @Localizer["RegistrationStop"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="step-box fullwidth">
+        <div class="step-box-head">
+            <strong class="role-name">@Localizer["UserRequests"]</strong>
+        </div>
+        <div class="step-box-body">
+            @await Html.PartialAsync("_UserRequests", requests)
+        </div>
+    </div>
+</div>

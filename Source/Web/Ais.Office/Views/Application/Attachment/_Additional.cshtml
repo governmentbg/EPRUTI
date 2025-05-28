@@ -1,0 +1,30 @@
+﻿@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Localization
+@model Ais.Data.Models.Document.InDocument
+<form action="@Url.Action("AdditionalAttachments", "Application")"
+      method="post"
+      data-ajax="true"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(m => m.UniqueId)
+    <div class="steps-body">
+        @{
+            ViewBag.ApplicationUniqueId = Model.UniqueId;
+            Model.Attachments = Model.Attachments?.Where(item => item.IsAdditional).ToList();
+            await Html.RenderPartialAsync("~/Views/Application/Attachment/_Index.cshtml", Model);
+        }
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn third right closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+    </div>
+</form>
+<script src="~/bundles/applicationbundle.min.js" asp-append-version="true"></script>
+@{
+    await Html.RenderPartialAsync("_FileTemplate");
+}

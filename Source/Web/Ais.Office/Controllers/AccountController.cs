@@ -1,10 +1,5 @@
 ﻿namespace Ais.Office.Controllers
 {
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Account;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Employee;
-    using Ais.Data.Models.Journal;
     using Ais.Infrastructure.BaseTypes;
     using Ais.Infrastructure.Roles;
     using Ais.Office.Utilities.Extensions;
@@ -12,8 +7,16 @@
     using Ais.Services.Ais;
     using Ais.Utilities.Encryption;
 
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Account;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Employee;
+    using global::Ais.Data.Models.Journal;
+
     using Kendo.Mvc.Extensions;
     using Kendo.Mvc.UI;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
 

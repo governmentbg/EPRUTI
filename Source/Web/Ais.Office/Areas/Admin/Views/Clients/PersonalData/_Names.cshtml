@@ -1,12 +1,18 @@
-﻿@using Ais.Office.ViewModels.Clients
+﻿@using global::Ais.Data.Models.DynamicValidation
+@using Ais.Office.ViewModels.Clients
+@using Microsoft.Extensions.Configuration
+@using Ais.Office.Utilities.Helpers
 @model ClientUpsertModel
+@inject IConfiguration Configuration
 @{
     var namesAndEgnBulstatShouldBeReadOnly = ViewBag.NamesAndEgnBulstatShouldBeReadOnly is bool && (bool)ViewBag.NamesAndEgnBulstatShouldBeReadOnly;
     var requiredFields = ViewBag.RequiredFields as ICollection<string> ?? Array.Empty<string>();
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+    var validations = ViewBag.Validations as List<DynamicValidation>;
 }
 <div class="form-row">
-    <div class="form-input quad">
-        @Html.LabelFor(m => m.FirstNames, requiredFields.Contains("FirstNames") ? new { @class = "required" } : null)
+    <div class="form-input @(mrrbFlag ? "third" : "quad")">
+        @Html.RenderInfoLabelFor(m => m.FirstNames, validations)
         @{
             ViewData.TemplateInfo.HtmlFieldPrefix = string.Empty;
         }
@@ -18,8 +24,8 @@
         </div>
         @Html.ValidationMessageFor(m => m.FirstNames)
     </div>
-    <div class="form-input quad">
-        @Html.LabelFor(m => m.SurNames)
+    <div class="form-input @(mrrbFlag ? "third" : "quad")">
+        @Html.RenderInfoLabelFor(m => m.SurNames, validations)
         <div class="action-input">
             @Html.EditorFor(m => m.SurNames, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
             @{
@@ -28,8 +34,8 @@
         </div>
         @Html.ValidationMessageFor(m => m.SurNames)
     </div>
-    <div class="form-input quad">
-        @Html.LabelFor(m => m.FamilyNames, requiredFields.Contains("FamilyNames") ? new { @class = "required" } : null)
+    <div class="form-input @(mrrbFlag ? "third" : "quad")">
+        @Html.RenderInfoLabelFor(m => m.FamilyNames, validations)
         <div class="action-input">
             @Html.EditorFor(m => m.FamilyNames, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
             @{
@@ -38,66 +44,75 @@
         </div>
         @Html.ValidationMessageFor(m => m.FamilyNames)
     </div>
-    <div class="form-input quad">
-        @Html.LabelFor(m => m.Alias)
-        @Html.EditorFor(m => m.Alias)
-        @Html.ValidationMessageFor(m => m.Alias)
-    </div>
+    @if (!mrrbFlag)
+    {
+        <div class="form-input quad">
+            @Html.RenderInfoLabelFor(m => m.Alias, validations)
+            @Html.EditorFor(m => m.Alias)
+            @Html.ValidationMessageFor(m => m.Alias)
+        </div>
+    }
 </div>
-<div class="form-row">
-    <div class="form-input quad">
-        @Html.LabelFor(m => m.FirstNamesLatin, requiredFields.Contains("FirstNamesLatin") ? new { @class = "required" } : null)
-        <div class="action-input">
-            @Html.EditorFor(m => m.FirstNamesLatin, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
-            @{
-                RenderButtons(Model?.FirstNamesLatin?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
-            }
+@if (!mrrbFlag)
+{
+    <div class="form-row">
+        <div class="form-input quad">
+            @Html.RenderInfoLabelFor(m => m.FirstNamesLatin, validations)
+            <div class="action-input">
+                @Html.EditorFor(m => m.FirstNamesLatin, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+                @{
+                    RenderButtons(Model?.FirstNamesLatin?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
+                }
+            </div>
+            @Html.ValidationMessageFor(m => m.FirstNamesLatin)
         </div>
-        @Html.ValidationMessageFor(m => m.FirstNamesLatin)
-    </div>
-    <div class="form-input quad">
-        @Html.LabelFor(m => m.SurNamesLatin)
-        <div class="action-input">
-            @Html.EditorFor(m => m.SurNamesLatin, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
-            @{
-                RenderButtons(Model?.SurNamesLatin?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
-            }
+        <div class="form-input quad">
+            @Html.RenderInfoLabelFor(m => m.SurNamesLatin, validations)
+            <div class="action-input">
+                @Html.EditorFor(m => m.SurNamesLatin, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+                @{
+                    RenderButtons(Model?.SurNamesLatin?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
+                }
+            </div>
+            @Html.ValidationMessageFor(m => m.SurNamesLatin)
         </div>
-        @Html.ValidationMessageFor(m => m.SurNamesLatin)
-    </div>
-    <div class="form-input quad">
-        @Html.LabelFor(m => m.FamilyNamesLatin, requiredFields.Contains("FamilyNamesLatin") ? new { @class = "required" } : null)
-        <div class="action-input">
-            @Html.EditorFor(m => m.FamilyNamesLatin, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
-            @{
-                RenderButtons(Model?.FamilyNamesLatin?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
-            }
+        <div class="form-input quad">
+            @Html.RenderInfoLabelFor(m => m.FamilyNamesLatin, validations)
+            <div class="action-input">
+                @Html.EditorFor(m => m.FamilyNamesLatin, "StringArray", new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+                @{
+                    RenderButtons(Model?.FamilyNamesLatin?.Count ?? 0, namesAndEgnBulstatShouldBeReadOnly);
+                }
+            </div>
+            @Html.ValidationMessageFor(m => m.FamilyNamesLatin)
         </div>
-        @Html.ValidationMessageFor(m => m.FamilyNamesLatin)
+        <div class="form-input quad">
+            @Html.RenderInfoLabelFor(m => m.AliasLatin, validations)
+            @Html.EditorFor(m => m.AliasLatin)
+            @Html.ValidationMessageFor(m => m.AliasLatin)
+        </div>
     </div>
-    <div class="form-input quad">
-        @Html.LabelFor(m => m.AliasLatin)
-        @Html.EditorFor(m => m.AliasLatin)
-        @Html.ValidationMessageFor(m => m.AliasLatin)
-    </div>
-</div>
+}
 
 @functions {
     void RenderButtons(int removeButtonsCount, bool disableButton)
     {
+        var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+        @if(!mrrbFlag) {
         <div class="actions">
             @if (disableButton)
             {
-                <button class="k-button k-small names-button add-name-js" disabled><i class="k-i-plus k-icon k-font-icon"></i></button>
+                <a class="k-button k-small names-button add-name-js" disabled><i class="k-i-plus k-icon k-font-icon"></i></a>
             }
             else
             {
-                <button class="k-button k-small names-button add-name-js"><i class="k-i-plus k-icon k-font-icon"></i></button>
+                <a class="k-button k-small names-button add-name-js"><i class="k-i-plus k-icon k-font-icon"></i></a>
                 @for (var i = 1; i < removeButtonsCount; i++)
                 {
-                    <button class="k-button k-small names-button remove-name-js"><i class="k-i-trash k-icon k-font-icon"></i></button>
+                    <a class="k-button k-small names-button remove-name-js"><i class="k-i-trash k-icon k-font-icon"></i></a>
                 }
             }
         </div>
+        }
     }
 }
