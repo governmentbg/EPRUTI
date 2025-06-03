@@ -1,0 +1,78 @@
+﻿@using Microsoft.Extensions.Localization
+@using Ais.Utilities.Extensions
+@using global::Ais.Data.Models.Client
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@inject IStringLocalizer Localizer
+@model Ais.Data.Models.Document.Applicant
+@{
+    ////if used for more other cases except task procesing and adding application, make Enum Mode and use switch case
+    var isTaskProcessing = ViewBag.IsTaskProcessing is true;
+    var removeClass = isTaskProcessing ? "remove-additional-applicant-js" : "remove-applicant-js";
+    var editClass = isTaskProcessing ? "edit-additional-applicant-js" : "edit-applicant-js";
+}
+@if (Model != null)
+{
+    <div class="flex info-row">
+        <div class="number">@(ViewBag.ItemIndex).</div>
+        <div class="left">
+            @{
+                if (Model.Recipient != null)
+                {
+                    RenderClient(Model.Recipient);
+                }
+
+                if (Model.Author != null)
+                {
+                    <div>@Localizer["ByRepresentative"]</div>
+                    RenderClient(Model.Author);
+                }
+
+                if (Model.AuthorQuality != null)
+                {
+                    <div>@Localizer["AuthorQuality"]: <strong>@(Model.AuthorQuality.Type?.Name)</strong></div>
+                    var powerOfAttorney = Model.AuthorQuality.PowerOfAttorney;
+                    if (powerOfAttorney != null)
+                    {
+                        var file = powerOfAttorney.File;
+                        var downloadData = file?.GetDownloadData();
+                        var downloadLink = downloadData != null
+                            ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                            : null;
+                        if (downloadLink.IsNotNullOrEmpty())
+                        {
+                            <div class="ib">
+                                @Localizer["PowerOfAttorney"]:
+                                <a href="@downloadLink" target="_blank">
+                                    @(file?.Name ?? Localizer["Download"])
+                                </a>
+                            </div>
+                        }
+                        <div class="ib">
+                            @($"{Localizer["DateOfRegNumber"]}: {powerOfAttorney!.RegDate:d} {Localizer["PowerOfAttorneyRegNumber"]}: {powerOfAttorney!.RegNumber}, {Localizer["NotaryNumber"]} {powerOfAttorney!.NotaryNumber}, {Localizer["PowerOfAttorneyEndDate"]}: {powerOfAttorney!.EndDate:d}")
+                        </div>
+                    }
+                }
+            }
+        </div>
+        <div class="bttn-wrap w-auto">
+            <button type="button" class="bttn bttn-icon third small @(removeClass) autosize" data-uniqueid="@(Model.UniqueId)" title="@Localizer["Remove"]">
+                <i class="k-i-x k-icon k-font-icon"></i>
+            </button>
+        </div>
+    </div>
+
+    void RenderClient(Client client)
+    {
+        <div class="flex">
+            <div class="ib"><strong>@(client.GetFullName())</strong></div>
+            @if (client.EgnBulstat.IsNotNullOrEmpty())
+            {
+                <div class="ib">@Localizer["EgnBulstat"]: <strong class="@(client.IsDead ? "statusDead" : null)">@client.EgnBulstat</strong></div>
+            }
+            <button type="button" class="bttn bttn-icon third small autosize k-ml-auto @editClass" title="@Localizer["Edit"]" value="@client.Id" data-name="@client.FullName">
+                <i class="k-icon k-font-icon k-i-pencil"></i>
+            </button>
+        </div>
+    }
+}

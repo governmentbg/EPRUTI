@@ -1,9 +1,10 @@
 ﻿@inject IStringLocalizer Localizer
+@using global::Ais.Data.Models.OutAdmAct
 @using Microsoft.Extensions.Localization
 @using Ais.Utilities.Extensions
-@model Ais.Data.Models.Document.OutAdmAct
+@model OutAdmAct
 <div id="applicants" class="step-box">
-    <div class="step-box-head">
+    <div class="step-box-head-unordered">
         <h3 class="step-box-title">
             @Localizer["Applicant"]
         </h3>
@@ -15,7 +16,7 @@
             foreach (var applicant in Model.Applicants)
             {
                 ViewBag.ItemIndex = index;
-                await Html.RenderPartialAsync("Info/_Applicant", applicant);
+                await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/OutApplication/Info/_Applicant.cshtml", applicant);
                 index++;
             }
         }

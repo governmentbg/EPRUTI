@@ -1,23 +1,23 @@
 ﻿@inject IStringLocalizer Localizer
-@using Ais.Data.Models.OutAdmAct.OutAdmActState
+@using global::Ais.Data.Models.OutAdmAct
+@using global::Ais.Data.Models.OutAdmAct.OutAdmActState
 @using Ais.Office.Controllers
 @using Ais.Utilities.Extensions
 @using Microsoft.Extensions.Localization
-@using Ais.Data.Models.Service.Object
+@using global::Ais.Data.Models.Service.Object
 @using Ais.WebUtilities.Extensions
-@model Ais.Data.Models.Document.OutAdmAct
+@model OutAdmAct
 @{
     var isOverview = ViewBag.IsOverview is bool && (bool)ViewBag.IsOverview;
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
 }
 <div class="step-box">
-    <div class="step-box-head">
+    <div class="step-box-head-unordered">
         <h3 class="step-box-title">
             @Localizer["AdministrativeAct"]
         </h3>
     </div>
     <div class="step-box-body">
-
         <div class="doctitle flex align-center">
             <div class="regnumber" title="@Localizer["OutDocumentStatusTitle"]">
                 @Model.RegNumber
@@ -25,79 +25,80 @@
             </div>
             <h5 title="@Model.Type.Name">@Model.Type.Name</h5>
         </div>
-        @{
-            if (Model.RegDate.HasValue)
-            {
-                <div>@Localizer["RegDate"]: <strong>@(Model.RegDate.Value.ToString("d"))</strong></div>
-            }
-            if (!string.IsNullOrEmpty(Model?.Issuer?.AdministrativeBody?.Name))
-            {
-                <div>@Localizer["Publisher"]: <strong>@(Model?.Issuer?.AdministrativeBody?.Name)</strong></div>
-            }
+        <div class="doc-basic-info k-mt-1">
+            @{
+                if (!string.IsNullOrEmpty(Model?.RegisterType?.Name))
+                {
+                    <div class="ib">@Localizer["AARegisterType"]: <strong>@(Model.RegisterType.Name)</strong></div>
+                }
+                if (Model.RegDate.HasValue)
+                {
+                    <div class="ib">@Localizer["RegDate"]: <strong>@(Model.RegDate.Value.ToString("d"))</strong></div>
+                }
+                if (!string.IsNullOrEmpty(Model?.Issuer?.AdministrativeBody?.Name))
+                {
+                    <div class="ib">@Localizer["Publisher"]: <strong>@(Model?.Issuer?.AdministrativeBody?.Name)</strong></div>
+                }
 
-            if (Model.RegUser?.FullName.IsNotNullOrEmpty() == true)
-            {
-                <div>@Localizer["RegisteredByEmployeee"]: <strong>@(Model.RegUser.FullName)</strong></div>
-            }
+                if (Model?.RegOffice?.Id.HasValue == true)
+                {
+                    <div class="ib">@Localizer["Office"]: <strong>@(Model.RegOffice.Name)</strong></div>
+                }
 
-            if (Model?.RegOffice?.Id.HasValue == true)
-            {
-                <div>@Localizer["Office"]: <strong>@(Model.RegOffice.Name)</strong></div>
-            }
+                if (Model.ConfirmUser.IsNotNullOrEmpty())
+                {
+                    <div class="ib">@Localizer["ConfirmUser"]: <strong>@(Model.ConfirmUser)</strong></div>
+                }
 
-            if (Model.ConfirmUser.IsNotNullOrEmpty())
-            {
-                <div>@Localizer["ConfirmUser"]: <strong>@(Model.ConfirmUser)</strong></div>
-            }
+                if (Model.Note.IsNotNullOrEmpty())
+                {
+                    <div class="ib">@Localizer["FactGrounds"]: <strong>@(Model.Note)</strong></div>
+                }
 
-            if (Model.Note.IsNotNullOrEmpty())
-            {
-                <div>@Localizer["FactGrounds"]: <strong>@(Model.Note)</strong></div>
-            }
+                if (Model.LegalGrounds.IsNotNullOrEmpty())
+                {
+                    <div class="ib">@Localizer["LegalGrounds"]: <strong>@(Model.LegalGrounds)</strong></div>
+                }
 
-            if (Model.LegalGrounds.IsNotNullOrEmpty())
-            {
-                <div>@Localizer["LegalGrounds"]: <strong>@(Model.LegalGrounds)</strong></div>
-            }
+                if (Model.StateUpsertModel.ValidByDate is not null)
+                {
+                    <div class="ib">@Localizer["ValidByDate"]: <strong>@(Model.StateUpsertModel.ValidByDate.Value.ToString("d"))</strong></div>
+                }
 
-            if (Model.StateUpsertModel.ValidByDate is not null)
-            {
-                <div>@Localizer["ValidByDate"]: <strong>@(Model.StateUpsertModel.ValidByDate.Value.ToString("d"))</strong></div>
-            }
+                if (Model.StateUpsertModel.AnnouncementDate is not null)
+                {
+                    <div class="ib">@Localizer["AnnouncementDate"]: <strong>@(Model.StateUpsertModel.AnnouncementDate.Value.ToString("d"))</strong></div>
+                }
 
-            if (Model.StateUpsertModel.AnnouncementDate is not null)
-            {
-                <div>@Localizer["AnnouncementDate"]: <strong>@(Model.StateUpsertModel.AnnouncementDate.Value.ToString("d"))</strong></div>
-            }
+                if (Model.StateUpsertModel.EffectiveDate is not null)
+                {
+                    <div class="ib">@Localizer["EffectiveDate"]: <strong>@(Model.StateUpsertModel.EffectiveDate.Value.ToString("d"))</strong></div>
+                }
 
-            if (Model.StateUpsertModel.EffectiveDate is not null)
-            {
-                <div>@Localizer["EffectiveDate"]: <strong>@(Model.StateUpsertModel.EffectiveDate.Value.ToString("d"))</strong></div>
-            }
+                if (!string.IsNullOrEmpty(Model?.StateUpsertModel?.AnnouncementType?.Name))
+                {
+                    <div class="ib">@Localizer["AnnouncementType"]: <strong>@(Model.StateUpsertModel.AnnouncementType.Name)</strong></div>
+                }
 
-            if (!string.IsNullOrEmpty(Model?.StateUpsertModel?.AnnouncementType?.Name))
-            {
-                <div>@Localizer["AnnouncementType"]: <strong>@(Model.StateUpsertModel.AnnouncementType.Name)</strong></div>
-            }
+                if (!string.IsNullOrEmpty(Model?.StateUpsertModel?.State?.Name))
+                {
+                    <div class="ib">@Localizer["State"]: <strong>@(Model.StateUpsertModel.State.Name)</strong></div>
+                }
 
-            if (!string.IsNullOrEmpty(Model?.StateUpsertModel?.State?.Name))
-            {
-                <div>@Localizer["State"]: <strong>@(Model.StateUpsertModel.State.Name)</strong></div>
-            }
+                if (Model.StateUpsertModel.ChangeDate is not null)
+                {
+                    <div class="ib">@Localizer["ChangeDate"]: <strong>@(Model.StateUpsertModel.ChangeDate)</strong></div>
+                }
 
-            if (Model.StateUpsertModel.ChangeDate is not null)
-            {
-                <div>@Localizer["ChangeDate"]: <strong>@(Model.StateUpsertModel.ChangeDate)</strong></div>
+                if (!string.IsNullOrEmpty(Model?.StateUpsertModel?.Dispute?.Description))
+                {
+                    <div class="ib">@Localizer["Description"]: <strong>@(Model.StateUpsertModel.Dispute.Description)</strong></div>
+                }
             }
-
-            if (!string.IsNullOrEmpty(Model?.StateUpsertModel?.Dispute?.Description))
-            {
-                <div>@Localizer["Description"]: <strong>@(Model.StateUpsertModel.Dispute.Description)</strong></div>
-            }
-
-            @if (Model?.StateUpsertModel?.StateHistory != null)
-            {
-                @(
+        </div>
+        @if (Model?.StateUpsertModel?.StateHistory != null)
+        {
+            @(
                 Html.Kendo().Grid<AdmActStateHistoryModel>(Model.StateUpsertModel.StateHistory)
                 .Name("grid")
                 .Columns(columns =>
@@ -108,13 +109,13 @@
                     "# if (Dispute) { #" +
                     "    # if (Dispute.Attachment) { #" +
                     "        # if (Dispute.Attachment.Url) { #" +
-                    $"            <div><a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?urls=#= Dispute.Attachment.Url #'>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : \"Download\" #</a></div>" +
+                    $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?urls=#= Dispute.Attachment.Url #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
                     "        # } else if (Dispute.Attachment.Id) { #" +
-                    $"            <div><a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?ids=#= Dispute.Attachment.Id #'>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : \"Download\" #</a></div>" +
+                    $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?ids=#= Dispute.Attachment.Id #' target='_blank' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
                     "        # } #" +
                     "    # } #" +
                     "    # if (Dispute.Description) { #" +
-                    "        <div>#= Dispute.Description #</div>" +
+                    "      <span>#= Dispute.Description #</span>" +
                     "    # } #" +
                     "# } #"
                     ).Title(Localizer["Details"]).Filterable(false).Sortable(false).Title(" ").Width("50px");
@@ -123,8 +124,7 @@
                 .HtmlAttributes(new { @class = "k-mt-2" })
                 .DataSource(ds => ds.Ajax().PageSize(10).Read("AdmActStateHistoryGetData", "OutApplication", new { area = "OutAdministrativeAct" }))
                 .Deferred(deferred)
-                    )
-            }
+                )
         }
     </div>
 </div>

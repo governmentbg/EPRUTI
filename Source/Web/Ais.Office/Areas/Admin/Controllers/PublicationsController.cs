@@ -5,12 +5,6 @@
     using System.ComponentModel;
     using System.Linq;
 
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.Publication;
     using Ais.Infrastructure.Roles;
     using Ais.Office.Services.StaticFilesStorageService;
     using Ais.Office.ViewModels.Publications;
@@ -19,7 +13,16 @@
     using Ais.WebServices.Services.SessionStorage;
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Helpers;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.Publication;
 
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
@@ -67,7 +70,6 @@
             this.mapper = mapper;
             this.staticFilesStorageService = staticFilesStorageService;
             this.Options.TableHeaderText = stringLocalizer["Publications"];
-            this.Options.ShowFieldToolTip = false;
             this.Options.Breadcrumbs = new[] { new Breadcrumb { Title = this.Localizer["Admin"] } };
         }
 
@@ -273,7 +275,7 @@
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <param name="searchQueryId">The search query identifier.</param>
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.PublicationsDelete)]
         public async Task Delete(Guid id, string searchQueryId = null)
         {

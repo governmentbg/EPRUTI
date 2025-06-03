@@ -93,11 +93,19 @@
                                         </li>
                                     }
 
+                                    link = Url.DynamicActionWithRightsCheck(nameof(RegistrationController.UserProfile), typeof(RegistrationController), new { id = employee.UserId });
+                                    if (link.IsNotNullOrEmpty())
+                                    {
+                                        <li>
+                                            <a href="@link" title="@Localizer["UserProfile"]"><span>@Localizer["UserProfile"]</span></a>
+                                        </li>
+                                    }
+
                                     link = Url.DynamicActionWithRightsCheck(nameof(AccountController.ChangePassword), typeof(AccountController));
                                     if (link.IsNotNullOrEmpty())
                                     {
                                         <li>
-                                            <a href="@link" class="js-trigger-popup" title="@Localizer["ChangePassword"]"><span>@Localizer["ChangePassword"]</span></a>
+                                            <a href="@link" class="js-trigger-popup" data-width="350px" title="@Localizer["ChangePassword"]"><span>@Localizer["ChangePassword"]</span></a>
                                         </li>
                                     }
 

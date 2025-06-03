@@ -1,0 +1,76 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.WebUtilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using global::Ais.Data.Models.Nomenclature
+@model Ais.Data.Models.Document.OutDocuments.OutDocStatusQuery
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var wrapperId = Guid.NewGuid().ToString();
+    var offices = ViewBag.Offices as List<Nomenclature>;
+    if (deferred)
+    {
+        @section Scripts
+        {
+            <script src="~/bundles/outdocstatusstatistics.min.js" asp-append-version="true"></script>
+            <script src="~/bundles/outdocuments.min.js" asp-append-version="true"></script>
+        }
+    }
+    else
+    {
+        <script src="~/bundles/outdocstatusstatistics.min.js" asp-append-version="true"></script>
+        <script src="~/bundles/outdocuments.min.js" asp-append-version="true"></script>
+    }
+}
+<form action="@Url.ActionLink("Search", "OutDocStatusStatistics")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-begin="kendo.ui.progress($('body'), true)"
+      data-ajax-complete="kendo.ui.progress($('body'), false)"
+      data-ajax-success="$('#@wrapperId').show()"
+      data-ajax-update="#@wrapperId"
+      data-ajax-mode="replace"
+      class="search"
+      id="search-form">
+    <div class="form-row">
+        <div class="form-input">
+            @Html.LabelFor(m => m.From, Localizer["From"])
+            @Html.EditorFor(m => m.From, "Date")
+        </div>
+        <div class="form-input">
+            @Html.LabelFor(m => m.To, Localizer["To"])
+            @Html.EditorFor(m => m.To, "Date")
+        </div>
+        <div class="form-input">
+            @Html.LabelFor(m => m.SendingOfficeId, Localizer["OfficeId"])
+            @(Html.Kendo().DropDownListFor(m => m.SendingOfficeId)
+                .BindTo(offices)
+                .DataValueField("Id")
+                .DataTextField("Name")
+                .Filter(FilterType.Contains)
+                .Events(e => e.Change("outdocstatusstatistics.onOfficeChange"))
+                .Deferred(deferred))
+        </div>
+        <div class="form-input">
+            @Html.LabelFor(m => m.To, Localizer["SendingUserIds"])
+            @(Html.Kendo().MultiSelectFor(m => m.SendingUserIds)
+                .DownArrow(true)
+                .AutoWidth(true)
+                .Filter(FilterType.Contains)
+                .DataValueField("Id")
+                .DataTextField("Name")
+                .DataSource(d => d.Read(r => r.Action("GetsEmployeesByOffice", "OutDocStatusStatistics").Data("outdocstatusstatistics.readEmployees")))
+                .Deferred(deferred))
+        </div>
+        <div class="form-input autosize k-ml-auto nest">
+            <label class="empty"></label>
+            <button class="bttn bttn-icon blue" title="@Localizer["Search"]" ajax-button-submit>
+                <svg class="icon">
+                    <use xlink:href="#icon-search"></use>
+                </svg>
+            </button>
+        </div>
+    </div>
+</form>
+<div id="@wrapperId">
+</div>

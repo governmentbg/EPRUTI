@@ -16,7 +16,7 @@
         private readonly string virtualPrefix;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EditorFileBrowserController"/> class.
+        /// Initializes a new instance of the <see cref="FileBrowserController"/> class.
         /// </summary>
         /// <param name="directoryBrowser">The directory browser.</param>
         /// <param name="permission">The permission.</param>

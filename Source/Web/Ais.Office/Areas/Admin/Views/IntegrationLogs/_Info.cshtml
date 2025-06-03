@@ -1,0 +1,42 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@using System.Text.RegularExpressions
+@using System.Text
+@model Ais.Office.ViewModels.IntegrationLogs.IntegrationLogViewModel
+@{
+    void RenderField(string value, string label)
+    {
+        if (value.IsNotNullOrEmpty())
+        {
+            <div class="form-input fullwidth">
+                <div class="ib">@label: <strong>@value</strong></div>
+            </div>
+        }
+    }
+}
+<div>
+    @{ 
+        RenderField(Model.Id.ToString(), Localizer["Id"]);
+        RenderField(Model.InternalMessage, Localizer["Message"]);
+        RenderField(Model.RegDate.ToString(), Localizer["Date"]);
+        RenderField(Model.IntegrationTypeName, Localizer["IntegrationType"]);
+        RenderField(Model.StatusName, Localizer["Status"]);
+
+        @Html.Label($"{Localizer["ExceptionStack"]}")
+        @ReplaceMultipleStringBuilder(Model.SystemMessage)
+    }
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right third  closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</div>
+
+@functions {
+    public string ReplaceMultipleStringBuilder(string input)
+    {
+        var sb = new StringBuilder(input);
+        return sb.ToString();
+    }
+}

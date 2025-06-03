@@ -1,17 +1,19 @@
 ﻿namespace Ais.Office.Areas.Admin.Controllers
 {
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Help;
     using Ais.Infrastructure.BaseTypes;
     using Ais.Infrastructure.Roles;
-    using Ais.Office.ViewModels.Faq;
     using Ais.Office.ViewModels.Help;
     using Ais.Services;
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models;
+    using global::Ais.Data.Models.Help;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;

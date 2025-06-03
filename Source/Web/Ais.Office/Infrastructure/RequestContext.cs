@@ -8,7 +8,9 @@
     using Ais.Office.Utilities.Extensions;
     using Ais.Utilities.Extensions;
     using Ais.Utilities.Helpers;
+
     using Ais.WebUtilities.Extensions;
+
     using Microsoft.AspNetCore.Http.Extensions;
 
     /// <summary>
@@ -21,6 +23,7 @@
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IConfiguration configuration;
         private EmployeePrincipal employeePrincipal;
+        private Guid? languageId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestContext"/> class.
@@ -33,7 +36,6 @@
             this.configuration = configuration;
 
             this.UserApiId = Guid.Parse(configuration["Api:AutomationUserId"]!);
-            this.LanguageId = LocalizationHelper.GetCurrentCultureId();
             var httpContext = httpContextAccessor?.HttpContext;
             if (httpContext != null)
             {
@@ -65,7 +67,7 @@
 
         public Guid? UserApiId { get; }
 
-        public Guid LanguageId { get; }
+        public Guid LanguageId => this.languageId ??= LocalizationHelper.GetCurrentCultureId();
 
         public DateTime CurrentTime { get; set; }
 
@@ -74,6 +76,12 @@
         public Guid? JournalId { get; set; }
 
         public string Url { get; }
+
+        public Task ChangeCulture(Guid languageId)
+        {
+            this.languageId = languageId;
+            return Task.CompletedTask;
+        }
 
         private EmployeePrincipal GetPrincipal()
         {

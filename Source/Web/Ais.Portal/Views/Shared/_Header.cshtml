@@ -1,0 +1,71 @@
+﻿@using FormTagHelper = Kendo.Mvc.TagHelpers.FormTagHelper
+@using Ais.WebUtilities.Extensions
+@using Ais.Utilities.Extensions
+@using Ais.Portal.Utilities.Extensions
+@using Kendo.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Localization
+@using Ais.Portal.Components
+@using Ais.Portal.Controllers
+@using Ais.Utilities.Helpers
+@using Microsoft.Extensions.Configuration
+@inject IStringLocalizer Localizer
+@inject IConfiguration Configuration
+@{
+    var currentCulture = Thread.CurrentThread.CurrentCulture;
+    var user = User.AsClient();
+    var roles = user?.Client?.User?.Roles?.Select(item => new { Id = $"{item.Id}_{item.UserGroupId}", RoleId = item.Id, Name = item.Name, UserGroupId = item.UserGroupId }).ToArray();
+    var currentRoleId = $"{user?.RoleId}_{user?.UserGroupId}";
+    var currentRole = roles?.FirstOrDefault(x => x.Id == currentRoleId);
+}
+<header>
+    <div class="header-center">
+        <div class="center">
+            <a class="logo left" href="@Url.Action("Index", "Home", new { culture = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName, area = string.Empty })">
+                <img src="~/images/logo@("MRRB").png" alt="Лого" />
+            </a>
+                <div class="right">
+                    @(await Component.InvokeAsync(typeof(HeaderMenuViewComponent)))
+                </div>
+        </div>
+        @if (roles.IsNotNullOrEmpty())
+        {
+            <ul class="center header-client">
+                <li class="cust-name">
+                    @($"{user?.Client?.User?.FullName} - {user?.Client?.Knik}")
+                </li>
+                @if (currentRole != null)
+                {
+                    <li class="cust-name">
+                        @currentRole.Name
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+    <div class="header-bottom">
+        <div class="center">
+            <label id="respbtn" for="respmenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <partial name="_Menu" />
+            <div class="clear"></div>
+        </div>
+    </div>
+</header>
+<div class="responsivenav">
+    <label id="respclose" for="respmenu">
+        <div>
+            <span></span><span></span>
+        </div>
+    </label>
+    <nav>
+        @{
+            TempData.Add("IsReponsiveMenu", true);
+            @await Component.InvokeAsync(typeof(MainMenuViewComponent))
+            ;
+        }
+    </nav>
+</div>

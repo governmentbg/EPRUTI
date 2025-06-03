@@ -1,12 +1,29 @@
 ﻿@inject IStringLocalizer Localizer
 @using Ais.WebUtilities.Extensions
 @using Microsoft.Extensions.Localization
-@using Ais.Data.Models.OutAdmAct.OutAdmActObject
+@using global::Ais.Data.Models.OutAdmAct.OutAdmActObject
 @model Ais.Data.Models.OutAdmAct.OutAdmActObject.ActAddress
 @{
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
     var admObjectUniqueId = ViewBag.AdmObjectUniqueId;
+    var index = ViewBag.ItemIndex - 1;
+    var objectIndex = ViewBag.AddressObjectIndex;
 }
+
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].ObjectId" value="@Model.ObjectId" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].Quarter" value="@Model.Quarter" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].BuildingNumber" value="@Model.BuildingNumber" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].Street" value="@Model.Street" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].StreetNumber" value="@Model.StreetNumber" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].Entrance" value="@Model.Entrance" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].FloorNumber" value="@Model.FloorNumber" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].ApartmentNumber" value="@Model.ApartmentNumber" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].Square" value="@Model.Square" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].SquareNumber" value="@Model.SquareNumber" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].AppComplex" value="@Model.AppComplex" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].AppComplexNumber" value="@Model.AppComplexNumber" />
+<input type="hidden" name="Object.AdmActObjects[@objectIndex].AddressList[@index].AddrPlaceName" value="@Model.AddrPlaceName" />
+
 
 @if (Model != null)
 {

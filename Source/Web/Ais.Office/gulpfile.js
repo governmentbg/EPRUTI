@@ -18,7 +18,7 @@ const regex = {
 const isDevMode = process.env.NODE_ENV === 'development' ? 'development' : 'production';
 
 const systemStyle = () => {
-    const pathModule = path.resolve(`./appsettings.${isDevMode ? "Development" : "AgccProd"}.json`);
+    const pathModule = path.resolve(`./appsettings.${"Development"}.json`);
     const data = fs.readFileSync(pathModule, 'utf8');
     const appSettings = JSON.parse(data);
     return appSettings.SystemStyle.IsNullOrEmpty() ? null : "-" + appSettings.SystemStyle

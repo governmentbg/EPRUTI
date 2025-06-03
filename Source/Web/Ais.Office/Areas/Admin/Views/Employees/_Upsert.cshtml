@@ -48,7 +48,7 @@
             </div>
             <div class="step-box-body">
                 <div class="form-row">
-                    <div class="form-input half privacy">
+                    <div class="form-input half">
                         @Html.LabelFor(m => m.Office, new { @class = "required" })
                         @(Html.Kendo()
                             .DropDownListFor(x => x.Office.Id)
@@ -124,7 +124,7 @@
                         @Html.EditorFor(m => m.StartPage)
                         @Html.ValidationMessageFor(m => m.StartPage)
                     </div>
-                    <div class="form-input half pint privacy">
+                    <div class="form-input half pint">
                         <label class="empty"></label>
                         @Html.Kendo().CheckBoxFor(m => m.UseNewPassword).Events(x => x.Change("admin_employees.onUseNewPasswordClick"))
                         @Html.ValidationMessageFor(m => m.UseNewPassword)

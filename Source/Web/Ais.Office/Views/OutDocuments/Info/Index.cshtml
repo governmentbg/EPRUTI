@@ -1,4 +1,4 @@
-﻿@using Ais.Data.Models.Document
+﻿@using global::Ais.Data.Models.Document
 @using Ais.Office.Controllers.Documents
 @using Ais.WebUtilities.Extensions
 @using Microsoft.Extensions.Localization
@@ -29,8 +29,6 @@
         tab.Add().Selected(true)
            .Text(Localizer["Document"])
            .LoadContentFrom(Url.DynamicAction(nameof(OutApplicationController.Info), typeof(OutApplicationController), new { id = Model }));
-        tab.Add().Text(this.Localizer["Folders"])
-           .LoadContentFrom(Url.DynamicAction(nameof(FoldersController.Info), typeof(FoldersController), new { id = Model, type = EntryType.OutDocument }));
         tab.Add().Text(this.Localizer["DeliveryData"])
            .LoadContentFrom(Url.DynamicAction(nameof(OutDocumentsController.SendingData), typeof(OutDocumentsController), new { id = Model }));
         tab.Add().Text(this.Localizer["DeliverData"])

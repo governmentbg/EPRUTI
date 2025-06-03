@@ -1,12 +1,16 @@
 ﻿@inject IStringLocalizer Localizer
+@using global::Ais.Data.Models.Document.OutDocuments
+@using global::Ais.Data.Models.Helpers
+@using global::Ais.Data.Models.OutAdmAct
 @using Ais.Office.Areas.OutAdministrativeAct.Controllers
 @using Microsoft.AspNetCore.Mvc.Controllers
 @using Microsoft.Extensions.Localization
 @using Ais.Office.ViewModels.Application
 @using Ais.WebUtilities.Extensions
-@model Ais.Data.Models.Document.Document
+@model OutAdmAct
 <div class="steps-footer k-display-inline-flex k-gap-10">
     @{
+        var step = (Step)ViewBag.Step;
         string SaveAdmAct()
         {
             return Url.DynamicAction(
@@ -15,10 +19,35 @@
             new
             {
                 applicationUniqueId = Model.UniqueId,
+                actualityStatus = DocActualityStatus.Actual,
+                current = step.Current
             });
         }
 
-        var step = (Step)ViewBag.Step;
+        string PublishAdmAct()
+        {
+            return Url.DynamicAction(
+            nameof(Ais.Office.Areas.OutAdministrativeAct.Controllers.OutApplicationController.SaveAdmAct),
+            ((ViewContext.ActionDescriptor as ControllerActionDescriptor)!).ControllerTypeInfo,
+            new
+            {
+                applicationUniqueId = Model.UniqueId,
+                actualityStatus = DocActualityStatus.Published,
+            });
+        }
+
+        string DeleteAdmAct()
+        {
+            return Url.DynamicAction(
+            nameof(Ais.Office.Areas.OutAdministrativeAct.Controllers.OutApplicationController.SaveAdmAct),
+            ((ViewContext.ActionDescriptor as ControllerActionDescriptor)!).ControllerTypeInfo,
+            new
+            {
+                applicationUniqueId = Model.UniqueId,
+                actualityStatus = DocActualityStatus.Deleted,
+            });
+        }
+
         string GetNextAction(Direction direction, string operation = null)
         {
             return Url.DynamicAction(
@@ -34,6 +63,18 @@
                 });
         }
 
+        string ValidateAdmAct()
+        {
+            return Url.DynamicAction(
+            nameof(Ais.Office.Areas.OutAdministrativeAct.Controllers.OutApplicationController.ValidateAdmAct),
+            ((ViewContext.ActionDescriptor as ControllerActionDescriptor)!).ControllerTypeInfo,
+            new
+            {
+                applicationUniqueId = Model.UniqueId,
+                actualityStatus = DocActualityStatus.Published,
+            });
+        }
+
         if (!step.IsFirst())
         {
             <button type="submit" class="left bttn big third" form="application" formaction="@GetNextAction(Direction.Backward)">
@@ -41,6 +82,13 @@
                     <use xlink:href="#icon-navarrow"></use>
                 </svg>
                 @Localizer["Backward"]
+            </button>
+        }
+
+        @if (Model?.DocActualityStatus?.Id == null || Model?.DocActualityStatus?.Id == EnumHelper.GetOutDocumentActuality(DocActualityStatus.Actual))
+        {
+            <button type="submit" class="right bttn big main" form="application" formaction="@SaveAdmAct()">
+                @Localizer["Save"]
             </button>
         }
 
@@ -60,10 +108,23 @@
             //this will be publish button
             // <button type="submit" class="right bttn big main sign-xml-js" form="application" formaction="@GetNextAction(Direction.Forward, "Save")" data-download="@signUrl" data-callback="@callback">
             //     @Localizer["Save"]
-            // </button>
-            <button type="submit" class="right bttn big main save-adm-act" form="application" formaction="@SaveAdmAct()">
-                @Localizer["Save"]
+            // </button
+            var statusIsPublish = Model?.DocActualityStatus?.Id == EnumHelper.GetOutDocumentActuality(DocActualityStatus.Published);
+            // Always allow publish when not already published.When already publish allow republish only if model has had changes
+            var allowPublish = !statusIsPublish ? true : this.ViewBag.ModelHasBeenChanged as bool? == true;
+            var isDisabled = allowPublish ? string.Empty : "disabled";
+            var publishText = allowPublish ? @Localizer["PublishAdmAct"] : @Localizer["NoChangesToModel"];
+
+            <button type="submit" class="right bttn big main publish-admact-js @isDisabled" data-uniqueid="@Model.UniqueId" form="application" validateaction="@ValidateAdmAct()" formaction="@PublishAdmAct()">
+                @publishText
             </button>
+
+            @if (Model?.DocActualityStatus?.Id == EnumHelper.GetOutDocumentActuality(DocActualityStatus.Actual))
+            {
+                <button type="submit" class="right bttn big red delete-admact-js" form="application" formaction="@DeleteAdmAct()">
+                @Localizer["Delete"]
+            </button>
+            }
         }
     }
 </div>

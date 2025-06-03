@@ -1,0 +1,18 @@
+@using Ais.WebUtilities.Extensions
+@model DateTime?
+
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = Ais.WebUtilities.Helpers.HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+
+
+@(Html.Kendo().DateTimePickerFor(m => m).Culture(Thread.CurrentThread.CurrentCulture.Name).Format(Thread.CurrentThread.CurrentCulture.DateTimeFormat.ShortDatePattern).HtmlAttributes(attributes).Deferred(!Context.Request.IsAjaxRequest()))

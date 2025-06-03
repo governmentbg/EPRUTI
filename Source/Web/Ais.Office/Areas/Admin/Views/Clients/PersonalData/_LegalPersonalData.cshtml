@@ -1,19 +1,23 @@
-﻿@using Ais.Office.ViewModels.Clients;
+﻿@using global::Ais.Data.Models.DynamicValidation
+@using Ais.Office.Utilities.Helpers
+@using Ais.Office.ViewModels.Clients;
 @using Kendo.Mvc.TagHelpers
 @model ClientUpsertModel
 @{
     var namesAndEgnBulstatShouldBeReadOnly = ViewBag.NamesAndEgnBulstatShouldBeReadOnly is bool && (bool)ViewBag.NamesAndEgnBulstatShouldBeReadOnly;
+    var isChecked = ViewBag.IsChecked ?? false;
+    var validations = ViewBag.Validations as List<DynamicValidation>;
 }
-<div class="clientType-js legal-js" style="display: none;">
+<div class="clientType-js legal-js municipality-js" style="display: none;">
     <div class="form-row">
-        <div class="form-input quad">
+        @* <div class="form-input quad @(isChecked ? string.Empty : "privacy")" @(isChecked ? "hidden" : string.Empty)>
             <label class="empty"></label>
-            @Html.EditorFor(m => m.Division, new { htmlAttributes = new { @class = "division-js" }})
+            @Html.EditorFor(m => m.Division, new { htmlAttributes = new { @class = "division-js", value = isChecked ?? Model.Division } })
             @Html.ValidationMessageFor(m => m.Division)
-        </div>
-        <div class="form-input quad">
-            @Html.LabelFor(m => m.FullName, new { @class = "required" })
-            @Html.EditorFor(m => m.FullName, new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly="readonly" } : null})
+        </div> *@
+        <div class="form-input fullwidth">
+            @Html.RenderInfoLabelFor(m => m.FullName, validations)
+            @Html.EditorFor(m => m.FullName, new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
             @Html.ValidationMessageFor(m => m.FullName)
         </div>
     </div>

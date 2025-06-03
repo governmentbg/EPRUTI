@@ -1,11 +1,13 @@
 ﻿namespace Ais.Office.Controllers
 {
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.ApplicationType;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.QueryModels;
     using Ais.Infrastructure.BaseTypes;
+    using Ais.Infrastructure.Roles;
     using Ais.Services.Ais;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.ApplicationType;
+    using global::Ais.Data.Models.QueryModels;
 
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -44,6 +46,7 @@
         /// Indexes this instance.
         /// </summary>
         /// <returns>IActionResult.</returns>
+        [Authorize(Roles = UserRolesConstants.BkDocumentRegistration)]
         public async Task<IActionResult> Index()
         {
             List<ApplicationType> result;

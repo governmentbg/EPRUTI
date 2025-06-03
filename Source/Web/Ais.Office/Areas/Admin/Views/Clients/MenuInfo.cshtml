@@ -44,6 +44,7 @@
         var titleElement = $("#@id").closest(".k-window").find(".k-window-title:first");
         if (titleElement && titleElement.length == 1) {
             titleElement.html(titleElement.text() + ' @(Localizer["AmountOnAccount"]):<span class="k-ml-1 @(amount < 0 ? "badge-danger" : "")">@(amount.ToString("c2"))</span>');
+
         }
     });
 </script>

@@ -1,9 +1,11 @@
 ﻿namespace Ais.Office.Models
 {
-    using Ais.Data.Models.User;
     using Ais.Services.Mapping;
     using Ais.Utilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Models.User;
 
     public class EmployeeUserViewModel : IHaveCustomMappings
     {

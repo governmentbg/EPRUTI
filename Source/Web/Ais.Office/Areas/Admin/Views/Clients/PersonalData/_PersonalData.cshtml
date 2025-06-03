@@ -1,24 +1,33 @@
-﻿@using Ais.Office.ViewModels.Clients
+﻿@using global::Ais.Data.Models.DynamicValidation
+@using Ais.Office.ViewModels.Clients
 @using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
 @using Ais.Office.Controllers
 @using Ais.WebUtilities.Extensions
+@using Ais.Utilities.Extensions
+@using Ais.Office.Utilities.Helpers
 @using Kendo.Mvc.TagHelpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Ais.Infrastructure.Roles;
 @inject IStringLocalizer Localizer;
+@inject IConfiguration Configuration
 @model ClientUpsertModel
 @{
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
     var skipCheckBoxChange = ViewBag.SkipCheckBoxCheck is bool && (bool)ViewBag.SkipCheckBoxCheck;
-    var css = Model.WithoutEgnBulstat ? "hidden" : string.Empty;
+    var css = mrrbFlag ? null : Model.WithoutEgnBulstat ? "hidden" : string.Empty;
     var searchButtonIdPhysical = Guid.NewGuid().ToString();
     var searchButtonIdLegal = Guid.NewGuid().ToString();
+    var searchButtonIdMunicipality = Guid.NewGuid().ToString();
     var customerTypeId = Guid.NewGuid().ToString();
+    var validations = ViewBag.Validations as List<DynamicValidation>;
+    var namesAndEgnBulstatShouldBeReadOnly = ViewBag.NamesAndEgnBulstatShouldBeReadOnly is bool && (bool)ViewBag.NamesAndEgnBulstatShouldBeReadOnly;
 }
 <div class="personal-data-js">
     <div class="k-px-5 k-pb-2 clientSection-js">
         <div class="form-row">
-            <div class="form-input quad">
-                @Html.LabelFor(m => m.Type, new { @class = "required" })
+            <div class="form-input @(mrrbFlag ? null : "quad")">
+                @Html.RenderInfoLabelFor(m => m.Type, validations)
                 @(Html.Kendo().DropDownListFor(m => m.Type.Id)
                     .HtmlAttributes(new { id = customerTypeId, data_selectorwrapper = ".clientSection-js", data_skipcheckboxchange = skipCheckBoxChange })
                     .DataValueField("Id")
@@ -28,13 +37,13 @@
                 @Html.ValidationMessageFor(m => m.Type)
             </div>
             <div class="clientType-js physicalwithbulstat-js form-input quad" style="display: none;">
-                @Html.LabelFor(m => m.EgnBulstat, new { @class = "required" })
+                @Html.RenderInfoLabelFor(m => m.Type, validations)
                 @Html.EditorFor(m => m.EgnBulstat)
                 @Html.ValidationMessageFor(m => m.EgnBulstat)
             </div>
-            <div class="clientType-js physicalwithbulstat-js legal-js physical-js foreignphysical-js" style="display: none;">
+            <div class="clientType-js physicalwithbulstat-js legal-js physical-js foreignphysical-js municipality-js" style="display: none;">
                 <div class="form-input">
-                    @Html.LabelFor(m => m.RegisterType)
+                    @Html.RenderInfoLabelFor(m => m.RegisterType, validations)
                     @(Html.Kendo().DropDownListFor(m => m.RegisterType.Id)
                         .OptionLabel(Localizer["Choose"].ToString())
                         .HtmlAttributes(new { id = Guid.NewGuid().ToString() })
@@ -45,35 +54,36 @@
                         .ServerFiltering(true))
                         .CascadeFrom(customerTypeId))
                 </div>
-                <div class="form-input register-number" style="display: none">
-                    @Html.LabelFor(m => m.RegisterNumber)
-                    @Html.TextBoxFor(m => m.RegisterNumber)
-                    @Html.ValidationMessageFor(m => m.RegisterNumber)
-                </div>
+                @if (!mrrbFlag)
+                {
+                    <div class="form-input register-number" style="display: none">
+                        @Html.RenderInfoLabelFor(m => m.RegisterType, validations)
+                        @Html.TextBoxFor(m => m.RegisterNumber)
+                        @Html.ValidationMessageFor(m => m.RegisterNumber)
+                    </div>
+                }
             </div>
             <div class="clientType-js physical-js fg-1" style="display: none;">
                 <div class="form-row search-row-js no-wrap">
-                    @if (User.IsInRole(UserRolesConstants.LoadFromGraoAndRegisterAgencyButton))
-                    {
-                        <div class="form-input w-auto">
-                            <label class="empty"></label>
-                            @Html.EditorFor(m => m.WithoutEgnBulstat, new { htmlAttributes = new { @class = "without-egnbulstat-physical-js" } })
-                            @Html.ValidationMessageFor(m => m.WithoutEgnBulstat)
-                        </div>
-                    }
-                    <div class="form-input third flex p-0 search-input-js">
+                    <div class="form-input w-auto privacy">
+                        <label class="empty"></label>
+                        @Html.EditorFor(m => m.WithoutEgnBulstat, new { htmlAttributes = new { @class = "without-egnbulstat-physical-js" } })
+                        @Html.ValidationMessageFor(m => m.WithoutEgnBulstat)
+                    </div>
+                    <div class="form-input p-0 w-auto search-input-js">
                         <div class="form-input w100">
-                            @Html.LabelFor(m => m.IsLnch, new { @class = "required" })
+                            @Html.RenderInfoLabelFor(m => m.IsLnch, validations)
                             @Html.EditorFor(m => m.IsLnch, "LnchDropDown")
                             @Html.ValidationMessageFor(m => m.IsLnch)
                         </div>
-                        <div class="form-input fg-1">
-                            <label>@Localizer["EgnBulstat"]</label>
+                        <div class="form-input fg-1 pr-0">
+                            @Html.RenderInfoLabelFor(m => m.EgnBulstat, validations)
                             <span class="egn-badge">@Model.EgnBulstat</span>
                             @if (User.IsInRole(UserRolesConstants.LoadFromGraoAndRegisterAgencyButton))
                             {
-                                @Html.TextBox("EgnBulstatSearch", $"{Model?.EgnBulstat}", new { data_searchbuttonselector = $"#{searchButtonIdPhysical}" })
-                                @Html.HiddenFor(m => m.EgnBulstat)
+                             @*    @Html.TextBox("EgnBulstatSearch", $"{Model?.EgnBulstat}", new { data_searchbuttonselector = $"#{searchButtonIdPhysical}" })
+                                @Html.HiddenFor(m => m.EgnBulstat) *@
+                                @Html.EditorFor(m => m.EgnBulstat, $"{Model?.EgnBulstat}", new { data_searchbuttonselector = $"#{searchButtonIdPhysical}" })
                             }
                             else
                             {
@@ -108,19 +118,20 @@
                 <div class="form-row search-row-js no-wrap">
                     @if (User.IsInRole(UserRolesConstants.LoadFromGraoAndRegisterAgencyButton))
                     {
-                        <div class="form-input w-auto">
-                            <label class="empty"></label>
+                        <div class="form-input w-auto privacy">
+                            @Html.RenderInfoLabelFor(m => m.WithoutEgnBulstat, validations)
                             @Html.EditorFor(m => m.WithoutEgnBulstat, new { htmlAttributes = new { @class = "without-egnbulstat-legal-js" } })
                             @Html.ValidationMessageFor(m => m.WithoutEgnBulstat)
                         </div>
                     }
-                    <div class="form-input third search-input-js @css">
-                        <label>@Localizer["EgnBulstat"]</label>
+                    <div class="form-input search-input-js pr-0 @css">
+                        @Html.RenderInfoLabelFor(m => m.EgnBulstat, validations)
                         <span class="egn-badge">@(Model?.EgnBulstat)</span>
                         @if (User.IsInRole(UserRolesConstants.LoadFromGraoAndRegisterAgencyButton))
                         {
-                            @Html.TextBox("EgnBulstatSearch", $"{Model?.EgnBulstat}", new { data_searchbuttonselector = $"#{searchButtonIdLegal}" })
-                            @Html.HiddenFor(m => m.EgnBulstat)
+                            @* @Html.TextBox("EgnBulstatSearch", $"{Model?.EgnBulstat}", new { data_searchbuttonselector = $"#{searchButtonIdLegal}" })
+                            @Html.HiddenFor(m => m.EgnBulstat) *@
+                            @Html.EditorFor(m => m.EgnBulstat, $"{Model?.EgnBulstat}", new { data_searchbuttonselector = $"#{searchButtonIdPhysical}" })
                         }
                         else
                         {
@@ -130,7 +141,7 @@
                     </div>
                     @if (User.IsInRole(UserRolesConstants.LoadFromGraoAndRegisterAgencyButton))
                     {
-                        <div class="form-input third search-input-js split-bttn-wrap single @css">
+                        <div class="form-input third search-input-js split-bttn-wrap single k-ml-2 @css">
                             <label class="empty"></label>
                             @(Html.Kendo().SplitButton()
                                 .Name(searchButtonIdLegal)
@@ -144,12 +155,12 @@
             <div class="clientType-js foreignlegal-js fullwidth" style="display: none;">
                 <div class="form-row">
                     <div class="form-input third">
-                        @Html.LabelFor(m => m.FullName, new { @class = "required" })
+                        @Html.RenderInfoLabelFor(m => m.FullName, validations)
                         @Html.EditorFor(m => m.FullName)
                         @Html.ValidationMessageFor(m => m.FullName)
                     </div>
                     <div class="form-input third">
-                        @Html.LabelFor(m => m.HomeCountry, new { @class = "required" })
+                        @Html.RenderInfoLabelFor(m => m.HomeCountry, validations)
                         @(Html.Kendo().DropDownListFor(m => m.HomeCountry.Id)
                             .HtmlAttributes(new { id = Guid.NewGuid().ToString() })
                             .Filter(FilterType.Contains)
@@ -160,9 +171,28 @@
                         @Html.ValidationMessageFor(m => m.HomeCountry)
                     </div>
                     <div class="form-input third">
-                        @Html.LabelFor(m => m.PlaceAbroad, new { @class = "required" })
+                        @Html.RenderInfoLabelFor(m => m.PlaceAbroad, validations)
                         @Html.EditorFor(m => m.PlaceAbroad)
                         @Html.ValidationMessageFor(m => m.PlaceAbroad)
+                    </div>
+                </div>
+            </div>
+            <div class="clientType-js homecountry-js fg-1" style="display: none;">
+                <div class="form-row search-row-js no-wrap">
+                    <div class="form-input third">
+                        @Html.RenderInfoLabelFor(m => m.FullName, validations)
+                        @Html.EditorFor(m => m.FullName, new { htmlAttributes = namesAndEgnBulstatShouldBeReadOnly ? new { @readonly = "readonly" } : null })
+                        @Html.ValidationMessageFor(m => m.FullName)
+                    </div>
+                </div>
+            </div>
+            <div class="clientType-js municipality-js fg-1" style="display: none;">
+                <div class="form-row search-row-js no-wrap">
+                    <div class="form-input third search-input-js">
+                        @Html.RenderInfoLabelFor(m => m.EgnBulstat, validations)
+                        <span class="egn-badge">@(Model?.EgnBulstat)</span>
+                        @Html.EditorFor(m => m.EgnBulstat)
+                        @Html.ValidationMessageFor(m => m.EgnBulstat)
                     </div>
                 </div>
             </div>

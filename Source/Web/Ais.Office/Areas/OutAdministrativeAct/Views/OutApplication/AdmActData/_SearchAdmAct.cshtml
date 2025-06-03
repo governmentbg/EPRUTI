@@ -1,1 +1,192 @@
-﻿
+﻿@using global::Ais.Data.Models.OutAdmAct
+@using global::Ais.Data.Models.Document
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@using Kendo.Mvc.TagHelpers
+@inject IStringLocalizer Localizer
+@model Ais.Office.ViewModels.AdmAct.QueryModels.AdmActRegisterQueryViewModel
+@{
+    var applicationUniqueId = this.ViewBag.ApplicationUniqueId as string;
+    var area = this.ViewBag?.Area as string ?? string.Empty;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var connectedAdmActs = this.ViewBag.Doc as List<ConnectedAdmAct>;
+}
+
+<div class="step-box">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["SearchAdmActs"]
+        </h3>
+    </div>
+    <div class="step-box-body">
+        <div id="searchAdmAct" action="@Url.Action("SearchAdmAct", "OutApplication", new { applicationUniqueId = applicationUniqueId})" data-ajax-method="get" data-ajax-update="#searchAdmActResultWrapper" class="">
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["RegNum"], "RegNum")
+                @Html.TextBoxFor(m => m.RegNum, new { id = string.Empty })
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["AARegisterType"], "RegisterTypeId")
+                @(Html.Kendo().DropDownListFor(m => m.RegisterTypeId)
+                    .DataValueField("Key")
+                    .DataTextField("Value")
+                    .BindTo(Model.RegisterTypeIdDataSource))
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["AAType"], "AAType")
+                @(Html.Kendo().DropDownListFor(m => m.TypeId)
+                    .DataValueField("Key")
+                    .DataTextField("Value")
+                    .CascadeFromParentField("RegisterTypeId")
+                    .DataSource(
+                    d => d.Read(r => r.Action("GetTypesByRegister", "AdmActRegister", new { area = "OutAdministrativeAct" }).Data("core.filterData"))
+                    .ServerFiltering(false))
+                    .Deferred(deferred))
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["IssuedDateFrom"], "IssuedDateFrom")
+                @(Html.Kendo().DatePickerFor(m => m.IssuedDateFrom).Deferred(deferred))
+                @Html.ValidationMessage("IssuedDateFrom")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["IssueDateTo"], "IssueDateTo")
+                @(Html.Kendo().DatePickerFor(m => m.IssuedDateTo).Deferred(deferred))
+                @Html.ValidationMessage("IssueDateTo")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["State"], "StateId")
+                @(Html.Kendo().DropDownListFor(m => m.StateId)
+                    .DataValueField("Key")
+                    .DataTextField("Value")
+                    .BindTo(Model.StateIdDataSource))
+                @Html.ValidationMessage("StateId")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["Administration"], "Administration")
+                @(Html.Kendo().DropDownListFor(m => m.AdministrationId)
+                    .DataValueField("Key")
+                    .DataTextField("Value")
+                    .BindTo(Model.AdministrationIdDataSource))
+                @Html.ValidationMessage("Administration")
+            </div>
+             <div class="form-input">
+                @Html.InfoLabel(Localizer["Issuer"], "Issuer")
+                @(Html.Kendo().DropDownListFor(m => m.IssuerId)
+                        .DataValueField("Key")
+                        .DataTextField("Value")
+                        .DataSource(
+                        d => d.Read(r => r.Action("GetIssuerByAdministration", "AdmActRegister", new { area = "OutAdministrativeAct" }).Data("core.filterData"))
+                        .ServerFiltering(true))
+                        .CascadeFromField("AdministartionId")
+                        .BindTo(Model.IssuerIdDataSource)
+                         .Filter(FilterType.Contains)
+                        .Deferred(deferred))
+                    @Html.ValidationMessage("Issuer")
+            </div>
+            <div class="form-input">
+                    @{
+                        var provinceId = Guid.NewGuid().ToString();
+                    }
+                    @Html.InfoLabel(Localizer["Province"], "Province")
+                @(Html.Kendo().DropDownListFor(m => m.ProvinceId)
+                    .HtmlAttributes(new { id = provinceId })
+                    .DataValueField("Key")
+                    .DataTextField("Value")
+                    .BindTo(Model.ProvinceIdDataSource))
+                @Html.ValidationMessage("Province")
+            </div>
+            <div class="form-input">
+                @{
+                    var mucipalityId = Guid.NewGuid().ToString();
+                }
+                @Html.InfoLabel(Localizer["Municipality"], "Municipality")
+                @(Html.Kendo().DropDownListFor(m => m.MunicipalityId)
+                    .HtmlAttributes(new { id = mucipalityId })
+                    .DataValueField("Key")
+                    .DataTextField("Value")
+                    .Filter(FilterType.Contains)
+                    .CascadeFrom(provinceId)
+                    .DataSource(
+                    d => d.Read(r => r.Action("GetMunicipalities", "AdmActRegister", new { area = "OutAdministrativeAct" }).Data("core.filterData"))
+                    .ServerFiltering(true))
+                    .Deferred(deferred))
+                @Html.ValidationMessage("Municipality")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["Region"], "Region")
+                @(Html.Kendo().DropDownListFor(m => m.RegionId)
+                    .DataValueField("Key")
+                    .DataTextField("Value")
+                    .Filter(FilterType.Contains)
+                    .CascadeFrom(mucipalityId)
+                    .DataSource(
+                    d => d.Read(r => r.Action("GetRegions", "AdmActRegister", new { area = "OutAdministrativeAct" }).Data("core.filterData"))
+                    .ServerFiltering(true))
+                    .Deferred(deferred))
+                @Html.ValidationMessage("Region")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["Limit"], "Limit")
+                @Html.TextBoxFor(m => m.Limit, new { id = string.Empty })
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["AnnouncementDateFrom"], "AnnouncementDateFrom")
+                @(Html.Kendo().DatePickerFor(m => m.AnnouncementDateFrom).Deferred(deferred))
+                @Html.ValidationMessage("AnnouncementDateFrom")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["AccouncementDateTo"], "AccouncementDateTo")
+                @(Html.Kendo().DatePickerFor(m => m.AccouncementDateTo).Deferred(deferred))
+                @Html.ValidationMessage("AccouncementDateTo")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["EffectiveDateFrom"], "EffectiveDateFrom")
+                @(Html.Kendo().DatePickerFor(m => m.EntryIntoForceDateFrom).Deferred(deferred))
+                @Html.ValidationMessage("EffectiveDateFrom")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["EffectiveDateTo"], "EffectiveDateTo")
+                @(Html.Kendo().DatePickerFor(m => m.EntryIntoForceDateTo).Deferred(deferred))
+                @Html.ValidationMessage("EffectiveDateTo")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["AnnouncementType"], "AnnouncementType")
+                @(Html.Kendo().DropDownListFor(m => m.AnnouncementTypeId)
+                    .DataValueField("Key")
+                    .DataTextField("Value")
+                    .BindTo(Model.AnnouncementTypeIdDataSource))
+                @Html.ValidationMessage("AnnouncementType")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["ValidByDateFrom"], "ValidByDateFrom")
+                @(Html.Kendo().DatePickerFor(m => m.ValidByDateFrom).Deferred(deferred))
+                @Html.ValidationMessage("ValidByDateFrom")
+            </div>
+            <div class="form-input">
+                @Html.InfoLabel(Localizer["ValidByDateTo"], "ValidByDateTo")
+                @(Html.Kendo().DatePickerFor(m => m.ValidByDateTo).Deferred(deferred))
+                @Html.ValidationMessage("ValidByDateTo")
+            </div>
+            <div class="form-input autosize k-ml-auto nest">
+                <label></label>
+                <button class="bttn blue small bttn-icon autosize" type="submit" title="@Localizer["Search"]" ajax-button-submit>
+                    <i class="k-i-search k-icon k-font-icon"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div id="searchAdmActResultWrapper">
+    </div>
+</div>
+@await Html.PartialAsync("ConnectedDocs/_ConnectedDocs", connectedAdmActs)
+<div class="k-dialog-buttongroup">
+    <button class="bttn right main save-connected-acts-js">
+        @Localizer["Save"]
+    </button>
+    <button class="bttn right third closeKendoWindow-js">
+        @Localizer["Close"]
+    </button>
+</div>

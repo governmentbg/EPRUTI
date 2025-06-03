@@ -5,13 +5,6 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Common.Base;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Employee;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.QueryModels.Employee;
     using Ais.Infrastructure.Roles;
     using Ais.Office.ViewModels.Employees;
     using Ais.Office.ViewModels.RoleChangeOrder;
@@ -21,11 +14,22 @@
     using Ais.Utilities.Extensions;
     using Ais.Utilities.Utilities;
     using Ais.WebServices.Services.SessionStorage;
+    using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Employee;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.QueryModels.Employee;
 
     using Kendo.Mvc.Extensions;
     using Kendo.Mvc.UI;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -263,7 +267,7 @@
             return this.Json(new { success = true });
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.UpsertEmployeeOverTime)]
         public async Task DeleteOverTime(Guid id, Guid employeeId)
         {
@@ -280,7 +284,7 @@
             await this.SessionStorageService.RemoveCollectionItem<OverTimeRow>($"{employeeId}_OverTimes", x => x.Id == id);
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.UpsertEmployeeSubstitution)]
         public async Task DeleteSubstitution(Guid id, Guid employeeId)
         {
@@ -377,7 +381,7 @@
             await this.employeeService.UpdateQueue(model);
             await transaction.CommitAsync();
 
-            this.ShowMessage(WebUtilities.Enums.MessageType.Success, this.Localizer["Success"]);
+            this.ShowMessage(MessageType.Success, this.Localizer["Success"]);
             return this.Json(new { success = true });
         }
 

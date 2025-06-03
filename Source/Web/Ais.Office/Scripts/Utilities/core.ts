@@ -1243,38 +1243,18 @@ export const onUploadSuccess = (e: kendo.ui.UploadSuccessEvent) => {
     }
 }
 
-export const onFileUploadRemove = (e: JQuery.EventBase, showConfirmDialog: boolean = true): void => {
+export const onFileUploadRemove = (e: JQuery.EventBase): void => {
     e.preventDefault();
-    if (showConfirmDialog) {
-        let actions = [
-            {
-                text: getResource("Yes"),
-                action: () => {
-                    removeAttachment();
-                    return true;
-                },
-                primary: true
-            },
-            {
-                text: getResource("No")
-            }
-        ];
-        createKendoDialog(
-            {
-                title: getResource("CancelFileTitle"),
-                content: getResource("ConfirmCancelFile"),
-                visible: true,
-                actions: actions
-            });
-    } else {
-        removeAttachment();
-    }
+    let attachmentPrefix = "Attachments[" + $("#Attachments_Index").val() + "].";
+    let uploadWidget = $("[data-prefix='" + attachmentPrefix + "']").data("kendoUpload");
+    uploadWidget.removeAllFiles();
+}
 
-    function removeAttachment() {
-        let attachmentPrefix = "Attachments[" + $("#Attachments_Index").val() + "].";
-        let uploadWidget = $("[data-prefix='" + attachmentPrefix + "']").data("kendoUpload");
-        uploadWidget.removeAllFiles();
+export const onObjectUploadSuccess = (e: kendo.ui.UploadSuccessEvent) => {
+    if (e.response) {
+        console.log(e.response);
     }
+    window.location.reload();
 }
 
 export const getFileSizeMessage = (file) => {
@@ -1376,6 +1356,11 @@ export function onSettlementChange(e: kendo.ui.DropDownListChangeEvent): void {
     }
     let label = regionDropDown.element.closest("div").find("label");
     if (!label) {
+        return;
+    }
+
+    let isNotRequiredSystemStyle = $("#IsNotRequiredSystemStyle");
+    if (isNotRequiredSystemStyle && isNotRequiredSystemStyle.val() == "True") {
         return;
     }
 
@@ -1481,3 +1466,32 @@ export function clearCache(): void {
     window.localStorage.clear();
     location.reload();
 }
+
+export function trigger(selector: string, trigger: string) {
+    $(selector).trigger(trigger);
+}
+
+export const ShowConfirmDialogBeforeAction = (action: (e: JQuery.EventBase) => void, title: string, content: string): ((e: JQuery.EventBase) => void) => {
+    return (e: JQuery.EventBase) => {
+        e.preventDefault();
+        let actions = [
+            {
+                text: getResource("Yes"),
+                action: () => {
+                    action(e);
+                    return true;
+                },
+                primary: true
+            },
+            {
+                text: getResource("No")
+            }
+        ];
+        createKendoDialog({
+            title: title,
+            content: content,
+            visible: true,
+            actions: actions
+        });
+    };
+};

@@ -2,8 +2,9 @@
 {
     using System.Security.Claims;
 
-    using Ais.Data.Models.Nomenclature;
     using Ais.Office.Models;
+
+    using global::Ais.Data.Models.Nomenclature;
 
     /// <summary>
     /// Class EmployeeClaimsPrincipal.
@@ -24,6 +25,7 @@
             this.Employee = employee;
             this.RoleIds = employee?.User?.Roles;
             this.activities = employee?.User?.Activities;
+            this.Egn = employee?.Egn;
         }
 
         public Guid? UserId => this.Employee?.User?.Id;
@@ -35,6 +37,8 @@
         public string Fullname => this.Employee?.FullName;
 
         public HashSet<Guid> RoleIds { get; }
+
+        public string Egn { get; set; }
 
         /// <summary>
         /// Determines whether [is in role] [the specified role].

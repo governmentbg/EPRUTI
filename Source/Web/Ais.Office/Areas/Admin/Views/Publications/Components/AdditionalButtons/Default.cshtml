@@ -1,9 +1,12 @@
-﻿@using Ais.Data.Models.Publication
+﻿@using global::Ais.Data.Models.Publication
 @using Ais.Office.Areas.Admin.Controllers
 @using Ais.WebUtilities.Extensions
 @using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
 @inject IStringLocalizer Localizer
+@inject IConfiguration Configuration
 @{
+    var isMrrb = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
     var controllerType = typeof(PublicationsController);
     if (Url.HasRightsToAction("Upsert", controllerType))
     {
@@ -15,7 +18,7 @@
             </a>
         </div>
     }
-    if (Url.HasRightsToAction("Upsert", controllerType))
+    if (Url.HasRightsToAction("Upsert", controllerType) && !isMrrb)
     {
         <div class="form-input autosize">
             <label class="empty">&nbsp;</label>
@@ -35,7 +38,7 @@
             </a>
         </div>
     }
-    if (Url.HasRightsToAction("Upsert", controllerType))
+    if (Url.HasRightsToAction("Upsert", controllerType) && !isMrrb)
     {
         <div class="form-input autosize">
             <label class="empty">&nbsp;</label>

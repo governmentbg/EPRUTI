@@ -1,0 +1,23 @@
+﻿@using global::Ais.Data.Models.OutAdmAct
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@using global::Ais.Data.Models.Document
+@inject IStringLocalizer Localizer;
+@model List<ConnectedAdmAct>
+@if (Model != null)
+{
+    <div class="step-box-body connected-documents-info-js">
+        @{
+            var index = 1;
+            foreach (var doc in Model)
+            {
+                ViewBag.ItemIndex = index;
+                await Html.RenderPartialAsync("~/Areas/OutAdministrativeAct/Views/AdmActRegister/Info/_ConnectedDocInfo.cshtml", doc);
+                index++;
+
+            }
+        }
+    </div>
+}
+

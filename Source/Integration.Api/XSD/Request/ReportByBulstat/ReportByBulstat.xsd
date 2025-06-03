@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ xmlns="http://egov.bg/RegiX/BABH/BabhFodders/ReportChina39Request" 
+ targetNamespace="http://egov.bg/RegiX/BABH/BabhFodders/ReportChina39Request" 
+ elementFormDefault="qualified" attributeFormDefault="unqualified">
+ <xs:complexType name="ReportChina39RequestType"><xs:annotation>
+ <xs:documentation>
+ Структура на входни параметри за Справка за обектите за производство на комбинирани фуражи на растителна основа, одобрени за износ за Китайска народна република </xs:documentation></xs:annotation><xs:sequence><xs:element name="eik" type="xs:string" minOccurs="0"><xs:annotation><xs:documentation>ЕИК</xs:documentation></xs:annotation></xs:element><xs:element name="odbhId" type="xs:int" minOccurs="0"><xs:annotation><xs:documentation>ОДБХ</xs:documentation></xs:annotation></xs:element></xs:sequence></xs:complexType><xs:element name="ReportChina39Request" type="ReportChina39RequestType"><xs:annotation><xs:documentation>Входни параметри за Справка за обектите за производство на комбинирани фуражи на растителна основа, одобрени за износ за Китайска народна република
+  </xs:documentation></xs:annotation>
+ </xs:element></xs:schema>

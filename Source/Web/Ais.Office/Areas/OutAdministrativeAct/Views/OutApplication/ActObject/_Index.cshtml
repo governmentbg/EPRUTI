@@ -1,15 +1,19 @@
-﻿@using Ais.Office.ViewModels.Application
+﻿@using global::Ais.Data.Models.Base
+@using global::Ais.Data.Models.OutAdmAct
+@using Ais.Office.ViewModels.Application
 @using Ais.WebUtilities.Extensions
 @using Ais.WebUtilities.Helpers
 @using Microsoft.Extensions.Localization
-@model Ais.Data.Models.Document.OutAdmAct
+@using global::Ais.Data.Models.Attachment
+@model OutAdmAct
 @inject IStringLocalizer Localizer;
 
 <div class="steps-body k-flex-column">
     @{
         ViewBag.ApplicationUniqueId = Model.UniqueId;
+        var attachmentType = ViewBag.AttachmentType as AttachmentType;
     }
-    <div class="step-box fg-1">
+    <div class="step-box mb-0">
         <div class="step-box-head">
             <h3 class="step-box-title">
                 @Localizer["ObjectsDescription"]
@@ -23,15 +27,21 @@
                     @Html.ValidationMessage("ObjectsDescription")
                 </div>
             </div>
-            <div class="button-wrap fullwidth">
-                <button class="bttn blue k-mb-2 right add-admact-object-js" title="@Localizer["AddAdmActObject"]" type="button">
-                    <i class="k-i-plus k-icon k-font-icon"></i> Добави обект
-                </button>
+            <div class="form-row">
+                <div class="button-wrap form-input mb-0 k-ml-auto">
+                    <button class="bttn blue add-admact-object-js" title="@Localizer["AddAdmActObject"]" type="button">
+                        <i class="k-i-plus k-icon k-font-icon"></i> Добави обект
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-
     @{
+        await Html.RenderPartialAsync("_Attachment.cshtml", new AttachmentType
+            {
+                Extensions = ".XLSX",
+                MaxSize = 20,
+            });
         await Html.RenderPartialAsync("_AdmActObjects.cshtml");
     }
 </div>

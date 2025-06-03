@@ -4,11 +4,6 @@
     using System.Collections.ObjectModel;
     using System.Threading.Tasks;
 
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Faq;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
     using Ais.Infrastructure.Roles;
     using Ais.Office.ViewModels.Faq;
     using Ais.Services.Ais;
@@ -17,10 +12,19 @@
     using Ais.WebServices.Services.SessionStorage;
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Faq;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
 
     using Kendo.Mvc.Extensions;
     using Kendo.Mvc.UI;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -139,7 +143,7 @@
         /// <param name="id">The identifier.</param>
         /// <param name="searchQueryId">The search query identifier.</param>
         /// <returns>A Task representing the asynchronous operation.</returns>
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.DeleteFaq)]
         public async Task DeleteAsync(Guid id, string searchQueryId)
         {

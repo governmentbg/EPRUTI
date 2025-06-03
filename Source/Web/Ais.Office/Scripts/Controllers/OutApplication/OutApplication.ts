@@ -1,9 +1,33 @@
-import { rebindEvent, requestOptional, createKendoDialog, openKendoWindow, requestOptionalUrl, onFileUploadRemove } from "scripts/Utilities/core";
+import { MessageType } from "@microsoft/signalr";
+import { rebindEvent, requestOptional, createKendoDialog, openKendoWindow, requestOptionalUrl, onFileUploadRemove, ShowConfirmDialogBeforeAction } from "scripts/Utilities/core";
 import { displayMessage, messageType } from "scripts/Utilities/notification";
 import { getResource } from "scripts/Utilities/resources";
 import { getGrid, getSelectedItemByGrid } from "scripts/Utilities/searchTable";
 
 const serviceObjectWrapperSelector = ".objects-js";
+
+interface Selector {
+    keyusages: string[];
+    issuers: string[];
+}
+
+interface Request {
+    selector: Selector;
+    showValidCerts: string;
+}
+
+const request: Request = {
+    selector: {
+        keyusages: [] as string[],
+        issuers: [] as string[]
+    },
+    showValidCerts: "true"
+};
+
+let bissport: number = 53952;
+let bissGetUrl: string = `https://localhost:${bissport}/getsigner`;
+let bissSignUrl = `https://localhost:${bissport}/sign`;
+
 
 function init() {
 
@@ -11,24 +35,41 @@ function init() {
     rebindEvent("click", ".add-outdoc-attachment-js", onAddAttachment);
     rebindEvent("click", ".add-objects-js", onAddObjects);
     rebindEvent("change", `${serviceObjectWrapperSelector} .results-pre-wrap [type="checkbox"]`, onObjectCheckboxChange);
-    rebindEvent("click", ".remove-object-js", onRemoveObject);
+    rebindEvent("click", ".remove-object-js", ShowConfirmDialogBeforeAction(onRemoveObject, getResource("RemoveObjectTitle"), getResource("ConfirmRemoveObject")));
     rebindEvent("click", ".add-admact-object-js", onAddAdmActObject);
     rebindEvent("click", ".add-admact-object-address-js", onAddAddressToAdmActObject);
     rebindEvent("click", ".arrow-icon", onArrowClick);
     rebindEvent("click", ".search-admact-js", onSearchAdmAct);
+    rebindEvent("click", ".choose-admact-js", onChooseConnectedAdmAct);
+    rebindEvent("click", ".remove-admact-js", ShowConfirmDialogBeforeAction(onRemoveConenctedAdmAct, getResource("RemoveAdmActTitle"), getResource("ConfirmRemoveAdmAct")));
+    rebindEvent("click", ".save-connected-acts-js", onSaveConnectedAdmActs);
     rebindEvent("click", ".attach-admact-js", onAddAddressToAdmActObject);
     rebindEvent("click", ".edit-admact-state-js", onEditAdmActState);
-    rebindEvent("click", ".delete-admact-history-row-js", OnDeleteAdmActState);
-    rebindEvent("click", ".remove-attachment-js", removeStateAttachment);
-    rebindEvent("click", ".add-adm-act-state", addAdmActStateRow);
+    rebindEvent("click", ".delete-admact-history-row-js", ShowConfirmDialogBeforeAction(OnDeleteAdmActState, getResource("RemoveAdmActStateRowTitle"), getResource("ConfirmRemoveAdmActStateRow")));
+    rebindEvent("click", ".remove-attachment-state-js", ShowConfirmDialogBeforeAction(onFileUploadRemove, getResource("RemoveFileTitle"), getResource("ConfirmRemoveFile")));
+    rebindEvent("click", ".add-admact-state", addAdmActStateRow);
     rebindEvent("click", ".download-file", downloadFile);
     rebindEvent("click", ".attachments-wrap .attachment-group-name", onAttachmentGroupNameClick);
+    rebindEvent("click", ".change-adm-act-actuality", onDocActualityChange);
+    rebindEvent("click", ".info-admact-js", onOpenAmdActInfo);
+    rebindEvent("click", ".indentificators-info-js", openIdentificatorsInfo)
+    rebindEvent("click", ".remove-allobjects-js", ShowConfirmDialogBeforeAction(onRemoveAllObjects, getResource("RemoveAllObjectTitle"), getResource("ConfirmRemoveAllObject")));
+    rebindEvent("click", ".add-objects-js", onAddIndetificators)
+    rebindEvent("click", ".remove-applicant-js", ShowConfirmDialogBeforeAction(onRemoveApplicant, getResource("RemoveApplicantTitle"), getResource("ConfirmRemoveApplicant")));
+    rebindEvent("click", ".remove-actObject-js", ShowConfirmDialogBeforeAction(onRemoveActObject, getResource("RemoveActObjectTitle"), getResource("ConfirmRemoveActObject")));
+    rebindEvent("click", ".remove-objectAddress-js", ShowConfirmDialogBeforeAction(onRemoveObjectAddress, getResource("RemoveObjectAddressTitle"), getResource("ConfirmRemoveObjectAddress")));
+    rebindEvent("change", "#RegisterTypeId", onAARegisterTypeChange);
+    rebindEvent("change", "#AdministrationId", onAdminiStrationChangeChange);
+    rebindEvent("click", ".publish-admact-js", ShowConfirmDialogBeforeAction(onPublishAdmAct, getResource("ConfirmPublishTitle"), getResource("ConfirmPublish")));
+    rebindEvent("click", ".save-admact-js", onSaveAdmAct);
+    rebindEvent("click", ".delete-admact-js", ShowConfirmDialogBeforeAction(onDeleteAdmAct, getResource("DeleteAdmActTitle"), getResource("ConfirmDeleteAdmAct")));
+    rebindEvent("click", ".open-model-version-js", openModelVersion);
     rebindEvent("click", ".choose-contact-js", (e: JQuery.EventBase) => {
         e.preventDefault();
         let sender = $(e.currentTarget);
         let id = sender.val();
         if (!id) {
-            let wrapper = sender.closest(".step-box-body");
+            let wrapper = sender.closest(".contact-data-js");
             let contactsDropDown = wrapper.find("[data-role='dropdownlist']").data("kendoDropDownList");
             id = contactsDropDown.value();
         }
@@ -100,29 +141,11 @@ function init() {
                 }
             });
     });
-    rebindEvent("click", ".remove-applicant-js", (e: JQuery.EventBase) => {
-        e.preventDefault();
-        let sender = $(e.currentTarget);
-        requestOptional(
-            "RemoveApplicant",
-            "OutApplication",
-            {
-                type: "POST",
-                data: {
-                    applicationUniqueId: sender.closest("form").find("[name=UniqueId]:first").val(),
-                    uniqueid: sender.data("uniqueid")
-                },
-                success: (data) => {
-                    let wrapper = sender.closest(".applicants-js");
-                    sender.closest(".flex").remove();
-                    wrapper.find(".flex > .number").each((index, item) => { $(item).html(`${(index + 1)}.`); });
-                }
-            });
-    });
     rebindEvent("click", ".add-applicant-js, .edit-applicant-js", (e: JQuery.EventBase) => {
         e.preventDefault();
         let sender = $(e.currentTarget);
         let isEdit = sender.hasClass("edit-applicant-js");
+        let docTypeId = $("#docTypeId").val();
         openKendoWindow(
             isEdit ? "Edit" : "Create",
             "Clients",
@@ -130,7 +153,8 @@ function init() {
                 type: "GET",
                 area: "Admin",
                 data: {
-                    id: sender.val()
+                    id: sender.val(),
+                    docTypeId: docTypeId
                 }
             },
             {
@@ -144,6 +168,7 @@ function init() {
                     let success = e.sender.element.data("success");
                     if (success === true) {
                         let client = e.sender.element.data("item");
+                        let oldApplicantId = e.sender.element.data("editedApplicant");
                         requestOptional(
                             "RefreshApplicant",
                             "OutApplication",
@@ -151,8 +176,8 @@ function init() {
                                 type: "GET",
                                 data: {
                                     applicationUniqueId: sender.closest("form").find("[name=UniqueId]:first").val(),
-                                    clientId: client["Id"]
-
+                                    clientId: client["Id"],
+                                    oldApplicantId
                                 },
                                 success: (data) => {
                                     if (!data) {
@@ -160,7 +185,7 @@ function init() {
                                     }
 
                                     if (data.applicants) {
-                                        $("#applicants").replaceWith(data.applicants);
+                                        $("#applicantsInfoWrapper").replaceWith(data.applicants);
                                     }
 
                                     displayMessage(getResource("Success"), messageType.success);
@@ -227,52 +252,6 @@ function init() {
             });
     });
 
-    rebindEvent("click", ".remove-actObject-js", (e: JQuery.EventBase) => {
-        e.preventDefault();
-        let sender = $(e.currentTarget);
-        requestOptional(
-            "RemoveAdmObject",
-            "OutApplication",
-            {
-                type: "POST",
-                area: "OutAdministrativeAct",
-                data: {
-                    applicationUniqueId: sender.closest("form").find("[name=UniqueId]:first").val(),
-                    uniqueid: sender.data("uniqueid")
-                },
-                success: (data) => {
-                    let wrapper = sender.closest(".admact-objects-js");
-                    sender.closest(".admact-object-js").remove();
-                    wrapper.find(".flex > .number").each((index, item) => { $(item).html(`${(index + 1)}.`); });
-                }
-            });
-    });
-
-    rebindEvent("click", ".remove-objectAddress-js", (e: JQuery.EventBase) => {
-        e.preventDefault();
-        let sender = $(e.currentTarget);
-        requestOptional(
-            "RemoveAdmObjectAddress",
-            "OutApplication",
-            {
-                type: "POST",
-                area: "OutAdministrativeAct",
-                data: {
-                    applicationUniqueId: sender.closest("form").find("[name=UniqueId]:first").val(),
-                    uniqueid: sender.data("uniqueid")
-                },
-                success: (data) => {
-                    let wrapper = sender.closest(".admact-object-addresses-js");
-                    sender.closest(".info-row").remove();
-                    wrapper.find(".flex > .number").each((index, item) => { $(item).html(`${(index + 1)}.`); });
-                    console.log('wrapper', wrapper)
-                    if (!wrapper.find('.info-row').length) {
-                        wrapper.closest('.admact-object-js').find('.info-row i').removeClass('k-i-caret-alt-down').addClass('k-i-sarrow-e')
-                    }
-                }
-            });
-    });
-
     $(window).on('beforeunload', (e) => {
         if (!document.activeElement
             || !document.activeElement["href"]) {
@@ -314,13 +293,480 @@ function init() {
             }
         })
     })
+    //////$(function () {
+    //////    $(".attachment-group-name").each(function () {
+    //////        if ($(this).find(".attachment-group-wrapper").length == 0) {
+    //////            $(this).remove();
+    //////        }
+    //////    })
+    //////})
 
+    //////$(function () {
+    //////    $(".attachment-main-group").each(function () {
+    //////        if ($(this).find(".attachment-group-wrapper").length == 0) {
+    //////            $(this).remove();
+    //////        }
+    //////    })
+
+
+    //////})
+}
+
+function onSaveAdmAct(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    let saveUrl = sender.attr('formaction');
+    ContinueWithSave(saveUrl);
+}
+
+function onDeleteAdmAct(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    let saveUrl = sender.attr('formaction');
+    ContinueWithSave(saveUrl);
+}
+
+function onPublishAdmAct(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    let saveUrl = sender.attr('formaction');
+    let validateAction = sender.attr('validateaction');
+    let applicationUniqueId = sender.data("uniqueid");
+
+    requestOptionalUrl(validateAction,
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            success: (data) => {
+                if (data.success == true) {
+                    BissSignRequest(applicationUniqueId, saveUrl);
+                }
+                else {
+                    $('.content').html(data);
+                }
+            }
+        });
+}
+
+function BissSignRequest(uniqueId, saveUrl) {
+    request.selector.keyusages = new Array();
+    request.selector.keyusages.push("digitalSignature");
+    request.selector.issuers = new Array();
+    var payload = JSON.stringify(request);
+    $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+        if (options.url === bissGetUrl) {
+            delete options.headers['X-CSRF-TOKEN'];
+        }
+    });
+
+    $.ajax({
+        url: bissGetUrl,
+        type: "POST",
+        crossDomain: true,
+        data: payload,
+        contentType: "application/json",
+        dataType: "json",
+        global: false,
+    }).done(function (response) {
+        if (response.status == "ok") {
+            requestOptional(
+                "HashBissCertificate",
+                "OutApplication",
+                {
+                    type: "POST",
+                    area: "OutAdministrativeAct",
+                    data: {
+                        applicationUniqueId: uniqueId,
+                        signerCertificateB64: response.chain[0]
+                    },
+                    success: (data) => {
+                        bissSign(data.contents, new Array(data.signedContentsBase64), new Array(data.signedContentsCert), data.signerCertificateB64, saveUrl);
+                    }
+                });
+        } else {
+            displayMessage(getResource("BISSServerError"), messageType.error);
+        }
+    })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 0) {
+                DownloadBissFile();
+                displayMessage(getResource("BISSNotFoundError"), messageType.error);
+            }
+
+            if (jqXHR.responseJSON.reasonText) {
+                displayMessage(getResource("BissResponseMessage") + `: ${jqXHR.responseJSON.reasonText}`, messageType.error);
+            }
+        });
+}
+
+function bissSign(contents, signedContentsBase64, signedContentsCert, signerCertificateB64, saveUrl) {
+
+    var port = 53952;
+    let request = {
+        version: "1.0",
+        signatureType: "signature",
+        contentType: "data",
+        confirmText: [getResource("ConfirmSignBISS")],
+        signerCertificateB64: signerCertificateB64,
+        signedContents: signedContentsBase64,
+        signedContentsCert: signedContentsCert,
+        contents: [contents],
+        hashAlgorithm: "SHA256",
+    };
+
+    let payload = JSON.stringify(request);
+
+    $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+        if (options.url === bissSignUrl) {
+            delete options.headers['X-CSRF-TOKEN'];
+        }
+    });
+
+    $.ajax({
+        url: bissSignUrl,
+        type: "POST",
+        crossDomain: true,
+        data: payload,
+        contentType: "application/json",
+        dataType: "json",
+        global: false,
+
+    }).done(function (response) {
+        if (response.status == "ok") {
+            requestOptional(
+                "SignBiss",
+                "OutApplication",
+                {
+                    type: "POST",
+                    area: "OutAdministrativeAct",
+                    data: { clientSignature: response.signatures[0], signerCertificateB64: signerCertificateB64 },
+                    success: (data) => {
+                        if (data.success == true) {
+                            ContinueWithSave(saveUrl);
+                        }
+                    }
+                });
+        }
+        else {
+            displayMessage(getResource("BISSServerError"), messageType.error);
+        }
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        if (jqXHR.responseJSON.reasonText) {
+            displayMessage(getResource("BissResponseMessage") + `: ${jqXHR.responseJSON.reasonText}`, messageType.error);
+        }
+    });
+}
+
+function ContinueWithSave(saveUrl) {
+    requestOptionalUrl(saveUrl,
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            success: (data) => {
+            }
+        });
+}
+
+function onAARegisterTypeChange(e: JQuery.EventBase) {
+    let dropDown = $('#RegisterTypeId').data("kendoDropDownList");
+    let registerId = dropDown.value();
+
+    requestOptional(
+        "GetTypesByRegister",
+        "AdmActRegister",
+        {
+            type: "GET",
+            area: "OutAdministrativeAct",
+            data: {
+                key: registerId
+            },
+            success: (data) => {
+                if (data) {
+                    var typeDropDown = $("#TypeId").data("kendoDropDownList");
+
+                    typeDropDown.setDataSource(new kendo.data.DataSource({ data: data }));
+                    typeDropDown.enable(true);
+                }
+            }
+        });
+}
+
+function onAdminiStrationChangeChange(e: JQuery.EventBase) {
+    let dropDown = $('#AdministrationId').data("kendoDropDownList");
+    let registerId = dropDown.value();
+
+    requestOptional(
+        "GetIssuerByAdministration",
+        "AdmActRegister",
+        {
+            type: "GET",
+            area: "OutAdministrativeAct",
+            data: {
+                key: registerId
+            },
+            success: (data) => {
+                if (data) {
+                    var typeDropDown = $("#IssuerId").data("kendoDropDownList");
+
+                    typeDropDown.setDataSource(new kendo.data.DataSource({ data: data }));
+                    typeDropDown.enable(true);
+                }
+            }
+        });
+}
+
+export function onAddIndetificators(e: JQuery.EventBase) {
+    e.preventDefault();
+    window.location.reload();
+}
+
+function onRemoveObjectAddress(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    requestOptional(
+        "RemoveAdmObjectAddress",
+        "OutApplication",
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            data: {
+                applicationUniqueId: sender.closest("form").find("[name=UniqueId]:first").val(),
+                uniqueid: sender.data("uniqueid")
+            },
+            success: (data) => {
+                let wrapper = sender.closest(".admact-object-addresses-js");
+                sender.closest(".info-row").remove();
+                wrapper.find(".flex > .number").each((index, item) => { $(item).html(`${(index + 1)}.`); });
+                console.log('wrapper', wrapper)
+                if (!wrapper.find('.info-row').length) {
+                    wrapper.closest('.admact-object-js').find('.info-row i').removeClass('k-i-caret-alt-down').addClass('k-i-sarrow-e')
+                }
+            }
+        });
+}
+
+function onRemoveActObject(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    requestOptional(
+        "RemoveAdmObject",
+        "OutApplication",
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            data: {
+                applicationUniqueId: sender.closest("form").find("[name=UniqueId]:first").val(),
+                uniqueid: sender.data("uniqueid")
+            },
+            success: (data) => {
+                let wrapper = sender.closest(".admact-objects-js");
+                sender.closest(".admact-object-js").remove();
+                wrapper.find(".flex > .number").each((index, item) => { $(item).html(`${(index + 1)}.`); });
+            }
+        });
+}
+
+function onRemoveApplicant(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    requestOptional(
+        "RemoveApplicant",
+        "OutApplication",
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            data: {
+                applicationUniqueId: sender.closest("form").find("[name=UniqueId]:first").val(),
+                uniqueid: sender.data("uniqueid")
+            },
+            success: (data) => {
+                let wrapper = sender.closest(".applicants-js");
+                sender.closest(".flex").remove();
+                wrapper.find(".flex > .number").each((index, item) => { $(item).html(`${(index + 1)}.`); });
+            }
+        });
+}
+
+function onRemoveAllObjects(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    requestOptional(
+        "RemoveAllObjects",
+        "OutApplication",
+        {
+            type: "GET",
+            area: "OutAdministrativeAct",
+            data: {
+                applicationUniqueId: $("#application").find("[name=UniqueId]:first").val(),
+            },
+            success: (data) => {
+                window.location.reload();
+            }
+        },
+    )
+}
+
+function openIdentificatorsInfo(e: JQuery.EventBase) {
+    e.preventDefault();
+    openKendoWindow(
+        "GetExcelToolTip",
+        "OutApplication",
+        {
+            useArea: true,
+            area: "OutAdministrativeAct",
+        },
+        {
+            title: `${getResource("Info")}`,
+            resizable: true,
+            modal: true,
+            height: "90%",
+            width: "90%",
+        }
+    )
+}
+
+function onOpenAmdActInfo(e: JQuery.EventBase): void {
+    e.preventDefault();
+    let sender = $(e.currentTarget)
+    let title = sender.data("regnumber") != undefined ? sender.data("regnumber") : sender.data("regnum");
+    openKendoWindow(
+        "Info",
+        "OutApplication",
+        {
+            data: {
+                id: sender.data("id"),
+                groupTypeId: sender.data("outgroupid"),
+            },
+            useArea: true,
+            area: "OutAdministrativeAct",
+        },
+        {
+            title: `${getResource("Info")} ${title}`,
+            resizable: true,
+            modal: true,
+            height: "90%",
+            width: "90%",
+        }
+    )
+}
+
+function onSaveConnectedAdmActs(e: JQuery.EventBase) {
+    e.preventDefault();
+    let connectedInforWrapper = $("#connected-docs-info");
+    let connectInfoData = connectedInforWrapper.find(".connected-documents-info-js");
+
+    requestOptional(
+        "SaveConnectedDocuments",
+        "OutApplication",
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            data: {
+                applicationUniqueId: $("#application").find("[name=UniqueId]:first").val(),
+            },
+            success: (data) => {
+                if (data.success) {
+                    $(".closeKendoWindow-js").trigger('click');
+                    if (connectInfoData) {
+                        connectInfoData.remove();
+                    }
+
+                    if (data.connectedDocs) {
+                        connectedInforWrapper.append(data.connectedDocs);
+                    }
+
+                }
+            },
+        }
+    )
+}
+
+function onChooseConnectedAdmAct(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    let id = sender.data("id");
+    let regNumber = sender.data("regnumber");
+    let regDate = sender.data("regdate");
+    let administration = sender.data("administration");
+    let typeName = sender.data("typename");
+
+    requestOptional(
+        "ConnectDocument",
+        "OutApplication",
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            data: {
+                id,
+                regNumber,
+                regDate,
+                type: {
+                    name: typeName
+                },
+                administration,
+                applicationUniqueId: $("#application").find("[name=UniqueId]:first").val(),
+            },
+            success: (data) => {
+                if (data) {
+                    let applicantsWrapper = $(".connected-documents-js");
+                    if (data["index"] >= 0) {
+                        applicantsWrapper.find(`> :eq(${data["index"]})`).replaceWith(data.doc);
+                    }
+                    else {
+                        applicantsWrapper.append(data.doc);
+                    }
+                }
+            },
+        }
+    )
+}
+
+function onRemoveConenctedAdmAct(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    let id = sender.data("id");
+    let regNumber = sender.data("regnumber");
+
+    requestOptional(
+        "RemoveConnectedDocumenct",
+        "OutApplication",
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            data: {
+                id,
+                regNumber,
+                applicationUniqueId: $("#application").find("[name=UniqueId]:first").val(),
+            },
+            success: (data) => {
+                let wrapper = sender.closest(".connected-documents-js");
+                sender.closest(".info-row").remove();
+            }
+        }
+    )
+}
+
+function onDocActualityChange(e: JQuery.EventBase) {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    requestOptional(
+        "ChangeActualityStatus",
+        "OutApplication",
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            data: {
+                applicationUniqueId: $("#application").find("[name=UniqueId]:first").val(),
+                status: sender.data("status")
+            }
+        }
+    )
 }
 
 function onSearchAdmAct(e: JQuery.EventBase) {
     e.preventDefault();
     openKendoWindow(
-        "SearchAdmAct",
+        "GetSearchAdmAct",
         "OutApplication",
         {
             type: "GET",
@@ -331,7 +777,12 @@ function onSearchAdmAct(e: JQuery.EventBase) {
         },
         {
             modal: true,
-            title: "test",
+            title: getResource("SearchAndConnectAdmAct"),
+            open: (e) => {
+                e.sender.wrapper.css({
+                    top: 10
+                });
+            },
             close: (e) => {
                 if (e.userTriggered) {
                     return;
@@ -401,6 +852,8 @@ function onAddAttachment(e: JQuery.EventBase) {
     let uniqueId = sender.data("unique-id");
     let attachmentTypeId = sender.data("type-id");
     let wrapperTarget = (".step-box");
+    let attachmentWraper = sender.closest('.attachments-wrap');
+    let required = attachmentWraper.find('label:first-of-type').hasClass('required');
 
     if ($(sender).closest(".attachment-group-wrapper")) {
         //uniqueId = sender.find('.add-outgroup-attachment-js').data('type-id');
@@ -415,7 +868,8 @@ function onAddAttachment(e: JQuery.EventBase) {
             type: "POST",
             data: {
                 applicationUniqueId: uniqueId,
-                attachmentTypeId
+                attachmentTypeId,
+                isRequired: required ? true : false
             },
             success: (content) => {
                 if (content) {
@@ -593,10 +1047,6 @@ function onEditAdmActState(e: JQuery.EventBase): void {
         });
 }
 
-function removeStateAttachment(e: JQuery.EventBase): void {
-    onFileUploadRemove(e);
-}
-
 function OnDeleteAdmActState(e: JQuery.EventBase): void {
     e.preventDefault();
     let sender = $(e.currentTarget);
@@ -672,7 +1122,7 @@ function addAdmActStateRow(e: JQuery.EventBase): void {
                 if (data.success) {
                     let grid = $("#grid").data("kendoGrid") as kendo.ui.Grid;
                     grid.dataSource.read();
-                    onFileUploadRemove(e, false);
+                    onFileUploadRemove(e);
                     $("#StateUpsertModel_Dispute_Description").val('');
                 }
             }
@@ -705,6 +1155,63 @@ function onAttachmentGroupNameClick(e: JQuery.EventBase): void {
     e.preventDefault();
     let sender = $(e.currentTarget);
     sender.closest("fieldset").toggleClass('open')
+}
+
+function DownloadBissFile() {
+    let actions = [
+        {
+            text: getResource("Download"),
+            action: () => {
+                requestOptional(
+                    "DownloadBiss",
+                    "OutApplication",
+                    {
+                        type: "GET",
+                        area: "OutAdministrativeAct",
+                        success: (data) => {
+                            if (data.success == true) {
+                                window.location.href = data.url;
+                            }
+                        }
+                    });
+                return true;
+            },
+            primary: true
+        },
+        {
+            text: getResource("Close")
+        }
+    ];
+    createKendoDialog({
+        title: getResource("DownloadBissTitle"),
+        content: getResource("ConfirmDownloadBiss"),
+        visible: true,
+        actions: actions
+    });
+
+}
+
+function openModelVersion(e: JQuery.EventBase): void {
+    e.preventDefault();
+    let sender = $(e.currentTarget);
+    openKendoWindow(
+        "VersionInfo",
+        "OutApplication",
+        {
+            area: "OutAdministrativeAct",
+            type: "GET",
+            data: {
+                fileId: sender.data("fileid")
+            },
+        },
+        {
+            title: `${getResource("Info")} ${sender.data("name")} - ${getResource("Version")} : ${sender.data("date")}`,
+            resizable: true,
+            modal: true,
+            height: "90%",
+            width: "90%",
+        }
+    )
 }
 
 init();

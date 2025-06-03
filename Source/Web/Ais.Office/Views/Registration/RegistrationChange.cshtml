@@ -1,0 +1,215 @@
+﻿@using global::Ais.Data.Models.Employee
+@using global::Ais.Data.Models.Helpers
+@using global::Ais.Data.Models.RegistrationRequest
+@using Ais.Utilities.Extensions
+@using Ais.Infrastructure.KendoExt
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile
+@model Ais.Data.Models.RegistrationRequest.RegistrationRequest
+
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var isModelStateValid = ViewBag.IsModelStateValid is not bool || (bool)ViewBag.IsModelStateValid;
+    var asyncUploadChunkSize = Configuration.GetValue<double>("Attachment:AsyncUploadChunkSize");
+    var filePrefix = "File.";
+    var action = EnumHelper.GetRequestType(Model.Type.Id.Value) == RequestType.ChangeRegistration ? @Url.ActionLink("RegisterChangeRequest", "Registration") : @Url.ActionLink("RegisterRequest", "Registration");
+}
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+<div class="steps-body registration-wrap" id="ChangeRegistrationWrapper">
+    <div class="registrationWrapper-js">
+            <form method="post" action="@action"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+              data-ajax-update=".content-pre-wrap > .center">
+                @Html.ValidationSummary(true)
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.UniqueId)
+                @Html.HiddenFor(m => m.Id)
+                @Html.HiddenFor(m => m.FirstName)
+                @Html.HiddenFor(m => m.SurName)
+                @Html.HiddenFor(m => m.LastName)
+                @Html.HiddenFor(m => m.Role.Id)
+                @Html.HiddenFor(m => m.Status.Id)
+                @Html.HiddenFor(m => m.Type.Id)
+                @Html.HiddenFor(m => m.Egn)
+                @Html.HiddenFor(m => m.User.Id)
+
+                <div class="step-box fullwidth">
+                    <div class="step-box-head">
+                        <strong class="role-name">@Localizer["Role"]: @Model.Role.Name</strong>
+                        <span>2/2</span>
+                    </div>
+                    <div class="step-box-body">
+                        <div class="form-row">
+                            @if (Model.Office != null)
+                            {
+                                <div class="form-input autosize ib">
+                                    @Localizer["Administration"]:
+                                    <strong>@Model.Office.Name</strong>
+                                </div>
+                            }
+                            @if (Model.Administration.IsNotNullOrEmpty())
+                            {
+                                        <div class="form-input autosize ib">
+                                    @Localizer["Organization"]:
+                                    <strong>@Model.Administration</strong>
+                                </div>
+                            }
+                            @if (Model.FirstName.IsNotNullOrEmpty())
+                            {
+                                        <div class="form-input autosize ib">
+                                    @Localizer["FirstName"]:
+                                    <strong>@Model.FirstName</strong>
+                                </div>
+                            }
+                            @if (Model.SurName.IsNotNullOrEmpty())
+                            {
+                                        <div class="form-input autosize ib">
+                                    @Localizer["SurName"]:
+                                    <strong>@Model.SurName</strong>
+                                </div>
+                            }
+                            @if (Model.LastName.IsNotNullOrEmpty())
+                            {
+                                        <div class="form-input autosize ib">
+                                    @Localizer["LastName"]:
+                                    <strong>@Model.LastName</strong>
+                                </div>
+                            }
+                        </div>
+                        @if (EnumHelper.GetRequestType(Model.Type.Id.Value) != RequestType.ChangeRegistration)
+                        {
+                            @if (EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalAdministrator ||
+                           EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalOperator)
+                            {
+                                <div class="form-row">
+                                    <div class="form-input fullwidth">
+                                        @Html.InfoLabel(Localizer["Administration"], "Administration")
+                                        @(Html.Kendo().DropDownList()
+                                            .Name("Office.Id")
+                                            .OptionLabel(Localizer["Choose"].ToString())
+                                            .Value(Model?.Office?.Id.HasValue == true ? Model.Office.Id.ToString() : string.Empty)
+                                            .DataValueField("Id")
+                                            .DataTextField("Name")
+                                            .ValueTemplate(
+                                            $"<input type='hidden' name='Office.Name' value='#:Name#'/>" +
+                                            "<span>#:Name#</span>")
+                                            .Filter(FilterType.Contains)
+                                            .DataSource(d => d.Read(r => r.Action("GetAdministrations", "Registration", new { area = string.Empty })))
+                                            .Deferred(deferred))
+                                        @Html.ValidationMessage("Administration")
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-row">
+                                    <div class="form-input fullwidth">
+                                        @Html.InfoLabel(Localizer["Organization"], "Organization")
+                                        @Html.EditorFor(m => m.Administration)
+                                        @Html.ValidationMessage("Organization")
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            @Html.HiddenFor(m => m.Office.Id)
+                            @Html.HiddenFor(m => m.Administration)
+                        }
+
+                        <div class="form-row">
+                            <div class="form-input column">
+                                @Html.InfoLabel(Localizer["Department"], "Department")
+                                @Html.EditorFor(m => m.Department)
+                                @Html.ValidationMessage("Department")
+                            </div>
+                            <div class="form-input column">
+                                @Html.InfoLabel(Localizer["Position"], "Position")
+                                @Html.EditorFor(m => m.Position)
+                                @Html.ValidationMessage("Position")
+                            </div>
+                            <div class="form-input column">
+                                @Html.InfoLabel(Localizer["Email"], "Email")
+                                @Html.EditorFor(m => m.Email)
+                                @Html.ValidationMessage("Email")
+                            </div>
+                            <div class="form-input column">
+                                @Html.InfoLabel(Localizer["ContactPhone"], "ContactPhone")
+                                @Html.EditorFor(m => m.ContactPhone)
+                                @Html.ValidationMessage("ContactPhone")
+                            </div>
+
+                        </div>
+                        @if (EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalAdministrator ||
+                       EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.ExternalUserSpecializedAccess)
+                        {
+                            <div class="form-row">
+                                <div class="form-input fullwidth">
+                                    @Html.LabelFor(x => x.File)
+                                    @(Html.Kendo().Upload()
+                                        .Name($"{filePrefix}Url")
+                                        .HtmlAttributes(new { id = Guid.NewGuid().ToString(), data_prefix = filePrefix, name = string.Empty, @css = "k-mb-0" })
+                                        .Messages(x => x.Select(Localizer["SelectFiles"])
+                                        .DropFilesHere(Localizer["DropFilesHere"])
+                                        .InvalidFileExtension(Localizer["InvalidFileExtension"])
+                                        .Cancel(Localizer["Cancel"]))
+                                        .Async(a => a
+                                        .Save("Upload", "Attachment", new { area = string.Empty })
+                                        .Remove("Remove", "Attachment", new { area = string.Empty })
+                                        .AutoUpload(true)
+                                        .ChunkSize(asyncUploadChunkSize)
+                                        .Concurrent(false))
+                                        .ShowFileList(true)
+                                        .Multiple(false)
+                                        .TemplateId("fileTemplate")
+                                        .Validation(validation =>
+                                        {
+                                            validation.AllowedExtensions("doc", "docx", "pdf");
+                                        })
+                                        .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+                                        .Files(files =>
+                                        {
+                                            if (Model?.File?.Name.IsNotNullOrEmpty() == true)
+                                            {
+                                                var attachment = Model?.File;
+                                                files.AddCustomFile(
+                                                new UploadFile
+                                    {
+                                        Id = attachment!.Id,
+                                        Name = attachment.Name,
+                                        Url = attachment.Url,
+                                        Size = attachment.Size,
+                                        Extension = attachment.Extension,
+                                        Data = new Dictionary<string, object> { { "prefix", filePrefix } }
+                                    });
+                                            }
+                                        }))
+                                    @Html.ValidationMessage($"{filePrefix}Url")
+                                </div>
+                            </div>
+                        }
+                    <button class="bttn main fullwidth send-registration-request-js">
+                            @Localizer["SendRegistrationRequest"]
+                        </button>
+                    </div>
+                </div>
+            </form>
+        @* } *@
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("_FileTemplate");
+}

@@ -1,9 +1,52 @@
 ﻿@using Ais.Office.ViewModels.AdmAct
-@model List<AdmActSearchResultViewModel>
-<form method="post" asp-action="SearchAdmAct">
-    <h1>
-        test
-    </h1>
+@inject IStringLocalizer Localizer
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Office.ViewModels.Application
+@model string
 
-    <button class="k-i-search">Search</button>
-</form>
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().Grid<AdmActRegisterTableViewModel>()
+      .Name("searchAdmAct")
+      .HtmlAttributes(new { data_show_first_details = true, @class = "withoutpager" })
+      .Columns(columns =>
+      {
+          columns.Bound(e => e.Id)
+            .ClientTemplate("#:Id ? Id : ''#").Hidden();
+          columns.Bound(e => e.RegNumber)
+                 .ClientTemplate("#:RegNumber ? RegNumber : ''#");
+
+          columns.Bound(e => e.TypeName)
+          .ClientTemplate("#:TypeName ? TypeName : ''#");
+
+          columns.Bound(e => e.AdmActRegDate).Format("g")
+    .ClientTemplate("#: kendo.toString(kendo.parseDate(AdmActRegDate), 'dd.MM.yyyy г.') #");
+
+          columns.Bound(e => e.OfficeName)
+        .ClientTemplate("#:OfficeName ? OfficeName : ''#");
+          
+     columns.Bound(string.Empty)
+                    .Width(50)
+                    .ClientTemplate(
+                        "<div class='flex gap-5'>" +
+                        $"<button type='button' class='bttn bttn-icon third  small autosize info-admact-js' title='{Localizer["Info"]}' data-id='#:data.Id#' data-regnumber='#:data.RegNumber#'><i class='k-icon k-font-icon k-i-eye'></i></button>" +
+                        "</div>");
+
+          columns.Bound(string.Empty)
+                      .Width(50)
+                      .ClientTemplate(
+                          "<div class='flex gap-5'>" +
+                          $"<button type='button' class='bttn bttn-icon third  small autosize choose-admact-js' title='{Localizer["Choose"]}' data-id='#:data.Id#' data-regnumber='#:data.RegNumber#' data-typename='#:data.TypeName#' data-regdate='#:kendo.toString(kendo.parseDate(data.AdmActRegDate), 'dd.MM.yyyy г.')#' data-administration='#:data.OfficeName#'><i class='k-icon k-font-icon k-i-check'></i></button>" +
+                          "</div>");
+      })
+      .Pageable(p => p.Enabled(true).PreviousNext(true).ButtonCount(5))
+      .Width("auto")
+      .Events(e => e.DataBound("searchTable.onGridDataBound"))
+      .DataSource(
+          dataSource => dataSource
+              .Ajax()
+              .PageSize(5)
+              .Read(read => read.Action("ReadSearchAdmAct", "OutApplication", new { applicationUniqueId = Model })))
+      .Deferred(deferred))

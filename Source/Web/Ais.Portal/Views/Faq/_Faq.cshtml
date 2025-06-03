@@ -1,0 +1,18 @@
+﻿@using global::Ais.Data.Models.Faq;
+@using Microsoft.Extensions.Localization;
+@inject IStringLocalizer Localizer;
+@model List<FaqTableModel>
+@Html.Hidden("CategoryId", ViewBag.CategoryId as string)
+<div class="form-row k-align-items-center">
+    <div class="form-input quad">
+        @Html.Kendo().TextBox().Name("SearchWord").HtmlAttributes(new { @class = "k-input-js" }).Placeholder(Localizer["SearchWord"]).Deferred()
+    </div>
+    <div class="form-input autosize">
+        <button class="bttn main searchByWord-js search-faq">@Localizer["Search"]</button>
+    </div>
+</div>
+<div id="faq-result">
+    @{
+        await Html.RenderPartialAsync("_FaqResult", Model);
+    }
+</div>

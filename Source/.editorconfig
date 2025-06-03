@@ -34,6 +34,8 @@ csharp_prefer_static_local_function = true:suggestion
 csharp_style_conditional_delegate_call = true:suggestion
 dotnet_diagnostic.SA1623.severity = suggestion
 dotnet_diagnostic.SA1609.severity = suggestion
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = true
 
 # CA1416: Validate platform compatibility
 dotnet_diagnostic.CA1416.severity = none

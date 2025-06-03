@@ -5,30 +5,12 @@
     using System.ComponentModel;
     using System.ComponentModel.DataAnnotations;
     using System.Linq;
-    using System.Net;
     using System.Threading.Tasks;
 
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Common.Base;
     using Ais.Data.Models;
-    using Ais.Data.Models.Address;
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.BgPosts;
-    using Ais.Data.Models.Document;
-    using Ais.Data.Models.Document.InDocuments;
-    using Ais.Data.Models.Document.OutDocuments;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.QueryModels.Documents;
-    using Ais.Data.Models.Recipients;
-    using Ais.Data.Models.Role;
-    using Ais.Data.Models.TableModels.Documents;
     using Ais.Infrastructure.Roles;
     using Ais.Office.Hubs;
     using Ais.Office.Services.DocumentStatusService;
-    using Ais.Office.Utilities.Extensions;
     using Ais.Office.ViewModels.BgPosts;
     using Ais.Office.ViewModels.DeliveryData;
     using Ais.Office.ViewModels.Documents;
@@ -44,7 +26,25 @@
     using Ais.WebServices.Services.Storage;
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Address;
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.BgPosts;
+    using global::Ais.Data.Models.Document;
+    using global::Ais.Data.Models.Document.InDocuments;
+    using global::Ais.Data.Models.Document.OutDocuments;
+    using global::Ais.Data.Models.Helpers;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.QueryModels.Documents;
+    using global::Ais.Data.Models.Recipients;
+    using global::Ais.Data.Models.Role;
+    using global::Ais.Data.Models.TableModels.Documents;
 
     using Kendo.Mvc.Extensions;
     using Kendo.Mvc.UI;
@@ -54,6 +54,7 @@
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
+
     using Newtonsoft.Json;
 
     using Breadcrumb = Ais.Data.Models.Breadcrumb;
@@ -152,10 +153,6 @@
             {
                 query = new OutDocumentsQueryViewModel
                 {
-                    RegDateFrom = DateTime.Now,
-                    RegDateTo = DateTime.Now,
-                    Limit = 200,
-                    OfficeId = this.User.AsEmployee()?.OfficeId
                 };
             }
 
@@ -206,7 +203,7 @@
         /// <param name="id">The identifier.</param>
         /// <param name="searchQueryId">The search query identifier.</param>
         /// <returns>A Task&lt;System.Threading.Tasks.Task&gt; representing the asynchronous operation.</returns>
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.OutDocumentDelete)]
         public async Task DeleteAsync(Guid id, string searchQueryId)
         {
@@ -270,7 +267,7 @@
 
             var sessionId = parcelData.BgPostsApiSessionString;
             List<ParcelData> data;
-            using var client = this.httpClientFactory.CreateClient(Resources.Office.Constants.BgPost);
+            using var client = this.httpClientFactory.CreateClient(Ais.Resources.Office.Constants.BgPost);
             {
                 var response = await client.GetAsync($"trace/session/{sessionId}?session={sessionId}");
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -401,7 +398,7 @@
 
             if (dbModel == null)
             {
-                return this.StatusCode(HttpStatusCode.NotFound.GetHashCode());
+                return this.NotFound();
             }
 
             return this.PartialView("_SendingData", this.mapper.Map<SendingDataViewModel>(dbModel));
@@ -739,7 +736,7 @@
             List<Nomenclature> result;
             await using (await this.contextManager.NewConnectionAsync())
             {
-                result = (await this.employeeService.GetEmployeesDdlAsync(new Data.Models.Employee.EmployeeShortQuery { Office = officeId, Fullname = name }))?.Select(x => new Nomenclature { Id = Guid.Parse(x.Key), Name = x.Value }).ToList();
+                result = (await this.employeeService.GetEmployeesDdlAsync(new Ais.Data.Models.Employee.EmployeeShortQuery { Office = officeId, Fullname = name }))?.Select(x => new Nomenclature { Id = Guid.Parse(x.Key), Name = x.Value }).ToList();
             }
 
             return this.Json(result.AddDefaultValue(this.Localizer["All"]));
@@ -826,7 +823,7 @@
                 statuses = await this.nomenclatureService.GetAsync("nstatus", flag: 2);
                 receiveMethods = await this.nomenclatureService.GetAsync("nreceivemethod");
                 offices = await this.nomenclatureService.GetOfficesAsync();
-                employees = await this.employeeService.GetEmployeesDdlAsync(new Data.Models.Employee.EmployeeShortQuery());
+                employees = await this.employeeService.GetEmployeesDdlAsync(new Ais.Data.Models.Employee.EmployeeShortQuery());
             }
 
             model.BkDocTypeIdDataSource = types.Select(x => new KeyValuePair<string, string>(key: x.Id.ToString(), value: x.Name)).ToList().AddDefaultValue(this.Localizer["All"]);

@@ -1,0 +1,24 @@
+﻿@using Ais.WebUtilities.Helpers;
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@model string
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+        ? ViewData["htmlAttributes"]
+        : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+@(Html.Kendo().DropDownListFor(m => m)
+      .HtmlAttributes(attributes)
+      .DataTextField("Name")
+      .DataValueField("Id")
+      .OptionLabel(Localizer["Choose"].ToString())
+      .AutoBind(false)
+      .Filter(FilterType.Contains)
+      .DataSource(r => r.Read(x => x.Action("GetAvailableEmployeesForTasks", "TasksDistribution")).ServerFiltering(false)))

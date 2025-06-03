@@ -1,23 +1,10 @@
 ﻿namespace Ais.Office.Controllers
 {
     using System.ComponentModel;
+    using System.Linq;
     using System.Xml;
 
-    using Ais.Data.Base.Ais;
     using Ais.Data.Models;
-    using Ais.Data.Models.Address;
-    using Ais.Data.Models.AdmActAttachment;
-    using Ais.Data.Models.ApplicationType;
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Client;
-    using Ais.Data.Models.Document;
-    using Ais.Data.Models.Folder;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.Journal;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.QueryModels;
-    using Ais.Data.Models.Service.Object;
     using Ais.Infrastructure.BaseTypes;
     using Ais.Infrastructure.Roles;
     using Ais.Office.Controllers.Documents;
@@ -29,10 +16,32 @@
     using Ais.WebServices.Services.Storage;
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Address;
+    using global::Ais.Data.Models.AdmActAttachment;
+    using global::Ais.Data.Models.ApplicationType;
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Client;
+    using global::Ais.Data.Models.Document;
+    using global::Ais.Data.Models.DynamicValidation;
+    using global::Ais.Data.Models.Folder;
+    using global::Ais.Data.Models.Helpers;
+    using global::Ais.Data.Models.Journal;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.OutAdmAct;
+    using global::Ais.Data.Models.QueryModels;
+    using global::Ais.Data.Models.Service.Object;
+
     using IO.SignTools.Contracts;
+
     using Kendo.Mvc.Extensions;
     using Kendo.Mvc.UI;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc.ModelBinding;
     using Microsoft.Extensions.Localization;
@@ -41,6 +50,7 @@
     /// <summary>
     /// Class OutApplicationController.
     /// Implements the <see cref="BaseController" />
+    /// <typeparam name="T">The entity type being handled.</typeparam>
     /// </summary>
     /// <seealso cref="BaseController" />
     public class OutApplicationController : BaseController
@@ -54,11 +64,13 @@
         protected readonly IClientService ClientService;
         protected readonly IIOSignToolsService SignToolsService;
         protected readonly IServiceAttachmentService AttachmentService;
+        protected readonly IFieldControlService FieldControlService;
         protected readonly IMapper Mapper;
 
         private const string AddressesKey = "Addresses";
         private const string FindClientsKey = "FindClients";
         private const string ObjectsKey = "SelectedObjectsKey";
+        private const string DynamicValidationKey = "DynamicValidationKey";
 
         private readonly IApplicationTypeService applicationTypeService;
 
@@ -70,7 +82,7 @@
         /// <param name="logger">The logger.</param>
         /// <param name="localizer">The localizer.</param>
         /// <param name="clientService">The client service.</param>
-        /// <param name="contextManager">The context manager.</param>
+        /// <param name="contextManager">The context manager.</param
         /// <param name="outDocumentService">The out document service.</param>
         /// <param name="mapper">The mapper.</param>
         /// <param name="storageService">The storage service.</param>
@@ -79,6 +91,7 @@
         /// <param name="signToolsService">The sign service.</param>
         /// <param name="configuration">The configuration.</param>
         /// <param name="attachmentService">The configuration.</param>
+        /// <param name="fieldControlService">The field control service.</param>
         public OutApplicationController(
             ILogger<BaseController> logger,
             IStringLocalizer localizer,
@@ -91,7 +104,8 @@
             IApplicationTypeService applicationTypeService,
             IIOSignToolsService signToolsService,
             IConfiguration configuration,
-            IServiceAttachmentService attachmentService)
+            IServiceAttachmentService attachmentService,
+            IFieldControlService fieldControlService)
             : base(logger, localizer)
         {
             this.ClientService = clientService;
@@ -103,6 +117,8 @@
             this.applicationTypeService = applicationTypeService;
             this.SignToolsService = signToolsService;
             this.AttachmentService = attachmentService;
+            this.FieldControlService = fieldControlService;
+
             this.validateSign = configuration.GetValue<bool>("Application:ValidateSign");
         }
 
@@ -141,7 +157,9 @@
 
             // Need for objects and files - popup dialogs with more info
             await this.SaveApplicationToSessionAsync(outDocument);
-            return this.ReturnView("Info/Index", outDocument);
+            return isAjax
+                ? this.ReturnView("Info/Index", outDocument)
+                : this.View("Info/Index", outDocument);
         }
 
         /// <summary>
@@ -300,7 +318,9 @@
         public virtual async Task<IActionResult> Step(string applicationUniqueId, StepType current)
         {
             var application = await this.GetApplicationFromSessionAsync(applicationUniqueId);
+
             await this.InitApplicationByStepAsync(application!, current);
+
             this.InitStepTitleAndBreadcrumbs(application);
             return this.View("Index", application);
         }
@@ -463,7 +483,7 @@
             Agent agent = null;
             if (authorId.HasValue)
             {
-                agent = recipient.Representatives?.SingleOrDefault(item => item.Id == authorId && item.Quality?.Id == qualityId);
+                agent = recipient.Representatives?.FirstOrDefault(item => item.Id == authorId && item.Quality?.Id == qualityId);
                 if (agent == null)
                 {
                     throw new UserException(this.Localizer["NoDataFound"]);
@@ -477,7 +497,7 @@
                 AuthorQuality = agent?.Quality,
             };
 
-            var application = await this.GetApplicationFromSessionAsync<OutDocument>(applicationUniqueId);
+            var application = await this.GetApplicationFromSessionAsync(applicationUniqueId);
             application.Applicants ??= new List<Applicant>();
 
             if (application.Applicants.Contains(applicant))
@@ -510,7 +530,7 @@
         /// <returns>Microsoft.AspNetCore.Mvc.IActionResult.</returns>
         /// <exception cref="UserException">this.Localizer["NoDataFound"]</exception>
         [HttpPost]
-        public async Task RemoveApplicant(string applicationUniqueId, string uniqueId)
+        public virtual async Task RemoveApplicant(string applicationUniqueId, string uniqueId)
         {
             var application = await this.GetApplicationFromSessionAsync<OutDocument>(applicationUniqueId);
             var count = application.Applicants.RemoveAll(item => item.UniqueId.Equals(uniqueId));
@@ -535,7 +555,7 @@
         [HttpPost]
         public async Task<IActionResult> ChooseAddress(string applicationUniqueId, Guid id, Guid recipientId, Guid? qualityId = null)
         {
-            var application = await this.GetApplicationFromSessionAsync<OutDocument>(applicationUniqueId);
+            var application = await this.GetApplicationFromSessionAsync(applicationUniqueId);
 
             var applicant = application.Applicants?.FirstOrDefault(item => item.Recipient.Id == recipientId && (!qualityId.HasValue || item.AuthorQuality?.Id == qualityId));
             var exist = applicant != null;
@@ -592,10 +612,16 @@
         }
 
         [HttpGet]
-        public async Task<IActionResult> RefreshApplicant(string applicationUniqueId, Guid clientId)
+        public async Task<IActionResult> RefreshApplicant(string applicationUniqueId, Guid clientId, Guid? oldApplicantId)
         {
-            var application = await this.GetApplicationFromSessionAsync<OutDocument>(applicationUniqueId);
-            var applicantsToRefresh = application.Applicants?.Where(applicant => applicant.Recipient?.Id == clientId || applicant.Author?.Id == clientId).ToList();
+            var application = await this.GetApplicationFromSessionAsync(applicationUniqueId);
+            var applicantsToRefresh = application.Applicants?
+                .Where(applicant =>
+                applicant.Recipient?.Id == clientId
+                || applicant.Author?.Id == clientId
+                || applicant.Recipient?.Id == oldApplicantId)
+                .ToList();
+
             if (applicantsToRefresh.IsNotNullOrEmpty())
             {
                 Client client;
@@ -615,7 +641,7 @@
                 {
                     foreach (var applicant in applicantsToRefresh!)
                     {
-                        if (applicant.Recipient?.Id == clientId)
+                        if (applicant.Recipient?.Id == clientId || applicant?.Recipient?.Id == oldApplicantId)
                         {
                             applicant.Recipient = client;
                             if (applicant.Author?.Id.HasValue == true)
@@ -688,9 +714,10 @@
         /// </summary>
         /// <param name="applicationUniqueId">The application unique identifier.</param>
         /// <param name="attachmentTypeId">The attachment type.</param>
+        /// <param name="isRequired">The required.</param>
         /// <returns>IActionResult.</returns>
         [HttpPost]
-        public async Task<IActionResult> AddAttachment(string applicationUniqueId, Guid? attachmentTypeId)
+        public async Task<IActionResult> AddAttachment(string applicationUniqueId, Guid? attachmentTypeId, bool isRequired = false)
         {
             await this.GetApplicationFromSessionAsync(applicationUniqueId);
 
@@ -698,6 +725,7 @@
             var type = await this.GetAttachmentType(attachmentType);
 
             this.ViewBag.DontShowRelateObject = true;
+            this.ViewBag.Required = isRequired;
             return this.PartialView("~/Views/Application/Attachment/_Attachment.cshtml", type);
         }
 
@@ -710,10 +738,10 @@
         [HttpPost]
         public async Task<IActionResult> RemoveObject(string applicationUniqueId, string id)
         {
-            OutDocument application = null;
+            OutAdmAct application = null;
             if (applicationUniqueId.IsNotNullOrEmpty())
             {
-                application = await this.SessionStorageService.GetAsync<OutDocument>(applicationUniqueId);
+                application = await this.GetApplicationFromSessionAsync<OutAdmAct>(applicationUniqueId);
             }
 
             application!.Objects?.Remove(application.Objects.SingleOrDefault(x => x.Id == id));
@@ -724,9 +752,12 @@
         protected virtual async Task<OutDocument> InitApplicationAsync(Guid type, Guid? groupType)
         {
             ApplicationType outDocumentType;
+            List<DynamicValidation> validations;
             await using (await this.ContextManager.NewConnectionAsync())
             {
                 outDocumentType = (await this.applicationTypeService.SearchAsync(new ApplicationTypeQueryModel { Id = type, EntryType = EntryType.OutDocument, IsVisibleInOffice = true })).SingleOrDefault();
+                validations = await this.FieldControlService.GetValidationsAsync(outDocumentType.Id);
+                await this.SessionStorageService.SetAsync<List<DynamicValidation>>(DynamicValidationKey, validations);
             }
 
             if (outDocumentType == null)
@@ -736,17 +767,31 @@
 
             var doc = groupType != null ? OutDocument.CreateInstanceByGroupType(groupType.Value) : OutDocument.CreateInstanceByType(type);
             doc.Type = new Nomenclature { Id = outDocumentType.Id, Name = outDocumentType.Name };
+            doc.DynamicValidations = validations;
             return doc;
         }
 
-        /// <summary>
-        /// Add application to session as an asynchronous operation.
-        /// </summary>
-        /// <param name="application">The application.</param>
-        /// <returns>A Task&lt;System.Threading.Tasks.Task&gt; representing the asynchronous operation.</returns>
-        protected async Task SaveApplicationToSessionAsync(OutDocument application)
+        ////// <summary>
+        /////// Add application to session as an asynchronous operation.
+        /////// </summary>
+        /////// <param name="application">The application.</param>
+        /////// <returns>A Task&lt;System.Threading.Tasks.Task&gt; representing the asynchronous operation.</returns>
+        protected async Task SaveApplicationToSessionAsync<T>(T application)
+            where T : class
         {
-            await this.SessionStorageService.SetAsync(application.UniqueId, application);
+            switch (application)
+            {
+                case OutAdmAct outAdmAct:
+                    await this.SessionStorageService.SetAsync<OutAdmAct>(outAdmAct.UniqueId, outAdmAct);
+                    break;
+
+                case OutDocument outDocument:
+                    await this.SessionStorageService.SetAsync<OutDocument>(outDocument.UniqueId, outDocument);
+                    break;
+
+                default:
+                    throw new ArgumentException($"{this.Localizer["UnsupportedType"]} {typeof(T).Name}");
+            }
         }
 
         /// <summary>
@@ -758,7 +803,7 @@
         /// <returns>A Task&lt;T&gt; representing the asynchronous operation.</returns>
         /// <exception cref="WarningException">this.Localizer["ApplicationNotFound"]</exception>
         protected async Task<T> GetApplicationFromSessionAsync<T>(string applicationUniqueId, bool silent = false)
-           where T : OutDocument
+           where T : class
         {
             T application = null;
             if (applicationUniqueId.IsNotNullOrEmpty())
@@ -1132,18 +1177,20 @@
         /// Initializes the attachments group.
         /// </summary>
         /// <param name="docTypeId">The document type.</param>
-        protected virtual async Task<List<AttachmentGroup>> InitAttachmentsGroups(Guid? docTypeId)
+        /// <param name="docSysTypeId">The document system type.</param>
+        protected virtual async Task<List<AttachmentGroup>> InitAttachmentsGroups(Guid? docTypeId, Guid? docSysTypeId)
         {
-            return await this.AttachmentService.SearchAttachmentsGroupAsync(docTypeId);
+            return await this.AttachmentService.SearchAttachmentsGroupAsync(docTypeId, docSysTypeId);
         }
 
         /// <summary>
         /// Initializes the attachments group.
         /// </summary>
         /// <param name="docTypeId">The document type.</param>
-        protected virtual async Task<List<Attachment>> InitAttachments(Guid? docTypeId)
+        /// <param name="objectSysTypeId">The object sys type.</param>
+        protected virtual async Task<List<Attachment>> InitAttachments(Guid? docTypeId, Guid? objectSysTypeId)
         {
-            return await this.AttachmentService.SearchAttachmentsAsync(docTypeId);
+            return await this.AttachmentService.SearchAttachmentsAsync(docTypeId, objectSysTypeId);
         }
 
         /// <summary>
@@ -1153,16 +1200,27 @@
         /// <param name="attachments">attachment types list</param>
         protected virtual List<AttachmentGroup> BuildGroupsTree(List<AttachmentGroup> groups, List<Attachment> attachments)
         {
-            return groups
-                   .Where(g => g.ParentId == null)
-                   .Select(
-                       g =>
-                       {
-                           g.Children = this.GetChildren(g, groups, attachments)?.ToList();
-                           g.Attachments = this.SetAttachmentGroups(g.Id, attachments);
-                           return g;
-                       })
-                   .ToList();
+            var mainGroups = groups.Where(x => x.ParentId is null).ToList();
+            var mainChildGroups = groups.Where(x => x.ParentId != null).ToList();
+
+            var tree = groups
+                .Where(g => g.ParentId == null)
+                .Select(g =>
+                {
+                    g.Children = this.GetChildren(g, groups, attachments)?.ToList();
+                    g.Attachments = this.SetAttachmentGroups(g.Id, attachments);
+
+                    ////var isLegitChildrens = g.Children.Where(x => x.Attachments != null && x.Attachments.Count > 0);
+                    ////if (isLegitChildrens.Count() == 0 && g.Attachments.Count == 0)
+                    ////{
+                    ////    return null;
+                    ////}
+
+                    return g;
+                })
+                ?.ToList();
+
+            return tree.Where(x => x != null).ToList();
         }
 
         /// <summary>
@@ -1244,14 +1302,16 @@
         /// <returns>AttachmentType.</returns>
         protected virtual async Task<AttachmentType> GetAttachmentType(Guid? typeId)
         {
-            return await Task.Run(
-                () => new AttachmentType
-                      {
-                          Extensions = ".PDF,.DOC,.DOCX,.XLS,.XLSX,.EML,.P7S,.ATS,.SXW,.TXT,.RTF,.JPG,.JPEG,.J2K,.JPX,.JP2,.PNG,.BMP,.TIFF,.DWG,.DXF,.CAD,.ZIP,.RA",
-                          MaxSize = 10,
-                          Id = typeId,
-                          Title = new MultipleLanguagesText { { Ais.Infrastructure.Localization.Languages.English, "Other" }, { Ais.Infrastructure.Localization.Languages.Bulgarian, "Други" } }
-                      });
+            return await Task.Run(() =>
+            {
+                return new AttachmentType
+                {
+                    Extensions = ".PDF,.DOC,.DOCX,.XLS,.XLSX,.EML,.P7S,.ATS,.SXW,.TXT,.RTF,.JPG,.JPEG,.J2K,.JPX,.JP2,.PNG,.BMP,.TIFF,.DWG,.DXF,.CAD,.ZIP,.RA",
+                    MaxSize = 10,
+                    Id = typeId,
+                    Title = new MultipleLanguagesText { { Ais.Infrastructure.Localization.Languages.English, "Other" }, { Ais.Infrastructure.Localization.Languages.Bulgarian, "Други" } }
+                };
+            });
         }
 
         protected (bool Redirect, string Area) GetAreaByApplicationType(OutDocument application)

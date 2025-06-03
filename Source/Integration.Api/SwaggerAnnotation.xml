@@ -1,0 +1,532 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Integration.Api</name>
+    </assembly>
+    <members>
+        <member name="T:Integration.Api.Controllers.AddressController">
+            <summary>
+            Class AddressController.
+            Implements the <see cref="T:Integration.Api.Controllers.BaseController" />
+            </summary>
+            <seealso cref="T:Integration.Api.Controllers.BaseController" />
+        </member>
+        <member name="M:Integration.Api.Controllers.AddressController.#ctor(Microsoft.Extensions.Logging.ILogger{Integration.Api.Controllers.AddressController},Microsoft.Extensions.Localization.IStringLocalizer,Ais.Data.Common.Base.IDataBaseContextManager{Ais.Data.Base.Ais.AisDbType},Ais.Services.Ais.IAddressService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Integration.Api.Controllers.AddressController"/> class.
+            </summary>
+            <param name="logger">The logger.</param>
+            <param name="localizer">The localizer.</param>
+            <param name="dataBaseContextManager">The data base context manager.</param>
+            <param name="addressService">The address service.</param>
+        </member>
+        <member name="M:Integration.Api.Controllers.AddressController.GetCountries">
+            <summary>
+            Gets the countries.
+            </summary>
+            <returns>ActionResult.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.AddressController.GetProvinces">
+            <summary>
+            Gets the provinces.
+            </summary>
+            <returns>ActionResult.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.AddressController.GetMunicipalities(System.Nullable{System.Guid},System.Nullable{System.Guid})">
+            <summary>
+            Gets the municipalities.
+            </summary>
+            <param name="provinceId">The province identifier.</param>
+            <param name="id">The identifier.</param>
+            <returns>JsonResult.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.AddressController.GetEkattes(System.Nullable{System.Guid})">
+            <summary>
+            Gets the ekattes.
+            </summary>
+            <param name="municipalityId">The municipality identifier.</param>
+            <returns>JsonResult.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.AddressController.GetRegions(System.Nullable{System.Guid})">
+            <summary>
+            Gets the regions.
+            </summary>
+            <param name="ekatteId">The ekatte identifier.</param>
+            <returns>JsonResult.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.AddressController.GetQuarters(System.Nullable{System.Guid})">
+            <summary>
+            Gets the quarters.
+            </summary>
+            <param name="ekatteId">The ekatte identifier.</param>
+        </member>
+        <member name="M:Integration.Api.Controllers.AddressController.GetPostCode(System.Guid)">
+            <summary>
+            Gets the post code.
+            </summary>
+            <param name="ekatteId">The ekatte identifier.</param>
+            <returns>JsonResult.</returns>
+        </member>
+        <member name="T:Integration.Api.Controllers.AttachmentController">
+            <summary>
+            Class AttachmentController.
+            Implements the <see cref="T:Integration.Api.Controllers.BaseController" />
+            </summary>
+            <seealso cref="T:Integration.Api.Controllers.BaseController" />
+        </member>
+        <member name="M:Integration.Api.Controllers.AttachmentController.#ctor(Microsoft.Extensions.Logging.ILogger{Integration.Api.Controllers.AttachmentController},Microsoft.Extensions.Localization.IStringLocalizer,Ais.WebServices.Services.Storage.IStorageService,Ais.Data.Common.Base.IDataBaseContextManager{Ais.Data.Base.Ais.AisDbType})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Integration.Api.Controllers.AttachmentController"/> class.
+            </summary>
+            <param name="logger">The logger.</param>
+            <param name="localizer">The localizer.</param>
+            <param name="storageService">The storage service.</param>
+            <param name="contextManager">The storage service.</param>
+        </member>
+        <member name="M:Integration.Api.Controllers.AttachmentController.Upload(Integration.Api.Models.Upload)">
+            <summary>
+            Uploads the specified meta data.
+            </summary>
+            <param name="upload">The meta data.</param>
+            <returns>IActionResult.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.AuthenticationController.SignIn(Integration.Api.Models.Authentication.SignInRequest)">
+            <summary>
+            Authenticate user.
+            </summary>
+            <param name="model">Username and password for authentication.</param>
+            <returns>AccessToken and refresh token.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.AuthenticationController.Refresh(Integration.Api.Models.Authentication.RefreshTokenRequest)">
+            <summary>
+            Generate new access token.
+            </summary>
+            <param name="model">Refresh token to generate new access token.</param>
+            <returns>AccessToken and refresh token.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.ClientsController.FindByNumberAsync(System.String)">
+            <summary>
+                Get client data by number.
+            </summary>
+            <param name="number">Client number - EGN/Bulstat/RegisterNumber.</param>
+            <returns>Client data.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.ClientsController.Upsert(Integration.Api.Models.ClientUpsertModel)">
+            <summary> Upsert the client</summary>
+            <param name="model">The model.</param>
+            <returns>IActionResult.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.JournalsController.GenerateActionXml(Integration.Api.Models.Journal.BaseAction,System.Boolean)">
+            <summary>
+            Generate xml with fill id, time, ip, browser and call user data.
+            </summary>
+            <param name="model">Action model.</param>
+            <param name="signByServer">Flag if xml must be sign by server.</param>
+            <returns>Serialized action model to xml file.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.JournalsController.CreateAsync(Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            Insert journal action data to database.
+            </summary>
+            <param name="signXml">Sign xml with journal action data.</param>
+            <returns>Journal id save in database.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.LoggerController.Create(Integration.Api.Models.Logger.LogEvent)">
+            <summary>
+            Log event form other module.
+            </summary>
+            <param name="logEvent">Log event data.</param>
+        </member>
+        <member name="M:Integration.Api.Controllers.NomenclaturesController.GetNomenclatureAsync(System.String)">
+            <summary>
+            Get nomenclature items by name.
+            </summary>
+            <param name="name">Nomenclature name.</param>
+            <returns>Collection with nomenclature items.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.NomenclaturesController.GetIssuers">
+            <summary>
+            Get issuers by user administration.
+            </summary>
+            <returns>Collection with nomenclature.</returns>
+        </member>
+        <member name="M:Integration.Api.Controllers.NomenclaturesController.GetAdmActTypes">
+            <summary>
+            Get administrative act types by user administration.
+            </summary>
+            <returns>Collection with nomenclature.</returns>
+        </member>
+        <member name="T:Integration.Api.Models.ClientUpsertModel">
+            <summary>
+            Class ClientUpsertModel.
+            Implements the <see cref="T:System.Guid" />
+            Implements the <see cref="T:Ais.Services.Mapping.IHaveCustomMappings" />
+            </summary>
+            <seealso cref="T:System.Guid" />
+            <seealso cref="T:Ais.Services.Mapping.IHaveCustomMappings" />
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.Type">
+            <summary>
+            Gets or sets the type.
+            </summary>
+            <value>The type.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.UserId">
+            <summary>
+            Gets or sets the user identifier.
+            </summary>
+            <value>The user identifier.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.UserName">
+            <summary>
+            Gets or sets the name of the user.
+            </summary>
+            <value>The name of the user.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.FirstNames">
+            <summary>
+            Gets or sets the first names.
+            </summary>
+            <value>The first names.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.SurNames">
+            <summary>
+            Gets or sets the sur names.
+            </summary>
+            <value>The sur names.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.FamilyNames">
+            <summary>
+            Gets or sets the family names.
+            </summary>
+            <value>The family names.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.Alias">
+            <summary>
+            Gets or sets the alias.
+            </summary>
+            <value>The alias.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.FirstNamesLatin">
+            <summary>
+            Gets or sets the first names latin.
+            </summary>
+            <value>The first names latin.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.SurNamesLatin">
+            <summary>
+            Gets or sets the sur names latin.
+            </summary>
+            <value>The sur names latin.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.FamilyNamesLatin">
+            <summary>
+            Gets or sets the family names latin.
+            </summary>
+            <value>The family names latin.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.AliasLatin">
+            <summary>
+            Gets or sets the alias latin.
+            </summary>
+            <value>The alias latin.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.Addresses">
+            <summary>
+            Gets or sets the addresses.
+            </summary>
+            <value>The addresses.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.IsLnch">
+            <summary>
+            Gets or sets a value indicating whether this instance is LNCH.
+            </summary>
+            <value><c>true</c> if this instance is LNCH; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.EgnBulstat">
+            <summary>
+            Gets or sets the egn bulstat.
+            </summary>
+            <value>The egn bulstat.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.HomeCountry">
+            <summary>
+            Gets or sets the home country.
+            </summary>
+            <value>The home country.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.PlaceAbroad">
+            <summary>
+            Gets or sets the place abroad.
+            </summary>
+            <value>The place abroad.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.DateOfBirth">
+            <summary>
+            Gets or sets the date of birth.
+            </summary>
+            <value>The date of birth.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.RegisterType">
+            <summary>
+            Gets or sets the type of the register.
+            </summary>
+            <value>The type of the register.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.RegisterIdentifier">
+            <summary>
+            Gets or sets the register identifier.
+            </summary>
+            <value>The register identifier.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.RegisterNumber">
+            <summary>
+            Gets or sets the register number.
+            </summary>
+            <value>The register number.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.RegisterAdditionData">
+            <summary>
+            Gets or sets the register addition data.
+            </summary>
+            <value>The register addition data.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.IsSelfRegistered">
+            <summary>
+            Gets a value indicating whether this instance is self registered.
+            </summary>
+            <value><c>true</c> if this instance is self registered; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.AcceptGeneralTerms">
+            <summary>
+            Gets a value indicating whether [accept general terms].
+            </summary>
+            <value><c>true</c> if [accept general terms]; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.FullName">
+            <summary>
+            Gets or sets the full name.
+            </summary>
+            <value>The full name.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.Email">
+            <summary>
+            Gets or sets the email.
+            </summary>
+            <value>The email.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.IdNumber">
+            <summary>
+            Gets or sets the identifier number.
+            </summary>
+            <value>The identifier number.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.IdType">
+            <summary>
+            Gets or sets the type of the identifier.
+            </summary>
+            <value>The type of the identifier.</value>
+        </member>
+        <member name="P:Integration.Api.Models.ClientUpsertModel.Representatives">
+            <summary>
+            Gets or sets the representatives.
+            </summary>
+            <value>The representatives.</value>
+        </member>
+        <member name="M:Integration.Api.Models.ClientUpsertModel.CreateMappings(AutoMapper.IProfileExpression)">
+            <summary>
+            Creates the mappings.
+            </summary>
+            <param name="configuration">The configuration.</param>
+        </member>
+        <member name="T:Integration.Api.Models.Journal.Action">
+            <summary>
+            Journal action.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Journal.Action.Time">
+            <summary>
+            Action time.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Journal.Action.User">
+            <summary>
+            Action user.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Journal.Action.Module">
+            <summary>
+            Action module.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Journal.BaseAction.Type">
+            <summary>
+            Action type.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Journal.BaseAction.Title">
+            <summary>
+            Action name - име на бутон/форма/през което е извършена промяната.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Journal.BaseAction.Reason">
+            <summary>
+            Action reason.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Journal.BaseAction.Objects">
+            <summary>
+            Collection ot action objects.
+            </summary>
+        </member>
+        <member name="T:Integration.Api.Models.Logger.LogEvent">
+            <summary>
+            Log data.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Logger.LogEvent.Level">
+            <summary>
+            Log level.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Logger.LogEvent.Message">
+            <summary>
+            Log message.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Logger.LogEvent.Exception">
+            <summary>
+            Exception call stack
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Logger.LogEvent.RequestId">
+            <summary>
+            Request id.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Logger.LogEvent.RequestPath">
+            <summary>
+            Request path.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Logger.LogEvent.ActionId">
+            <summary>
+            Action id.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Logger.LogEvent.ActionName">
+            <summary>
+            Action name.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Logger.LogEvent.SourceContext">
+            <summary>
+            Source context.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Logger.LogEvent.ConnectionId">
+            <summary>
+            Connection id.
+            </summary>
+        </member>
+        <member name="T:Integration.Api.Models.Nomenclature.Nomenclature">
+            <summary>
+            Nomenclature model.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Nomenclature.NomenclatureTable.Name">
+            <summary>
+            Table name.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Nomenclature.NomenclatureTable.Description">
+            <summary>
+            Table description.
+            </summary>
+        </member>
+        <member name="P:Integration.Api.Models.Nomenclature.NomenclatureTable.IsMultilingual">
+            <summary>
+            Is multilingual table.
+            </summary>
+        </member>
+        <member name="T:Integration.Api.Utilities.ServiceCollectionExt">
+            <summary>
+            Class ServiceCollectionExt.
+            </summary>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddCustomOptions(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Adds the custom options.
+            </summary>
+            <param name="services">The services.</param>
+            <param name="configuration">The configuration.</param>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddDataContext(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Adds the custom options.
+            </summary>
+            <param name="services">The services.</param>
+            <param name="configuration">The configuration.</param>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddRepostories(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the repositories.
+            </summary>
+            <param name="services">The services.</param>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddApiServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the api services.
+            </summary>
+            <param name="services">The services.</param>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddVersioning(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the versioning.
+            </summary>
+            <param name="services">The services.</param>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddCustomLocalization(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Adds the custom localization.
+            </summary>
+            <param name="services">The services.</param>
+            <param name="configuration">The services.</param>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddJwtAuthorization(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Adds the jwt configuration.
+            </summary>
+            <param name="services">The services.</param>
+            <param name="configuration">The configuration.</param>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddSwagger(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the swagger.
+            </summary>
+            <param name="services">The services.</param>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddAutoMapper(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the auto mapper.
+            </summary>
+            <param name="services">The services.</param>
+        </member>
+        <member name="M:Integration.Api.Utilities.ServiceCollectionExt.AddStorageService(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Adds the storage service.
+            </summary>
+            <param name="services">The services.</param>
+            <param name="configuration">The configuration.</param>
+        </member>
+        <member name="F:Regix.MRRBAdapter.AdministrativeBodyTypes.Item230ff0dd8d2d46f5a04b36bc4557bf0f">
+            <remarks/>
+        </member>
+        <member name="F:Regix.MRRBAdapter.AdministrativeBodyTypes.a861c8a7a3b44c63bbb9c75479c82973">
+            <remarks/>
+        </member>
+        <member name="F:Regix.MRRBAdapter.AdministrativeBodyTypes.bc77f8ab031e43229fd9617f777afd76">
+            <remarks/>
+        </member>
+    </members>
+</doc>

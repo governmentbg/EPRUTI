@@ -1,0 +1,65 @@
+﻿@using Ais.Portal.Components
+@inject IStringLocalizer Localizer
+@using System.Reflection
+@using Ais.Portal.Controllers
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
+@using System.Net
+@using System.Net.Sockets
+@using Ais.Infrastructure.Localization
+@inject IConfiguration Configuration
+@{
+    var assemblyName = Assembly.GetEntryAssembly()?.GetName();
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+}
+<footer>
+    <div class="footer-center">
+        <div class="center">
+            <div class="flex">
+                @(await Component.InvokeAsync(typeof(FooterMenuViewComponent)))
+                <div class="fbox4 column">
+                    <address>
+                        @(await Component.InvokeAsync(typeof(FooterDataViewComponent)))
+                    </address>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div class="footer-bottom">
+        <div class="center">
+            <a href="#" title="@Localizer["GoToTop"]" class="gotothis gotop">
+                <svg class="icon k-rotate-0">
+                    <use xlink:href="#icon-navarrow3"></use>
+                </svg>
+            </a>
+            @if (Url.HasRightsToAction(nameof(HomeController.ClearCache), typeof(HomeController)))
+            {
+                @if (mrrbFlag)
+                {
+                    <a class="clear-cache" title="@Localizer["ClearCache"]" href="@Url.Action("ClearCache", "Home", new { area = string.Empty})" data-ajax="true" data-ajax-method="POST" data-ajax-success="core.clearCache">
+                        <span class="icon">
+                            <i class="k-i-clear-css k-icon k-font-icon"></i>
+                        </span>
+                    </a>
+                }
+            }
+            <div class="copyleft">
+                @Localizer["AisPortalCopyright"] - v@(assemblyName?.Version?.ToString(3))/@((await Dns.GetHostEntryAsync(Dns.GetHostName())).AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork)?.ToString().Split('.').Last())
+            </div>
+        </div>
+    </div>
+
+    @if (Url.HasRightsToAction(nameof(HomeController.ClearCache), typeof(HomeController)))
+    {
+        @if (!mrrbFlag)
+        {
+            <a href="@Url.Action("ClearCache", "Home", new { area = string.Empty})" data-ajax="true" data-ajax-method="POST" data-ajax-success="core.clearCache">
+                <span>Clear cache</span>
+            </a>
+        }
+
+    }
+    <div class="clear"></div>
+</footer>

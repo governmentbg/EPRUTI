@@ -1,11 +1,12 @@
 ﻿namespace Ais.Office.Services.StaticFilesStorageService
 {
     using Ais.Common.Context;
-    using Ais.Data.Common.Repositories.Ais;
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Base;
     using Ais.Services.Data;
     using Ais.Utilities.Extensions;
+
+    using global::Ais.Data.Common.Repositories.Ais;
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Base;
 
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
@@ -84,11 +85,11 @@
 
                 var newFileName = Path.GetFileName(filePath);
                 var attachment = new GenericAttachment
-                                 {
-                                     Url = $"{this.attachmentsVirtualPath}/{this.tempDirectoryName}/{newFileName}".Trim(),
-                                     Name = newFileName,
-                                     Size = file.Length,
-                                 };
+                {
+                    Url = $"{this.attachmentsVirtualPath}/{this.tempDirectoryName}/{newFileName}".Trim(),
+                    Name = newFileName,
+                    Size = file.Length,
+                };
 
                 attachments.Add(attachment);
             }

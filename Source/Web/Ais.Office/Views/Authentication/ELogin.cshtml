@@ -1,27 +1,38 @@
-﻿@using Microsoft.Extensions.Localization
+﻿@using Ais.Infrastructure.Extensions
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Localization
+@inject IConfiguration Configuration
 @inject IStringLocalizer Localizer
-<div id="fixed-bgr"></div>
-<div id="wrap">
-    <div id="main">
-        <div class="center login">
-            <div class="login-wrap">
-                <form method="post" asp-all-route-data="@(new AttributeDictionary{ { "returnUrl", ViewBag.ReturnUrl as string } })">
-                    <h2>@Localizer["Login"]</h2>
-                    <div class=" form-row">
-                        <p>@Localizer["ELoginText"]</p>
-                    </div>
-                    <div class=" form-row">
-                        <a href="@Url.Action("ELogin", "Authentication", new { returnUrl = ViewBag.ReturnUrl as string })" class="bttn primary fullwidth">
-                            @Localizer["LoginWithEAuth"]
-                        </a>
-                    </div>
-                    <div class=" form-row">
-                        <a href="@Url.Action("RegisterRequest", "Registration")" class="bttn secondary fullwidth">
-                            @Localizer["RegisterRequest"]
-                        </a>
-                    </div>
-                </form>
+@{
+    ViewBag.DontRenderMenu = true;
+    var portalLink = Configuration.GetValue<string>("PortalLink");
+    var data = this.Localizer.GetResourceDescriptions();
+}
+<div class="steps-body registration-wrap">
+    <form method="post" asp-all-route-data="@(new AttributeDictionary{ { "returnUrl", ViewBag.ReturnUrl as string } })">
+        <div class="step-box fullwidth">
+            <div class="step-box-head">
+                <strong>@Localizer["Login"]</strong>
+            </div>
+            <div class="step-box-body">
+                <div class="form-row fullwidth gap-5">
+                    <a href="@Url.Action("ELogin", "Authentication", new { returnUrl = ViewBag.ReturnUrl as string })" class="bttn secondary fullwidth">
+                        @Localizer["LoginWithEAuth"]
+                    </a>
+                    <a href="@Url.Action("EnterEgn", "Registration", new { returnUrl = ViewBag.ReturnUrl as string })" class="bttn main fullwidth">
+                        @Localizer["LoginWithEnterEGN"]
+                    </a>
+                    <a href="@portalLink" class="bttn third fullwidth">@(Localizer["BackToPortal"])</a>
+                </div>
+                <div class="form-row fullwidth k-mt-1">
+                    <span class="eLoginText">
+                        @if (data?.TryGetValue("ELoginText", out var value) is true)
+                        {
+                            @Html.Raw(value)
+                        }
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>

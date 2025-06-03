@@ -1,7 +1,8 @@
 ﻿namespace Ais.Office.Services.StaticFilesStorageService
 {
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Base;
+
     using Microsoft.AspNetCore.Http;
 
     /// <summary>

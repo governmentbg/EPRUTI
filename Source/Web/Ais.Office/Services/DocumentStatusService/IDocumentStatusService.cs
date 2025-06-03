@@ -1,7 +1,7 @@
 ﻿namespace Ais.Office.Services.DocumentStatusService
 {
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Document;
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Document;
 
     public interface IDocumentStatusService
     {

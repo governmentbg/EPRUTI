@@ -1,0 +1,188 @@
+﻿@using global::Ais.Data.Models.Employee
+@using global::Ais.Data.Models.Helpers
+@using global::Ais.Data.Models.RegistrationRequest
+@using Ais.Office.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.Infrastructure.KendoExt
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile
+@model Ais.Data.Models.RegistrationRequest.RegistrationRequest
+@{
+    // var isEAuthentication = Model.RegistrationType == RegistrationType.EAuthentication;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var isModelStateValid = ViewBag.IsModelStateValid is not bool || (bool)ViewBag.IsModelStateValid;
+    var asyncUploadChunkSize = Configuration.GetValue<double>("Attachment:AsyncUploadChunkSize");
+}
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+<form method="post" action="@Url.ActionLink("Upsert", "RegistrationRequests")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.UniqueId)
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.RequestDate)
+    @Html.HiddenFor(m => m.User.FirstName)
+    @Html.HiddenFor(m => m.User.SurName)
+    @Html.HiddenFor(m => m.User.LastName)
+    @Html.HiddenFor(m => m.User.FullName)
+    @Html.HiddenFor(m => m.Role.Id)
+    @Html.HiddenFor(m => m.Role.Name)
+    @Html.HiddenFor(m => m.Type.Id)
+    @Html.HiddenFor(m => m.Type.Name)
+    @Html.HiddenFor(m => m.Office.Id)
+    @Html.HiddenFor(m => m.Office.Name)
+    @Html.HiddenFor(m => m.Administration)
+    @Html.HiddenFor(m => m.User.Id)
+    @Html.HiddenFor(m => m.User.Egn)
+
+    <div class="step-box fullwidth">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["BaseData"]</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input fullwidth ib">
+                    @Localizer["Role"]:
+                    <strong>@Model.Role?.Name</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["RequestType"]:
+                    <strong>@Model?.Type?.Name</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["Status"]:
+                    <span class="reg-status status@(Model.Status.Code)">@Model.Status.Name</span>
+                </div>
+                @if (EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalAdministrator ||
+                EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.ExternalUserSpecializedAccess)
+                {
+                    if (Model.File?.Id.HasValue == true)
+                    {
+                        var downloadData = Model.File?.GetDownloadData();
+                        var downloadLink = downloadData != null
+                        ? Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController), downloadData)
+                        : null;
+                        if (downloadLink.IsNotNullOrEmpty())
+                        {
+                            <div class="form-input fullwidth ib">
+                                @Localizer["Document"]:
+                                <a class="simplelink" href="@downloadLink" target="_blank">
+                                    @(Model.File?.Name ?? Localizer["Download"])
+                                </a>
+                            </div>
+                        }
+                    }
+                }
+                <div class="form-input fullwidth ib">
+                    @Localizer["Egn"]:
+                    <strong>@Model?.User?.Egn</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["FirstName"]:
+                    <strong>@Model.User.FirstName</strong>
+                </div>
+
+                <div class="form-input fullwidth ib">
+                    @Localizer["SurName"]:
+                    <strong>@Model.User.SurName</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["LastName"]:
+                    <strong>@Model.User.LastName</strong>
+                </div>
+                @if (EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalAdministrator ||
+                EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalOperator)
+                {
+                    <div class="form-input fullwidth ib">
+                        @Localizer["Administration"]:
+                        <strong>@Model.Office?.Name</strong>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-input fullwidth ib">
+                        @Localizer["Organization"]:
+                        <strong>@Model.Administration</strong>
+                    </div>
+                }
+                <div class="form-input fullwidth ib">
+                    @Localizer["Department"]:
+                    <strong>@Model.Department</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["Position"]:
+                    <strong>@Model.Position</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["Email"]:
+                    <strong>@Model.Email</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["ContactPhone"]:
+                    <strong>@Model.ContactPhone</strong>
+                </div>
+                @if (Model?.LastUpdateDate != null)
+                {
+                    <div class="form-input fullwidth ib">
+                        @Localizer["LastUpdateDate"]:
+                        <strong>@Model.LastUpdateDate</strong>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model?.LastUpdateUser?.UserName))
+                {
+                    <div class="form-input fullwidth ib">
+                        @Localizer["LastUpdateUser"]:
+                        <strong>@Model?.LastUpdateUser?.FullName</strong>
+                    </div>
+                }
+                <div class="form-input fullwidth">
+                    @Html.InfoLabel(Localizer["Status"], "Status")
+                    @(Html.Kendo().DropDownList()
+                        .Name("Status.Id")
+                        .OptionLabel(Localizer["Choose"].ToString())
+                        .Value(Model?.Status?.Id.HasValue == true ? Model.Status.Id.ToString() : string.Empty)
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .Events(ev => ev.Change(deferred ? "reqistrationrequests.rejectRequest" : "admin_reqistrationrequests.rejectRequest"))
+                        .ValueTemplate(
+                        $"<input type='hidden' name='Status.Name' value='#:Name#'/>" +
+                        "<span>#:Name#</span>")
+                        .Filter(FilterType.Contains)
+                        .DataSource(d => d.Read(r => r.Action("GetStatuses", "RegistrationRequests", new { area = "Admin" })))
+                        .Deferred(deferred))
+                    @Html.HiddenFor(m => m.Status.Code)
+                    @Html.ValidationMessage("Status")
+                </div>
+                <div class="form-input fullwidth hidden" id="rejection-js">
+                    @Html.InfoLabel(Localizer["RejectionDescription"], "RejectionDescription")
+                    @Html.TextAreaFor(x => x.Description, new { @class = "k-mb-0" })
+                    @Html.ValidationMessage("RejectionDescription")
+                </div>
+            </div>
+            <div class="fullwidth k-mt-1">
+                <button class="bttn main fullwidth">
+                    @Localizer["Save"]
+                </button>
+                @*
+                <button class="bttn error quad reject-request-js" name="statusGuid" value="@EnumHelper.GetRequestStatus(RequestStatus.Denied)">
+                @Localizer["Reject"]
+                </button> *@
+            </div>
+        </div>
+    </div>
+</form>
+

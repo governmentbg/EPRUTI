@@ -1,0 +1,21 @@
+@using Ais.WebUtilities.Extensions;
+
+@model bool?
+
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+       ? ViewData["htmlAttributes"]
+       : null;
+
+    var attributes = Ais.WebUtilities.Helpers.HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+        });
+}
+
+@(Html.Kendo().CheckBoxFor(m => m)
+      .HtmlAttributes(attributes)
+      .Label(ViewData["label"]?.ToString())
+      .Deferred(!Context.Request.IsAjaxRequest()))

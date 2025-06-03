@@ -1,17 +1,6 @@
 ﻿namespace Ais.Office.Areas.Admin.Controllers
 {
-    using Ais.Data.Base.Ais;
     using Ais.Data.Models;
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Base;
-    using Ais.Data.Models.Client;
-    using Ais.Data.Models.Helpers;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.QueryModels;
-    using Ais.Data.Models.QueryModels.Clients;
-    using Ais.Data.Models.Reporting;
-    using Ais.Data.Models.ServiceAttachment;
-    using Ais.Data.Models.TableModels.Clients;
     using Ais.Infrastructure.Roles;
     using Ais.Office.ViewModels.Clients;
     using Ais.Services.Ais;
@@ -22,10 +11,24 @@
     using Ais.WebServices.Services.Storage;
     using Ais.WebUtilities.Enums;
     using Ais.WebUtilities.Extensions;
+
     using AutoMapper;
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Base;
+    using global::Ais.Data.Models.Client;
+    using global::Ais.Data.Models.Helpers;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.QueryModels;
+    using global::Ais.Data.Models.QueryModels.Clients;
+    using global::Ais.Data.Models.Reporting;
+    using global::Ais.Data.Models.ServiceAttachment;
+    using global::Ais.Data.Models.TableModels.Clients;
 
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
+
     using OpenXmlTemplateEngine.Data;
     using OpenXmlTemplateEngine.Engine;
 
@@ -148,7 +151,7 @@
             return this.Json(new { success = true, refreshgrid = true, searchqueryid = searchQueryId });
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Authorize(Roles = UserRolesConstants.ClientAttachmentsDelete)]
         public async Task Delete(Guid id, string searchQueryId)
         {

@@ -83,7 +83,7 @@ function onRemovePageClick(e: JQuery.EventBase): void {
                 "Delete",
                 "Cms",
                 {
-                    type: "DELETE",
+                    type: "POST",
                     area: "Admin",
                     useArea: true,
                     data: { id: dataItem["Id"] },

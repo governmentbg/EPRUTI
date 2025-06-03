@@ -1,0 +1,49 @@
+﻿@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+
+@model Ais.Data.Models.RegistrationRequest.RegistrationRequest
+
+@* <script src="~/bundles/jquery.min.js" asp-append-version="true"></script>
+<script src="https://kendo.cdn.telerik.com/2024.2.514/js/kendo.all.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2024.2.514/js/kendo.aspnetmvc.min.js"></script>
+
+<script src="@Url.Content($"~/bundles/common.min.js")" asp-append-version="true"></script> *@
+@{
+    ViewBag.DontRenderMenu = true;
+}
+
+<div class="steps-body registration-wrap" id="RegistrationEgnWrapper">
+    <div class="registrationWrapper-js">
+        <form method="post" action="@Url.ActionLink("EnterEgn", "Registration")"
+              data-ajax="true"
+              data-ajax-method="POST"
+              data-ajax-update="#RegistrationEgnWrapper">
+            @Html.ValidationSummary(true)
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.UniqueId)
+            @Html.HiddenFor(m => m.Id)
+            @Html.Hidden("ReturnUrl", ViewBag.ReturnUrl as string)
+
+            <div class="step-box fullwidth">
+                <div class="step-box-head">
+                    <strong class="role-name">@Localizer["EnterEgn"]</strong>
+                    <span>0/2</span>
+                </div>
+                <div class="step-box-body">
+                    <div class="form-row">
+                        <div class="form-input fullwidth">
+                            @Html.InfoLabel(Localizer["Egn"], "Egn")
+                            @Html.EditorFor(m => m.Egn)
+                            @Html.ValidationMessage("Egn")
+                        </div>
+                    </div>
+                    <button class="bttn main fullwidth proceedtoRegister-js">
+                        @Localizer["ProceedToRegistration"]
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

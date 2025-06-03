@@ -2,9 +2,12 @@
 @using Ais.WebUtilities.Extensions
 @using Microsoft.Extensions.Localization
 @using Ais.Office.ViewModels.Application
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 @model string
 @{
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
 }
 @(Html.Kendo().Grid<ClientSearchResultViewModel>()
       .Name("grid")
@@ -12,9 +15,9 @@
       .Columns(columns =>
       {
           columns.Bound(e => e.Knik)
-                 .ClientTemplate("#:Knik ? Knik : ''#").Hidden(true);
+                 .ClientTemplate("#:Knik ? Knik : ''#").Hidden(@mrrbFlag);
           columns.Bound(e => e.WithoutEgnBulstat)
-                 .ClientTemplate("#: WithoutEgnBulstat ? resources.getResource('Yes') : resources.getResource('No') #");
+                 .ClientTemplate("#: WithoutEgnBulstat ? resources.getResource('Yes') : resources.getResource('No') #").Hidden(@mrrbFlag);
           columns.Bound(e => e.EgnBulstat)
                  .ClientTemplate(
                      "#var egn = EgnBulstat ? EgnBulstat : '';#" +
@@ -22,7 +25,7 @@
           columns.Bound(e => e.FullName)
                  .ClientTemplate("#:FullName ? FullName : ''#");
           columns.Bound(e => e.ForeignPersonData)
-                 .ClientTemplate("#:ForeignPersonData ? ForeignPersonData : ''#").Hidden(true);
+                 .ClientTemplate("#:ForeignPersonData ? ForeignPersonData : ''#").Hidden(@mrrbFlag);
           columns.Bound(string.Empty).Width(90)
                   .ClientTemplate("<div class='flex gap-5'>" +
                       $"<button type='button' class='bttn bttn-icon small autosize choose-applicant-js' title='{Localizer["Choose"]}' data-recipient='#:data.Id#'><i class='k-icon k-font-icon k-i-check'></i></button>" +

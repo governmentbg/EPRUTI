@@ -9,11 +9,15 @@
     using Ais.Utilities.Exception;
     using Ais.Utilities.Extensions;
     using Ais.WebServices.Services.SessionStorage;
+
     using AutoMapper;
+
     using Elasticsearch.Net;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
+
     using Nest;
 
     using LogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -54,7 +58,6 @@
                            .BasicAuthentication(configuration.GetValue<string>("ElasticSearch:User"), configuration.GetValue<string>("ElasticSearch:Password"));
             this.elasticClient = new ElasticClient(settings);
             this.Options.TableHeaderText = localizer["Logs"];
-            this.Options.ShowFieldToolTip = false;
             this.Options.Breadcrumbs = new[] { new Ais.Data.Models.Breadcrumb { Title = this.Localizer["Admin"] } };
         }
 

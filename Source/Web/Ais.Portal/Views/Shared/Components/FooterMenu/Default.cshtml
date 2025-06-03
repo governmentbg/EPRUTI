@@ -1,0 +1,29 @@
+﻿@using Ais.Utilities.Extensions
+@model List<Ais.Portal.ViewModels.MenuItem>
+@if (Model.IsNotNullOrEmpty())
+{
+    void RenderMenuSection(List<Ais.Portal.ViewModels.MenuItem> list, int rowNumber)
+    {
+        var divClass = $"fbox{@rowNumber}";
+        <div class="@divClass fbox">
+            <ul>
+                @foreach (var item in list)
+                {
+                    <li>
+                        <a href="@item.Url">@item.Title</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    var count = Model.Count / 3;
+    var row = 1;
+    while (row <= 3)
+    {
+        var temp = row < 3 ? Model.Take(count).ToList() : Model;
+        RenderMenuSection(temp, row);
+        Model.RemoveAll(x => temp.Contains(x));
+        row++;
+    }
+}

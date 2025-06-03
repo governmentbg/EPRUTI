@@ -1,11 +1,14 @@
 ﻿namespace Ais.Office.Models
 {
-    using Ais.Data.Models.Attachment;
-    using Ais.Data.Models.Nomenclature;
-    using Ais.Data.Models.User;
+    using Ais.Services.Mapping;
     using Ais.Utilities.Attributes;
 
-    public class RegisterEmployeeViewModel
+    using global::Ais.Data.Models.Attachment;
+    using global::Ais.Data.Models.Nomenclature;
+    using global::Ais.Data.Models.RegistrationRequest;
+    using global::Ais.Data.Models.User;
+
+    public class RegisterEmployeeViewModel : IMapFrom<RegistrationRequest>
     {
         public Guid? Id { get; set; }
 
@@ -66,18 +69,6 @@
         public Nomenclature Office { get; set; }
 
         /// <summary>
-        /// Gets or sets the administration.
-        /// </summary>
-        /// <value>The administration.</value>
-        public Nomenclature Administration { get; set; }
-
-        /// <summary>
-        /// Gets or sets the start page.
-        /// </summary>
-        /// <value>The start page.</value>
-        public string StartPage { get; set; }
-
-        /// <summary>
         /// Gets or sets the start page.
         /// </summary>
         /// <value>The start page.</value>
@@ -134,5 +125,21 @@
         [CustomDisplay("File")]
         ////[Required]
         public Attachment File { get; set; }
+
+        /// <summary>
+        /// Gets or sets the status.
+        /// </summary>
+        /// <value>The status.</value>
+        public Nomenclature Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description { get; set; }
+
+        public DateTime? RequestDate { get; set; }
+
+        public DateTime? ApprovalDate { get; set; }
     }
 }

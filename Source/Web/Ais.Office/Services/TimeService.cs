@@ -1,7 +1,8 @@
 ﻿namespace Ais.Office.Services
 {
-    using Ais.Data.Common.Base;
     using Ais.Utilities.Helpers;
+
+    using global::Ais.Data.Common.Base;
 
     /// <summary>
     /// Class TimeService.

@@ -1,0 +1,353 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WebApi</name>
+    </assembly>
+    <members>
+        <member name="M:WebApi.Controllers.AuthenticationController.SignIn(WebApi.Model.Authentication.SignInRequest)">
+            <summary>
+            Authenticate user.
+            </summary>
+            <param name="model">Username and password for authentication.</param>
+            <returns>AccessToken and refresh token.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.AuthenticationController.Refresh(WebApi.Model.Authentication.RefreshTokenRequest)">
+            <summary>
+            Generate new access token.
+            </summary>
+            <param name="model">Refresh token to generate new access token.</param>
+            <returns>AccessToken and refresh token.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.JournalsController.GenerateActionXml(WebApi.Model.Journal.BaseAction,System.Boolean)">
+            <summary>
+            Generate xml with fill id, time, ip, browser and call user data.
+            </summary>
+            <param name="model">Action model.</param>
+            <param name="signByServer">Flag if xml must be sign by server.</param>
+            <returns>Serialized action model to xml file.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.JournalsController.CreateAsync(Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            Insert journal action data to database.
+            </summary>
+            <param name="signXml">Sign xml with journal action data.</param>
+            <returns>Journal id save in database.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.LoggerController.Create(WebApi.Model.Logger.LogEvent)">
+            <summary>
+            Log event form other module.
+            </summary>
+            <param name="logEvent">Log event data.</param>
+        </member>
+        <member name="M:WebApi.Controllers.NomenclaturesController.GetNomenclatureAsync(System.String)">
+            <summary>
+            Get nomenclature items by name.
+            </summary>
+            <param name="name">Nomenclature name.</param>
+            <returns>Collection with nomenclature items.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.NomenclaturesController.GetTablesAsync">
+            <summary>
+            Get nomenclature table description.
+            </summary>
+            <returns>Collection with nomenclature table description.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.NomenclaturesController.GetIssuers">
+            <summary>
+            Get issuers by user administration.
+            </summary>
+            <returns>Collection with nomenclature.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.NomenclaturesController.GetAdmActTypes">
+            <summary>
+            Get administrative act types by user administration.
+            </summary>
+            <returns>Collection with nomenclature.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.OutAdmActController.SearchAsync(Ais.Data.Models.QueryModels.AdmAct.ApiAdmActSearchResultQueryModel)">
+            <summary>
+            Get administrative acts by query.
+            </summary>
+            <param name="query">query model.</param>
+            <returns>List of administrative acts.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.OutAdmActController.InfoAsync(System.Nullable{System.Guid})">
+            <summary>
+            Get administrative acts info by id.
+            </summary>
+            <param name="id">The identifier.</param>
+            <returns>The administrative act info.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.UsersController.GetAsync(System.Guid)">
+            <summary>
+            Get user data by id.
+            </summary>
+            <param name="id">User identifier.</param>
+            <returns>User with roles and activities.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.UsersController.GetByUserNameAsync(System.String)">
+            <summary>
+            Get user data by username.
+            </summary>
+            <param name="userName">Username.</param>
+            <returns>User with roles and activities.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.UsersController.GetRolesAsync(System.Guid)">
+            <summary>
+            Get user roles and activities.
+            </summary>
+            <param name="userId">User id.</param>
+            <returns>Collection with user roles and activities.</returns>
+        </member>
+        <member name="M:WebApi.Controllers.UsersController.GetByEgnAsync(System.String)">
+            <summary>
+            Get user roles and activities by EGN.
+            </summary>
+            <param name="egn">User EGN.</param>
+            <returns>Collection with user roles and activities.</returns>
+        </member>
+        <member name="T:WebApi.Model.Journal.Action">
+            <summary>
+            Journal action.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Journal.Action.Time">
+            <summary>
+            Action time.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Journal.Action.User">
+            <summary>
+            Action user.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Journal.Action.Module">
+            <summary>
+            Action module.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Journal.BaseAction.Type">
+            <summary>
+            Action type.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Journal.BaseAction.Title">
+            <summary>
+            Action name - име на бутон/форма/през което е извършена промяната.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Journal.BaseAction.Reason">
+            <summary>
+            Action reason.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Journal.BaseAction.Objects">
+            <summary>
+            Collection ot action objects.
+            </summary>
+        </member>
+        <member name="T:WebApi.Model.Logger.LogEvent">
+            <summary>
+            Log data.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Logger.LogEvent.Level">
+            <summary>
+            Log level.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Logger.LogEvent.Message">
+            <summary>
+            Log message.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Logger.LogEvent.Exception">
+            <summary>
+            Exception call stack
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Logger.LogEvent.RequestId">
+            <summary>
+            Request id.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Logger.LogEvent.RequestPath">
+            <summary>
+            Request path.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Logger.LogEvent.ActionId">
+            <summary>
+            Action id.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Logger.LogEvent.ActionName">
+            <summary>
+            Action name.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Logger.LogEvent.SourceContext">
+            <summary>
+            Source context.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Logger.LogEvent.ConnectionId">
+            <summary>
+            Connection id.
+            </summary>
+        </member>
+        <member name="T:WebApi.Model.Nomenclature.Nomenclature">
+            <summary>
+            Nomenclature model.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Nomenclature.NomenclatureTable.Name">
+            <summary>
+            Table name.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Nomenclature.NomenclatureTable.Description">
+            <summary>
+            Table description.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.Nomenclature.NomenclatureTable.IsMultilingual">
+            <summary>
+            Is multilingual table.
+            </summary>
+        </member>
+        <member name="T:WebApi.Model.OutAdmAct.OutAdmActSearchResult">
+            <summary>
+            Class SearchResult.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.OutAdmAct.OutAdmActSearchResult.Id">
+            <summary>
+            Gets or sets the identifier.
+            </summary>
+            <value>The identifier.</value>
+        </member>
+        <member name="P:WebApi.Model.OutAdmAct.OutAdmActSearchResult.TypeName">
+            <summary>
+            Gets or sets the type name.
+            </summary>
+            <value>The type name.</value>
+        </member>
+        <member name="P:WebApi.Model.OutAdmAct.OutAdmActSearchResult.RegNumber">
+            <summary>
+            Gets or sets the Reg number.
+            </summary>
+            <value>The Reg number.</value>
+        </member>
+        <member name="P:WebApi.Model.OutAdmAct.OutAdmActSearchResult.OfficeName">
+            <summary>
+            Gets or sets the office name.
+            </summary>
+            <value>The office name.</value>
+        </member>
+        <member name="P:WebApi.Model.OutAdmAct.OutAdmActSearchResult.AdmActRegDate">
+            <summary>
+            Gets or sets out adm act registration date.
+            </summary>
+            <value>The out adm act registration date.</value>
+        </member>
+        <member name="P:WebApi.Model.OutAdmAct.OutAdmActSearchResult.IssuerName">
+            <summary>
+            Gets or sets the issuer name.
+            </summary>
+            <value>The issuer name.</value>
+        </member>
+        <member name="T:WebApi.Model.User.Activity">
+            <summary>
+            Role activity class.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.User.Activity.Id">
+            <summary>
+            Identifier.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.User.Activity.Name">
+            <summary>
+            Name.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.User.Activity.Code">
+            <summary>
+            Code.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.User.Activity.Type">
+            <summary>
+            Activity type.
+            </summary>
+        </member>
+        <member name="T:WebApi.Model.User.ByEgnSearchResult">
+            /// <summary>
+            Class ApiSearchResult.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.User.ByEgnSearchResult.Id">
+            <summary>
+            Gets the user identifier.
+            </summary>
+            <value>The identifier.</value>
+        </member>
+        <member name="P:WebApi.Model.User.ByEgnSearchResult.Egn">
+            <summary>
+            Gets the egn.
+            </summary>
+            <value>The egn.</value>
+        </member>
+        <member name="P:WebApi.Model.User.ByEgnSearchResult.CanLogin">
+            <summary>
+            Gets the can login boolean.
+            </summary>
+            <value>If user can login.</value>
+        </member>
+        <member name="P:WebApi.Model.User.ByEgnSearchResult.CanRead">
+            <summary>
+            Gets the can read boolean.
+            </summary>
+            <value>If user can read.</value>
+        </member>
+        <member name="P:WebApi.Model.User.ByEgnSearchResult.CanWrite">
+            <summary>
+            Gets the can write boolean.
+            </summary>
+            <value>If user can write.</value>
+        </member>
+        <member name="P:WebApi.Model.User.ByEgnSearchResult.AreaType">
+            <summary>
+            Gets the area type.
+            </summary>
+            <value>The area type.</value>
+        </member>
+        <member name="P:WebApi.Model.User.ByEgnSearchResult.AreaCode">
+            <summary>
+            Gets the area code.
+            </summary>
+            <value>The area code.</value>
+        </member>
+        <member name="T:WebApi.Model.User.Role">
+            <summary>
+            User role class.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.User.Role.Id">
+            <summary>
+            Identifier.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.User.Role.Name">
+            <summary>
+            Name.
+            </summary>
+        </member>
+        <member name="P:WebApi.Model.User.Role.Activities">
+            <summary>
+            Collection with activities.
+            </summary>
+        </member>
+    </members>
+</doc>

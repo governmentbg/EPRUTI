@@ -1,0 +1,109 @@
+﻿@using global::Ais.Data.Models.Helpers
+@using global::Ais.Data.Models.Employee
+@using global::Ais.Data.Models.Task;
+@using global::Ais.Data.Models.User
+@using Ais.Office.Controllers;
+@using Ais.WebUtilities.Extensions;
+@using Microsoft.Extensions.Localization;
+@using global::Ais.Data.Models.Notice;
+@using System.Web;
+@using Ais.Utilities.Extensions;
+@model Employee
+@inject IStringLocalizer Localizer;
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var userStatusHistory = ViewBag.UserStatusHistory as List<UserStatusHistory> ?? new List<UserStatusHistory>();
+}
+<div class="step-box fullwidth">
+    <div class="step-box-head">
+        <h3 class="step-box-title">@Localizer["EmployeeData"]</h3>
+    </div>
+    <div class="step-box-body">
+        <div class="form-row">
+            @if (Model?.Office?.Name != null)
+            {
+                <div class="form-input fullwidth ib">
+                    @Localizer["Office"]:
+                    <strong>@Model.Office.Name</strong>
+                </div>
+            }
+            @if (Model?.Administration != null)
+            {
+                <div class="form-input fullwidth ib">
+                    @Localizer["Administration"]:
+                    <strong>@Model.Administration</strong>
+                </div>
+            }
+            <div class="form-input fullwidth ib">
+                @Localizer["Department"]:
+                <strong>@Model.Department</strong>
+            </div>
+            <div class="form-input fullwidth ib">
+                @Localizer["Position"]:
+                <strong>@Model.Position</strong>
+            </div>
+            <div class="form-input fullwidth ib">
+                @Localizer["Egn"]:
+                <strong>@Model.Egn</strong>
+            </div>
+            <div class="form-input fullwidth ib">
+                @Localizer["FirstName"]:
+                <strong>@Model.FirstName</strong>
+            </div>
+            <div class="form-input fullwidth ib">
+                @Localizer["SurName"]:
+                <strong>@Model.SurName</strong>
+            </div>
+            <div class="form-input fullwidth ib">
+                @Localizer["LastName"]:
+                <strong>@Model.LastName</strong>
+            </div>
+            <div class="form-input fullwidth ib">
+                @Localizer["Email"]:
+                <strong>@Model.User.Email</strong>
+            </div>
+            <div class="form-input fullwidth ib">
+                @Localizer["ContactPhone"]:
+                <strong>@Model.Phone</strong>
+            </div>
+            <div class="form-input fullwidth">
+                @if (userStatusHistory.IsNotNullOrEmpty())
+                {
+                    @(Html.Kendo().Grid(userStatusHistory)
+                        .Name("HistoryData")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(m => m.UserId).Hidden();
+
+                            columns.Bound(m => m.Status.Name)
+                            .Title(Localizer["Status"]);
+
+                            columns.Bound(m => m.Description)
+                            .Title(Localizer["Description"]);
+
+                            columns.Bound(m => m.Attachment).ClientTemplate(
+                            "# if (Attachment) { #" +
+
+                            "        # if (Attachment.Url) { #" +
+                            $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?urls=#= Attachment.Url #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Attachment.Name ? Attachment.Name : '' #</a>" +
+                            "        # } else if (Attachment.Id) { #" +
+                            $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?ids=#= Attachment.Id #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Attachment.Name ? Attachment.Name : '' #</a>" +
+                            "    # } #" +
+                            "# } #"
+                            ).Title(Localizer["Attachment"]).Filterable(false).Sortable(false);
+
+                           columns.Bound(m => m.LastUpdateDate)
+                                .Title(Localizer["LastUpdateDate"])
+                                .Format("{0:dd.MM.yyyy HH:mm}");
+
+                                columns.Bound(m => m.LastUpdateUser)
+                                .Title(Localizer["LastUpdateUser"]);
+                        })
+                        .Pageable()
+                        .DataSource(d => d.Ajax().PageSize(5))
+                        .Deferred(deferred))
+                }
+                </div>
+        </div>
+    </div>
+</div>

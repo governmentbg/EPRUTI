@@ -1,9 +1,11 @@
 ﻿namespace Ais.Office.Controllers
 {
-    using Ais.Data.Base.Ais;
-    using Ais.Data.Models.Nomenclature;
     using Ais.Infrastructure.BaseTypes;
     using Ais.Services.Ais;
+
+    using global::Ais.Data.Base.Ais;
+    using global::Ais.Data.Common.Base;
+    using global::Ais.Data.Models.Nomenclature;
 
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Localization;
@@ -50,7 +52,7 @@
         [AcceptVerbs("GET", "POST")]
         public async Task<JsonResult> Index(string name, int? flag = null)
         {
-            List<Data.Models.Nomenclature.Nomenclature> result;
+            List<Ais.Data.Models.Nomenclature.Nomenclature> result;
             await using (await this.dataBaseContextManager.NewConnectionAsync())
             {
                 result = await this.nomenclatureService.GetAsync(name, flag: flag);
@@ -83,6 +85,18 @@
             await using (await this.dataBaseContextManager.NewConnectionAsync())
             {
                 model = await this.nomenclatureService.GetIssuer(id);
+            }
+
+            return this.Json(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAdmActRegisterTypes(Guid? docType)
+        {
+            ICollection<Nomenclature> model;
+            await using (await this.dataBaseContextManager.NewConnectionAsync())
+            {
+                model = await this.nomenclatureService.GetAdmActRegisterTypes(docType);
             }
 
             return this.Json(model);

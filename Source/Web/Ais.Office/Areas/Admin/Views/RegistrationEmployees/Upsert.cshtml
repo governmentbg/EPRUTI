@@ -1,0 +1,235 @@
+﻿@using global::Ais.Data.Models.Attachment
+@using global::Ais.Data.Models.Employee
+@using global::Ais.Data.Models.Helpers
+@using global::Ais.Data.Models.RegistrationRequest
+@using global::Ais.Data.Models.User
+@using Ais.Office.Areas.Admin.Controllers
+@using Ais.Office.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.Infrastructure.KendoExt
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer Localizer
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@using UploadFile = Ais.Infrastructure.KendoExt.UploadFile
+@model Ais.Data.Models.Employee.Employee
+@{
+    // var isEAuthentication = Model.RegistrationType == RegistrationType.EAuthentication;
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+    var isModelStateValid = ViewBag.IsModelStateValid is not bool || (bool)ViewBag.IsModelStateValid;
+    var asyncUploadChunkSize = Configuration.GetValue<double>("Attachment:AsyncUploadChunkSize");
+    var filePrefix = "File.";
+    var userStatusHistory = ViewBag.UserStatusHistory as List<UserStatusHistory> ?? new List<UserStatusHistory>();
+}
+@section Breadcrumbs
+{
+    @{
+        await Html.RenderPartialAsync("_Breadcrums");
+    }
+}
+
+<form method="post" action="@Url.ActionLink("Upsert", "RegistrationEmployees")"
+data-ajax="true"
+data-ajax-method="POST"
+data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.UniqueId)
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.FirstName)
+    @Html.HiddenFor(m => m.SurName)
+    @Html.HiddenFor(m => m.LastName)
+    @Html.HiddenFor(m => m.User.Email)
+
+    <div class="step-box fullwidth">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["BaseData"]</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                @if (@Model.Office?.Name != null)
+                {
+                    <div class="form-input fullwidth ib">
+                        @Localizer["Office"]:
+                        <strong>@Model.Office.Name</strong>
+                    </div>
+                }
+                @if (Model.Administration.IsNotNullOrEmpty())
+                {
+                    <div class="form-input fullwidth ib">
+                        @Localizer["Administration"]:
+                        <strong>@Model.Administration</strong>
+                    </div>
+                }                
+                <div class="form-input fullwidth ib">
+                    @Localizer["Department"]:
+                    <strong>@Model.Department</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["Position"]:
+                    <strong>@Model.Position</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["Egn"]:
+                    <strong>@Model.Egn</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["FirstName"]:
+                    <strong>@Model.FirstName</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["SurName"]:
+                    <strong>@Model.SurName</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["LastName"]:
+                    <strong>@Model.LastName</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["Email"]:
+                    <strong>@Model.User.Email</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["ContactPhone"]:
+                    <strong>@Model.Phone</strong>
+                </div>
+                <div class="form-input fullwidth ib">
+                    @Localizer["Status"]:
+                    <strong>@Model.User.Status.Name</strong>
+                </div>
+                <div class="form-input fullwidth">
+                    @if(userStatusHistory.IsNotNullOrEmpty())
+                    {
+                        @(Html.Kendo().Grid(userStatusHistory)
+                        .Name("HistoryData")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(m => m.UserId).Hidden();
+
+                            columns.Bound(m => m.Status.Name)
+                                .Title(Localizer["Status"]);
+
+                            columns.Bound(m => m.Description)
+                                .Title(Localizer["Description"]);
+
+                            columns.Bound(m => m.Attachment).ClientTemplate(
+                                "# if (Attachment) { #" +
+
+                                "        # if (Attachment.Url) { #" +
+                                $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?urls=#= Attachment.Url #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Attachment.Name ? Attachment.Name : '' #</a>" +
+                                "        # } else if (Attachment.Id) { #" +
+                                $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?ids=#= Attachment.Id #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Attachment.Name ? Attachment.Name : '' #</a>" +
+                                "    # } #" +
+                                "# } #"
+                                ).Title(Localizer["Attachment"]).Filterable(false).Sortable(false);
+
+                                columns.Bound(m => m.LastUpdateDate)
+                                .Title(Localizer["LastUpdateDate"])
+                                .Format("{0:dd.MM.yyyy HH:mm}");
+
+                                columns.Bound(m => m.LastUpdateUser)
+                                .Title(Localizer["LastUpdateUser"]);
+
+                        })
+                        .Pageable()
+                        .DataSource(d => d.Ajax().PageSize(5))
+                        .Deferred(deferred))
+                    }
+                </div>
+                <div class="form-input fullwidth">
+                    @Html.InfoLabel(Localizer["Status"], "Status")
+                    @(Html.Kendo().DropDownList()
+                        .Name("User.Status.Id")
+                        .Value(Model?.User.Status?.Id.HasValue == true ? Model.User.Status.Id.ToString() : string.Empty)
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .ValueTemplate(
+                        $"<input type='hidden' name='User.Status.Name' value='#:Name#'/>" +
+                        "<span>#:Name#</span>")
+                        .Filter(FilterType.Contains)
+                        .DataSource(d => d.Read(r => r.Action("GetStatuses", "RegistrationEmployees", new { area = "Admin" })))
+                        .Deferred(deferred))
+                    @Html.ValidationMessage("Status")
+                </div>
+                <div class="form-input fullwidth">
+                    @Html.InfoLabel(Localizer["AdditionalRights"], "AdditionalRights")
+
+                    @(Html.Kendo().MultiSelect()
+                        .Name("AdditionalRolesMultiSelect")
+                        .Value(Model.AdditionalRoles.IsNotNullOrEmpty() ? Model.AdditionalRoles.Select(x => x.Id) : null)
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .DownArrow(true)
+                        .TagTemplate("#var index = kendo.guid();# <input type='hidden' name='AdditionalRoles.Index' value='#:index#'/> <input type='hidden' name='AdditionalRoles[#:index#].Id' value='#:data.Id#'/> <input type='hidden' name='AdditionalRoles[#:index#].Name' value='#:data.Name#'/> <span class=> #:data.Name# <span/> ")
+                        .DataSource(d => d.Read(r => r.Action("GetAdditionalRoleTypes", "RegistrationEmployees")))
+                        .Deferred(deferred))
+                    @Html.ValidationMessage("AdditionalRoles")
+                </div>
+            </div>
+            <div class="form-input fullwidth">
+                @Html.LabelFor(x => x.File)
+                @(Html.Kendo().Upload()
+                    .Name($"{filePrefix}Url")
+                    .HtmlAttributes(new { id = Guid.NewGuid().ToString(), data_prefix = filePrefix, name = string.Empty })
+                    .Messages(x => x.Select(Localizer["SelectFiles"])
+                    .DropFilesHere(Localizer["DropFilesHere"])
+                    .InvalidFileExtension(Localizer["InvalidFileExtension"])
+                    .Cancel(Localizer["Cancel"]))
+                    .Async(a => a
+                    .Save("Upload", "Attachment", new { area = string.Empty })
+                    .Remove("Remove", "Attachment", new { area = string.Empty })
+                    .AutoUpload(true)
+                    .ChunkSize(asyncUploadChunkSize)
+                    .Concurrent(false))
+                    .ShowFileList(true)
+                    .Multiple(false)
+                    .TemplateId("fileTemplate")
+                    .Validation(validation =>
+                    {
+                        validation.AllowedExtensions("doc", "docx", "pdf");
+                    })
+                    .Events(e => e.Upload("core.onUpload").Success("core.onUploadSuccess"))
+                    .Files(files =>
+                    {
+                        if (Model?.File?.Name.IsNotNullOrEmpty() == true)
+                        {
+                            var attachment = Model?.File;
+                            files.AddCustomFile(
+                            new UploadFile
+                        {
+                            Id = attachment!.Id,
+                            Name = attachment.Name,
+                            Url = attachment.Url,
+                            Size = attachment.Size,
+                            Extension = attachment.Extension,
+                            Data = new Dictionary<string, object> { { "prefix", filePrefix } }
+                        });
+                        }
+                    }))
+                @Html.ValidationMessage($"{filePrefix}Url")
+                <div class="form-input fullwidth">
+                @Html.InfoLabel(Localizer["Description"], "Description")
+                @Html.TextAreaFor(m => m.Description)
+                @Html.ValidationMessage("Description")
+                </div>
+            </div>
+            </div>
+            
+            <div class="k-dialog-buttongroup">
+                <button class="bttn right main">
+                    @Localizer["Save"]
+                </button>
+                <button class="bttn  third  right closeKendoWindow-js">
+                    @Localizer["Close"]
+                </button>
+            </div>
+        </div>
+    </div>
+    @{
+        await Html.RenderPartialAsync("_FileTemplate");
+    }
+</form>
+

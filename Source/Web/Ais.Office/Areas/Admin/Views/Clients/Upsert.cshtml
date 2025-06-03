@@ -1,4 +1,5 @@
-﻿@using Ais.Office.Areas.Admin.Controllers
+﻿@using global::Ais.Data.Models.DynamicValidation
+@using Ais.Office.Areas.Admin.Controllers
 @using Ais.Office.ViewModels.Clients;
 @using Ais.WebUtilities.Extensions
 @using Microsoft.Extensions.Localization;
@@ -11,6 +12,8 @@
     var id = Guid.NewGuid().ToString();
     var actionName = isRepresentative ? nameof(ClientsController.CreateRepresentative) : Model.IsNew ? nameof(ClientsController.CreatePost) : nameof(ClientsController.Edit);
     var url = Url.DynamicAction(actionName, typeof(ClientsController));
+    var validations = ViewBag.Validations as List<DynamicValidation> ?? new List<DynamicValidation>() as List<DynamicValidation>;
+    ViewBag.Validations = validations;
 }
 <form method="post" action="@url"
       data-ajax="true"
@@ -19,6 +22,7 @@
       id="@id">
     @Html.Hidden("searchQueryId", ViewBag.SearchQueryId as string)
     @Html.Hidden("clientUniqueId", ViewBag.ClientUniqueId as string)
+    @Html.Hidden("docTypeId", ViewBag.DocTypeId as string)
     @Html.ValidationSummary(true)
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.Id)

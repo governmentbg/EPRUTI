@@ -1,9 +1,12 @@
-﻿@using Ais.WebUtilities.Extensions
+﻿@using global::Ais.Data.Models.OutAdmAct
+@using Ais.WebUtilities.Extensions
 @using Microsoft.Extensions.Localization
-@using Kendo.Mvc.TagHelpers
+@using global::Ais.Data.Models.OutAdmAct.OutAdmActState
+@using global::Ais.Data.Models.Document;
 @using OutApplicationController = Ais.Office.Areas.OutAdministrativeAct.Controllers.OutApplicationController
-@model Ais.Data.Models.Document.OutAdmAct
+@model OutAdmAct
 @inject IStringLocalizer Localizer;
+
 <form id="AdmActStateForm" class="dirty-check" action="@Url.DynamicAction(nameof(OutApplicationController.AdmActStateUpsertPost), typeof(OutApplicationController))"
       data-ajax="true"
       data-ajax="true"
@@ -12,6 +15,7 @@
     @Html.ValidationSummary(true)
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.Id)
+
     <div>
         @{
             await Html.RenderPartialAsync("AdmActState/_State", Model);

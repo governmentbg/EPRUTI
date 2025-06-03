@@ -1,0 +1,21 @@
+﻿@using Microsoft.Extensions.Localization
+@using HtmlHelperExt = Ais.WebUtilities.Helpers.HtmlHelperExt
+@model object
+@inject IStringLocalizer Localizer;
+@{
+    var htmlAttributes = ViewData.ContainsKey("htmlAttributes")
+        ? ViewData["htmlAttributes"]
+        : null;
+
+    var attributes = HtmlHelperExt.MergeHtmlAttributes(
+        htmlAttributes,
+        new Dictionary<string, object>
+        {
+            { "id", Guid.NewGuid().ToString() },
+            { "class", "k-textbox" },
+            { "type", "email" },
+            { "data_msg_email", Localizer["InvalidEmail"] }
+        });
+}
+
+@Html.TextBoxFor(model => model, attributes)

@@ -1,4 +1,4 @@
-﻿@using Ais.Data.Models.Attachment
+﻿@using global::Ais.Data.Models.Attachment
 @using Ais.WebUtilities.Extensions
 <script id="fileTemplate" type="text/x-kendo-template">
     #var file = files[0];#
@@ -38,8 +38,5 @@
             <span class="k-file-size">#:core.getFileSizeMessage(file)#</span>
         #}#
     </span>
-    <strong class="k-upload-status">
-        <button type="button" class="k-upload-action"></button>
-        <button type="button" class="k-upload-action"></button>
-    </strong>
+
 </script>

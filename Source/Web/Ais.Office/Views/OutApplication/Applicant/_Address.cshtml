@@ -1,14 +1,20 @@
 ﻿@inject IStringLocalizer Localizer
+@inject IConfiguration Configuration
 @using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Configuration
 @model Ais.Data.Models.Address.Address
+@{
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+}
+
 @if (Model != null)
 {
     <div class="fullwidth">
-        <div class="ib">
+        <div class="ib @(mrrbFlag ? "privacy" : null)">
             @Localizer["Email"]: <strong>@(Model.Email)</strong>
         </div>
-        <div class="ib">@Localizer["Phone"]: <strong>@(Model.Phone)</strong></div>
-        <div class="bb">
+        <div class="ib @(mrrbFlag ? "privacy" : null)">@Localizer["Phone"]: <strong>@(Model.Phone)</strong></div>
+        <div class="ib @(mrrbFlag ? "k-mt-1" : null)">
             @Localizer["Address"]:
             <strong>@(Model.FullDescription)</strong>
         </div>

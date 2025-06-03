@@ -3,8 +3,10 @@
     using Ais.Common.Cache;
     using Ais.Infrastructure.BaseTypes;
     using Ais.Infrastructure.Roles;
+    using Ais.Office.Utilities.Extensions;
     using Ais.Utilities.Encryption;
     using Ais.Utilities.Extensions;
+
     using Ais.WebUtilities.Extensions;
 
     using Microsoft.AspNetCore.Authorization;
@@ -43,7 +45,7 @@
         public IActionResult Index()
         {
             ////TODO да се обсъди как ще се действа с начална страница според потребителя
-            return this.RedirectToAction("Index", "Documents");
+            return this.RedirectToAction("UserProfile", "Registration", new { id = this.User.AsEmployee().UserId });
         }
 
 #if DEBUG
@@ -88,7 +90,7 @@
         [Route("KeepAlive")]
         public async Task KeepAlive()
         {
-            await this.HttpContext.Session.SetAsync<DateTime?>(Resources.Constants.LastChangedDate, null);
+            await this.HttpContext.Session.SetAsync<DateTime?>(Ais.Resources.Constants.LastChangedDate, null);
         }
     }
 }

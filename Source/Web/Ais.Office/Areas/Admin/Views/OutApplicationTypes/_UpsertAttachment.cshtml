@@ -1,0 +1,68 @@
+﻿@using global::Ais.Data.Models.Attachment
+@using global::Ais.Data.Models.Helpers;
+@using global::Ais.Data.Models.Nomenclature
+@using global::Ais.Data.Models.Service;
+@using Ais.Office.ViewModels.Services
+@using Microsoft.Extensions.Localization
+
+@model OutDocAttachment
+
+@inject IStringLocalizer Localizer;
+
+@{
+    var docId = ViewBag.DocId as string;
+    var required = ViewBag.Required;
+}
+<form method="post" class="dirty-check" action="@Url.ActionLink("EditAttachment", "OutApplicationTypes")"
+      data-ajax="true"
+      data-ajax-method="POST"
+      data-ajax-success="core.onKendoWindowSuccessCallback">
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.Hidden("DocumentId", docId)
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.GroupRelDocId)
+    @Html.HiddenFor(m => m.DocumentId)
+    @Html.HiddenFor(m => m.GroupRelDocContent)
+    @Html.HiddenFor(m => m.Type.Id)
+    @Html.HiddenFor(m => m.Name)
+
+    <div class="step-box">
+        <div class="step-box-head">
+            <h3 class="step-box-title">@Localizer["Attachments"]</h3>
+        </div>
+        <div class="step-box-body">
+            <div class="form-row">
+                <div class="form-input quad">
+                    @Html.Label(Localizer["Name"])
+                    @Html.DisplayFor(m => m.Name)
+                </div>
+                <div class="form-input quad">
+                    @Html.Label(Localizer["IsRequired"])
+                    @(Html.Kendo().DropDownListFor(m => m.IsRequired.Id)
+                        .DataValueField("Id")
+                        .DataTextField("Name")
+                        .ValueTemplate(
+                        "<input type='hidden' name='IsRequired.Name' value='#:Name#'/>" +
+                        "<span>#:Name#</span>")
+                        .Filter(FilterType.Contains)
+                        .BindTo(required))
+                    @Html.ValidationMessageFor(m => m.IsRequired)
+                </div>
+                <div class="form-input quad">
+                    @Html.Label(Localizer["IsWebVisible"])
+                    @(Html.Kendo().CheckBoxFor(m => m.IsWebVisible))
+                    @Html.ValidationMessageFor(m => m.IsWebVisible)
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-dialog-buttongroup">
+        <button class="bttn right main">
+            @Localizer["Save"]
+        </button>
+        <button class="bttn right third closeKendoWindow-js">
+            @Localizer["Close"]
+        </button>
+    </div>
+</form>

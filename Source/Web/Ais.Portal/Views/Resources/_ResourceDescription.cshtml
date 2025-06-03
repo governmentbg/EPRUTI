@@ -1,0 +1,7 @@
+﻿@using Ais.Utilities.Extensions
+@using System.Web
+@model string
+@if (Model.IsNotNullOrEmpty())
+{
+    @Html.Raw(HttpUtility.HtmlDecode(Model))
+}

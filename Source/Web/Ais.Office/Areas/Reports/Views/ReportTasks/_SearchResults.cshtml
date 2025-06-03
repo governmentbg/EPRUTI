@@ -1,0 +1,59 @@
+﻿@inject IStringLocalizer Localizer;
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Office.ViewModels.Reports.Tasks
+@model List<TaskByPeriodTableViewModel>
+@{
+    var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
+}
+@(Html.Kendo().PivotContainer()
+      .Name("container")
+      .ConfiguratorPosition("left")
+      .Content(@<text>
+                   @(Html.Kendo().PivotConfiguratorV2()
+                         .Name("configurator")
+                         .Sortable()
+                         .Filterable()
+                         .Deferred(deferred))
+                   @(Html.Kendo().PivotGridV2<TaskByPeriodTableViewModel>()
+                         .Name("pivotgrid")
+                         .HtmlAttributes(new { @class = "hidden-on-narrow k-collapse" })
+                         .Configurator("#configurator")
+                         .ColumnWidth(250)
+                         .Height(500)
+                         .BindTo(Model ?? new List<TaskByPeriodTableViewModel>())
+                         .DataSource(dataSource => dataSource
+                                         .Custom()
+                                         .Schema(schema => schema
+                                                     .Model(model =>
+                                                     {
+                                                         foreach (var propertyInfo in typeof(TaskByPeriodTableViewModel).GetProperties())
+                                                         {
+                                                             var propertyName = propertyInfo.Name;
+                                                             model.Field(propertyName, propertyInfo.PropertyType).From(propertyName);
+                                                         }
+                                                     })
+                                                     .Cube(cube => cube
+                                                               .Dimensions(dimensions =>
+                                                               {
+                                                                   foreach (var propertyInfo in typeof(TaskByPeriodTableViewModel).GetProperties())
+                                                                   {
+                                                                       var propertyName = propertyInfo.Name;
+                                                                       dimensions.Add(propertyName).Caption(Localizer[propertyName]);
+                                                                   }
+                                                               })
+                                                               .Measures(measures =>
+                                                               {
+                                                                   measures.Add(Localizer["SumServicePrice"]).Format("{0}").Field(model => model.ServicePrice).AggregateName("sum").Caption(Localizer["ServicePrice"]);
+                                                                   measures.Add(Localizer["SumServicesCount"]).Format("{0}").Field(model => model.ServicesCount).AggregateName("sum").Caption(Localizer["ServicesCount"]);
+                                                                   measures.Add(Localizer["SumServiceDueDate"]).Format("{0}").Field(model => model.ServiceDueDate).AggregateName("sum").Caption(Localizer["ServiceDueDate"]);
+                                                                   measures.Add(Localizer["SumTaskRemainingTime"]).Format("{0}").Field(model => model.TaskRemainingTime).AggregateName("sum").Caption(Localizer["TaskRemainingTime"]);
+                                                               })
+                                                     )))
+                         .Deferred(deferred))
+                   @(Html.Kendo().PivotConfiguratorButton()
+                         .Name("Button")
+                         .Configurator("configurator")
+                         .Deferred(deferred))
+                </text>)
+      .Deferred(deferred))

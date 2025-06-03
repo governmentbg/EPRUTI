@@ -1,0 +1,29 @@
+﻿@using global::Ais.Data.Models.Faq;
+@using Ais.Utilities.Extensions;
+@model List<FaqTableModel>
+@{
+    var guid = Guid.NewGuid().ToString();
+}
+<section class="content-pre-wrap accordeon">
+    @if (Model.IsNotNullOrEmpty())
+    {
+        @(Html.Kendo().PanelBar()
+            .Name(guid)
+            .HtmlAttributes(new { @class = "accordeon" })
+            .Items(panelbar =>
+            {
+                Model.ForEach(a =>
+                {
+                    panelbar.Add()
+                    .Enabled(true)
+                    .Text(a.Question)
+                    .Expanded(false)
+                    .LoadContentFrom("GetAnswer", "Faq", new { questionId = a.Id });
+                });
+            })
+            .Deferred())
+    }
+</section>
+<script>
+    $("#@guid").kendoPanelBar();
+</script>

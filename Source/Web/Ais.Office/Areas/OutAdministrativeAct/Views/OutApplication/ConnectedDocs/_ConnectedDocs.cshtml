@@ -1,0 +1,28 @@
+﻿@using global::Ais.Data.Models.OutAdmAct
+@using Ais.Office.ViewModels.Application
+@using Ais.WebUtilities.Extensions
+@using Ais.WebUtilities.Helpers
+@using Microsoft.Extensions.Localization
+@using global::Ais.Data.Models.Document
+@inject IStringLocalizer Localizer;
+@model List<ConnectedAdmAct>
+
+<div id="connected-docs" class="step-box">
+    <div class="step-box-head">
+        <h3 class="step-box-title">
+            @Localizer["ConnectedDocs"]
+        </h3>
+    </div>
+    <div class="step-box-body connected-documents-js connected-documents-info-js">
+        @if (Model != null)
+        {
+            var index = 1;
+            foreach (var doc in Model)
+            {
+                ViewBag.ItemIndex = index;
+                await Html.RenderPartialAsync("ConnectedDocs/_ConnectedDoc", doc);
+                index++;
+            }
+        }
+    </div>
+</div>

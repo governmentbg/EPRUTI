@@ -1,0 +1,93 @@
+﻿@using Ais.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@using System.Text
+@using Microsoft.Extensions.Configuration
+@model List<Ais.Portal.ViewModels.MenuItem>
+@inject IStringLocalizer Localizer
+@inject IConfiguration Configuration
+@{
+    var isResponsive = TempData.ContainsKey("IsReponsiveMenu") && (bool?)TempData["IsReponsiveMenu"] == true;
+    var defaultUrl = Url.RouteUrl("default", new { controller = string.Empty, action = string.Empty });
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+}
+<a href="@defaultUrl" class="favicon hidden">
+    <img src="~/images/favicon@(mrrbFlag ? "MRRB" : null).png" alt="@Localizer["Home"]">
+</a>
+<ul>
+    <li class="home">
+        <a href="@Url.RouteUrl("Default", new { controller = string.Empty, action = string.Empty, culture =  Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName })">
+            @if (!isResponsive)
+            {
+                if (mrrbFlag)
+                {
+                    <i class="icon-home k-i-home k-icon k-font-icon"></i>
+                }
+                else
+                {
+                    <svg class="icon">
+                        <use xlink:href="#icon-categories"></use>
+                    </svg>
+                }
+            }
+            <span>@Localizer["Home"]</span>
+        </a>
+    </li>
+    @if (Model.IsNotNullOrEmpty())
+    {
+        foreach (var item in Model)
+        {
+            RenderMenuItem(item);
+        }
+    }
+</ul>
+
+@functions {
+    private void RenderMenuItem(Ais.Portal.ViewModels.MenuItem item)
+    {
+        <li>
+            @{
+                var attributes = new StringBuilder();
+                if (item.Url.IsNotNullOrEmpty())
+                {
+                    attributes.Append($"href=\"{item.Url}\" ");
+                }
+
+                if (item.Title.IsNotNullOrEmpty())
+                {
+                    attributes.Append($"title=\"{item.Title}\" ");
+                }
+
+                if (item.Class.IsNotNullOrEmpty())
+                {
+                    attributes.Append($"class=\"{item.Class}\" ");
+                }
+
+                if (item.IsAjax)
+                {
+                    attributes.Append($"data-ajax=\"true\" data-mode=\"{(item.HttpMethod!.IsNotNullOrEmpty() ? item.HttpMethod : "GET")}\" ");
+                }
+
+                if (item.InNewWindow)
+                {
+                    attributes.Append("target=\"_blank\" ");
+                }
+
+                <a @Html.Raw(attributes.ToString().Trim())>
+                    <span>
+                        @item.Title
+                    </span>
+                </a>
+
+                if (item.Items?.IsNotNullOrEmpty() == true)
+                {
+                    <ul>
+                        @foreach (var childItem in item.Items!)
+                        {
+                            RenderMenuItem(childItem);
+                        }
+                    </ul>
+                }
+            }
+        </li>
+    }
+}

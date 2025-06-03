@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://egov.bg/RegiX/MRRB"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://egov.bg/RegiX/MRRB"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+	<!-- General complex types -->
+	<xs:complexType name="NomenclatureType">
+		<xs:annotation>
+			<xs:documentation>Тип за номенклатура с код и име</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Code" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Код</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Name" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Наименование</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="CadNumber">
+		<xs:annotation>
+			<xs:documentation>Кадастрален идентификатор</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="(\d{5})(\.\d{1,4}){2}(\.\d{1,3}){0,2}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!--UIN-->
+	<xs:simpleType name="UIN">
+		<xs:annotation>
+			<xs:documentation>ЕГН</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\d{10}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!--UIN-->
+	<xs:simpleType name="UIC">
+		<xs:annotation>
+			<xs:documentation>ЕИК</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\d{9}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Bulstat">
+		<xs:annotation>
+			<xs:documentation>Булстат</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\d{9}|\d{13}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!--AdmActType-->
+	<xs:complexType name="AdmActType">
+		<xs:sequence>
+			<xs:element name="RegNumber" type="xs:string"/>
+			<xs:element name="RegDate" type="xs:string"/>
+			<xs:element name="AnnoucmentDate" type="xs:string" nillable="true"/>
+			<xs:element name="AnnoucmentType" type="NomenclatureType" nillable="true"/>
+			<xs:element name="EffectiveDate" type="xs:string" nillable="true"/>
+			<xs:element name="Type" type="NomenclatureType" nillable="true"/>
+			<xs:element name="State" type="NomenclatureType" nillable="true"/>
+			<xs:element name="ValidByDate" type="xs:string" nillable="true"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--Issuer-->
+	<xs:complexType name="IssuerType">
+		<xs:sequence>
+			<xs:element name="Administration" type="xs:string"/>
+			<xs:element name="AdministrativeBody" type="NomenclatureType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--Applicant-->
+	<xs:complexType name="Applicant">
+		<xs:sequence>
+			<xs:element name="FullName" type="xs:string"/>
+			<xs:element name="EgnBulstat" type="xs:string"/>
+			<xs:element name="Address" type="xs:string"/>
+			<xs:element name="Type" type="xs:string"/>
+			<xs:element name="QualityName" type="xs:string"/>
+			<xs:element name="Phone" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--Address-->
+	<xs:complexType name="AddressType">
+		<xs:sequence>
+			<xs:element name="FullDescription" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--AdmActObject-->
+	<xs:complexType name="ActObjectType">
+		<xs:sequence>
+			<xs:element name="Province" type="NomenclatureType"/>
+			<xs:element name="Municipality" type="NomenclatureType"/>
+			<xs:element name="Settlement" type="NomenclatureType" />
+			<xs:element name="Region" type="NomenclatureType" />
+			<xs:element name="CadIdentifier" type="xs:string" />
+			<xs:element name="RegPlace" type="xs:string" />
+			<xs:element name="RegQuarter" type="xs:string" />
+			<xs:element name="RegUpi" type="xs:string" />
+			<xs:element name="CadPlanRegion" type="xs:string" />
+			<xs:element name="CadPlanNumber" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<!--AdmActObject-->
+	<xs:complexType name="AdmActObjectType">
+		<xs:sequence>
+			<xs:element name="NameDesc" type="xs:string"/>
+			<xs:element name="ActObject" type="ActObjectType" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--AdmActRespons-->
+	<xs:complexType name ="AmdActResponseType">
+			<xs:sequence>
+				<xs:element name="AdmAct" type="AdmActType"/>
+				<xs:element name="Applicant" type="Applicant" maxOccurs="unbounded"/>
+				<xs:element name="Issuer" type="IssuerType"/>
+				<xs:element name="AdmActObject" type="AdmActObjectType"/>
+			</xs:sequence>
+	</xs:complexType>
+	<!--AdministrationTypes-->
+	<xs:simpleType name="AdministrativeBodyTypes">
+		<xs:annotation>
+			<xs:documentation>Административен орган</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="230ff0dd-8d2d-46f5-a04b-36bc4557bf0f">
+				<xs:annotation>
+					<xs:documentation>Министерски съвет</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="a861c8a7-a3b4-4c63-bbb9-c75479c82973">
+				<xs:annotation>
+					<xs:documentation>Длъжностно лице с предоставени функции от министъра на регионалното развитие и благоустройството</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="bc77f8ab-031e-4322-9fd9-617f777afd76">
+				<xs:annotation>
+					<xs:documentation>Министър на регионалното развитие и благоустройството</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+			
+	</xs:simpleType>
+</xs:schema>

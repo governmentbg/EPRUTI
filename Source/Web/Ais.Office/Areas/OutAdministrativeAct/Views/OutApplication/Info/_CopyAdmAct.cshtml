@@ -1,17 +1,18 @@
-﻿@using Ais.Office.Controllers
+﻿@using System.Linq
+@using global::Ais.Data.Models.OutAdmAct
+@using Ais.Office.Controllers
 @using Microsoft.Extensions.Localization
 @using Ais.Utilities.Extensions
-@using Ais.Data.Models.Document
+@using global::Ais.Data.Models.Document
 @using System.Text.RegularExpressions
 @using Ais.WebUtilities.Extensions
-@using System.Linq
 @inject IStringLocalizer Localizer
-@model Ais.Data.Models.Document.OutAdmAct
+@model OutAdmAct
 @{
     if (Model.Attachments.IsNotNullOrEmpty())
     {
         <div class="step-box">
-            <div class="step-box-head">
+            <div class="step-box-head-unordered">
                 <h3 class="step-box-title">
                     @Localizer["CopyAdmAct"]
                 </h3>
@@ -21,10 +22,26 @@
                 {
                     ViewBag.Group = group;
                     <div class="mainGroup">
-                        @await Html.PartialAsync("Info/_AttachmentGroup", Model)
+                        @await Html.PartialAsync("~/Areas/OutAdministrativeAct/Views/OutApplication/Info/_AttachmentGroup.cshtml", Model)
                     </div>
                 }
             </div>
         </div>
     }
 }
+
+
+<script>
+    $(function () {
+        $(".mainGroup").each(function () {
+            if ($(this).find(".uploadedFile").length == 0) {
+                $(this).remove();
+            }
+
+            let emptyUpload = $(this).find(".k-upload-empty")
+            if (emptyUpload.length == 0) {
+                $(emptyUpload).remove();
+            }
+        })
+    })
+</script>

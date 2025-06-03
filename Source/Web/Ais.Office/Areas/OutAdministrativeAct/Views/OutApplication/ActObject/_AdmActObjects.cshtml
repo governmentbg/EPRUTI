@@ -1,7 +1,8 @@
 ﻿@inject IStringLocalizer Localizer
+@using global::Ais.Data.Models.OutAdmAct
 @using Microsoft.Extensions.Localization
 @using Ais.Utilities.Extensions
-@model Ais.Data.Models.Document.OutAdmAct
+@model OutAdmAct
 <div class="step-box admact-objects-js">
     <div class="step-box-head">
         <h3 class="step-box-title">
@@ -12,7 +13,7 @@
         @{
             if (Model?.Object?.AdmActObjects?.IsNotNullOrEmpty() == true)
             {
-                var index = 1;
+                var index = 0;
                 foreach (var actObject in Model.Object.AdmActObjects!)
                 {
                     ViewBag.ItemIndex = index;

@@ -1,6 +1,7 @@
-﻿@using Ais.Data.Models.AdmActAttachment
-@using Ais.Data.Models.Attachment
-@using Ais.Data.Models.Document
+﻿@using global::Ais.Data.Models.AdmActAttachment
+@using global::Ais.Data.Models.Attachment
+@using global::Ais.Data.Models.Document
+@using global::Ais.Data.Models.OutAdmAct
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer Localizer
 @model OutAdmAct
@@ -8,7 +9,7 @@
 @{
     <div class="steps-body k-flex-column">
         <div class="step-box">
-            <div class="step-box-head">
+            <div class="step-box-head-unordered">
                 <h3 class="step-box-title">
                     Вид на документа:
                 </h3>
@@ -22,8 +23,8 @@
             @foreach (var group in Model.AttachmentGroups)
             {
                 ViewBag.Group = group as AttachmentGroup;
-                <div class="step-box">
-                    <div class="step-box-head">
+                <div class="step-box attachment-main-group">
+                    <div class="step-box-head-unordered">
                         <h3 class="step-box-title fullwidth">
                             @(group?.Name)
                         </h3>

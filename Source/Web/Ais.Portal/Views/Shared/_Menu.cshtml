@@ -1,0 +1,83 @@
+﻿@using Ais.Portal.Components
+@using Ais.Portal.Utilities.Extensions
+@using Microsoft.Extensions.Localization
+@using Ais.Portal.Controllers
+@using Ais.Utilities.Extensions
+@using Ais.WebUtilities.Extensions
+@using Microsoft.Extensions.Configuration
+@inject IStringLocalizer Localizer;
+@inject IConfiguration Configuration
+@{
+    var user = User.AsClient();
+    var roles = user?.Client?.User?.Roles?.Select(item => new { Id = $"{item.Id}_{item.UserGroupId}", RoleId = item.Id, Name = item.Name, UserGroupId = item.UserGroupId }).ToArray();
+    var currentRoleId = $"{user?.RoleId}_{user?.UserGroupId}";
+    var currentRole = roles?.FirstOrDefault(x => x.Id == currentRoleId);
+    var mrrbFlag = Configuration.GetValue<string>("SystemStyle")?.Equals("mrrb", StringComparison.InvariantCultureIgnoreCase) == true;
+
+}
+<nav id="mainMenu">
+    @await Component.InvokeAsync(typeof(MainMenuViewComponent))
+    @if (!mrrbFlag)
+    {
+        <div class="right">
+            {
+
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <a href="@Url.Action("Login", "Authentication")">
+                    <svg class="icon">
+                        <use xlink:href="#icon-profile"></use>
+                    </svg><span>@Localizer["Login"]</span>
+                </a>
+            }
+            else
+            {
+                <a href="#myprofile" class="js-trigger-dropdown dropdown-trigger">
+                    <svg class="icon">
+                        <use xlink:href="#icon-profile"></use>
+                    </svg>
+                </a>
+            }
+        </div>
+
+    }
+</nav>
+@if (!mrrbFlag)
+{
+    <div id="myprofile" class="hidden">
+        <div class="msgs-wrap">
+            <nav>
+                <ul>
+                    @if (roles.IsNotNullOrEmpty())
+                    {
+                        <li class="cust-name">
+                            @($"{user?.Client?.User?.FullName} - {user?.Client?.Knik}")
+                        </li>
+
+                        if (currentRole != null)
+                        {
+                            <li class="cust-name">
+                                @currentRole.Name
+                            </li>
+                        }
+
+                        <li>
+                            <div class="label">@Localizer["ChangeLoadProfile"]</div>
+                            @(Html.Kendo().DropDownList()
+                                .Name("clientUserRoles")
+                                .DataValueField("Id")
+                                .DataTextField("Name")
+                                .AutoWidth(true)
+                                .BindTo(roles)
+                                .Filter(FilterType.Contains)
+                                .Value(currentRoleId)
+                                .Events(e => e.Change("core.userRoleChange"))
+                                .Deferred())
+                        </li>
+                        <li><hr></li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    </div>
+}

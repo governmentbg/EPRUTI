@@ -1,16 +1,16 @@
-﻿@using Ais.Office.Controllers
+﻿@using global::Ais.Data.Models.OutAdmAct
 @using Ais.Office.Areas.OutAdministrativeAct.Controllers
 @using Ais.WebUtilities.Extensions
 @using Microsoft.AspNetCore.Mvc.Controllers
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer Localizer;
-@model Ais.Data.Models.Document.OutAdmAct
+@model OutAdmAct
 <div class="steps-body">
     @{
         ViewBag.SkipScripts = true;
         ViewBag.IsOverview = true;
-
-        
+        @Html.Hidden(OutApplicationController.SignApplicationKey)
+        @Html.Hidden("ActualityStatus", Model.DocActualityStatus)
     }
     @await Html.PartialAsync("Info/_Index")
 </div>
