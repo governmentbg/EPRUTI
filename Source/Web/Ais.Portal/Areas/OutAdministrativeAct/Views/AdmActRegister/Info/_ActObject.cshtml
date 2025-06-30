@@ -30,20 +30,20 @@
                     <div class="flex info-row align-center">
                         <i class="@(item?.AddressList.IsNotNullOrEmpty() == true ? "k-i-caret-alt-down" : "k-i-sarrow-e") k-font-icon arrow-icon"></i>
                         <div class="left">
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].Province.Id, validations, Localizer["ObjectDescProvince"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].Municipality.Id, validations, Localizer["ObjectDescMunicipality"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].Settlement.Id, validations, Localizer["ObjectDescSettlement"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].Region.Id, validations, Localizer["ObjectDescRegion"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].CadIdentifier, validations, Localizer["ObjectDescCadIdentifier"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].RegPlace, validations, Localizer["ObjectDescRegPlace"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].RegQuarter, validations, Localizer["ObjectDescRegQuarter"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].RegUpi, validations, Localizer["ObjectDescRegUpi"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].CadPlanRegion, validations, Localizer["ObjectDescCadPlanRegion"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].CadPlanNumber, validations, Localizer["ObjectDescCadPlanNumber"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].KVSPlace, validations, Localizer["ObjectDescKVSPlace"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].KVSNumber, validations, Localizer["ObjectDescKVSNumber"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].TerritoryType.Id, validations, Localizer["ObjectDescTerritoryType"]))
-                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].ProtectedTerritory, validations, Localizer["ObjectDescProtectedTerritory"]))
+                            @{
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].AddrPlaceName, validations, Localizer["AddrDescAddrPlaceName"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].Street, validations, Localizer["AddrDescStreet"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].StreetNumber, validations, Localizer["AddrDescStreetNumber"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].Square, validations, Localizer["AddrDescSquare"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].SquareNumber, validations, Localizer["AddrDescSquareNumber"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].Quarter, validations, Localizer["AddrDescQuarter"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].AppComplex, validations, Localizer["AddrDescAppComplex"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].AppComplexNumber, validations, Localizer["AddrDescAppComplexNumber"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].BuildingNumber, validations, Localizer["AddrDescBuildingNumber"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].Entrance, validations, Localizer["AddrDescEntrance"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].FloorNumber, validations, Localizer["AddrDescFloorNumber"]))
+                                @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].ApartmentNumber, validations, Localizer["AddrDescApartmentNumber"]))
+                            }
                         </div>
                     </div>
                     <div class="admact-object-addresses-js">
@@ -57,18 +57,18 @@
                                     <div class="number">@(ViewBag.ItemIndex).</div>
                                     <div class="left">
                                         @{
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].AddrPlaceName, validations, Localizer["AddrDescAddrPlaceName"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].Street, validations, Localizer["AddrDescStreet"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].StreetNumber, validations, Localizer["AddrDescStreetNumber"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].Square, validations, Localizer["AddrDescSquare"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].SquareNumber, validations, Localizer["AddrDescSquareNumber"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].Quarter, validations, Localizer["AddrDescQuarter"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].AppComplex, validations, Localizer["AddrDescAppComplex"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].AppComplexNumber, validations, Localizer["AddrDescAppComplexNumber"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].BuildingNumber, validations, Localizer["AddrDescBuildingNumber"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].Entrance, validations, Localizer["AddrDescEntrance"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].FloorNumber, validations, Localizer["AddrDescFloorNumber"]))
-                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[i].ApartmentNumber, validations, Localizer["AddrDescApartmentNumber"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].AddrPlaceName, validations, Localizer["AddrDescAddrPlaceName"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].Street, validations, Localizer["AddrDescStreet"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].StreetNumber, validations, Localizer["AddrDescStreetNumber"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].Square, validations, Localizer["AddrDescSquare"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].SquareNumber, validations, Localizer["AddrDescSquareNumber"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].Quarter, validations, Localizer["AddrDescQuarter"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].AppComplex, validations, Localizer["AddrDescAppComplex"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].AppComplexNumber, validations, Localizer["AddrDescAppComplexNumber"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].BuildingNumber, validations, Localizer["AddrDescBuildingNumber"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].Entrance, validations, Localizer["AddrDescEntrance"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].FloorNumber, validations, Localizer["AddrDescFloorNumber"]))
+                                            @(Html.RenderInfoIfVisible(Model, m => m.Object.AdmActObjects[i].AddressList[j].ApartmentNumber, validations, Localizer["AddrDescApartmentNumber"]))
                                         }
                                     </div>
                                 </div>

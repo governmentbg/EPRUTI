@@ -13,6 +13,7 @@
         ViewBag.ApplicationUniqueId = Model.UniqueId;
         ViewBag.DocTypeId = Model.Type.Id;
         var step = (Step)ViewBag.Step;
+        @await Component.InvokeAsync("AdmActName", new { typeId = Model.Type.Id })
         await Html.RenderPartialAsync("_Steps");
         await Html.RenderPartialAsync("_Errors");
         <div class="k-window-split-wrap k-widget k-splitter" data-role="splitter">
@@ -80,7 +81,7 @@
         {
             await Html.RenderPartialAsync("_FileTemplate");
         }
-        if(step.Current is StepType.CopyAdmAct)
+        if (step.Current is StepType.CopyAdmAct)
         {
             await Html.RenderPartialAsync("_FileTemplate");
 

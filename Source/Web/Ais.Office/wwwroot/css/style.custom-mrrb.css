@@ -276,7 +276,6 @@ docs li {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        max-width: 200px;
     }
 }
 
@@ -544,7 +543,7 @@ nav ul li > a > span {
 }
 
 #submenu ul li a {
-    padding: 5px 2px 0px;
+    padding: 8px 2px 4px;
     border-bottom: 4px solid #fff;
 }
 
@@ -1908,4 +1907,124 @@ header nav #threedots:before, header nav #threedots:after {
 
 .help-editor .k-editor {
     height: calc(100vh - 250px);
+}
+
+.aa-shortname {
+    padding: 15px 20px 0px;
+    margin-bottom: -5px;
+    font: bold 12px Tahoma;
+    color: #000;
+}
+
+@media screen and (max-width: 746px) {
+    .responsivenav nav ul ul li a:hover {
+        padding-left: 16px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    #respbtn {
+        margin-top: 4px;
+    }
+
+    .registration-wrap {
+        width: 100%;
+    }
+
+        .registration-wrap .step-box .step-box-head, .profile-wrap .step-box .step-box-head {
+            flex-wrap: nowrap;
+            flex-direction: row;
+        }
+
+        .registration-wrap form {
+            display: flex;
+        }
+
+        .registration-wrap .form-input.fullwidth {
+            padding-right: 10px;
+        }
+
+    .user-container .right:hover ul {
+        top: 48px;
+        width: 90%;
+        margin: 0 auto;
+        min-width: unset;
+    }
+
+    .user-container .personal-data .restriction {
+        white-space: normal;
+        max-width: none;
+    }
+
+    nav .right {
+        margin-top: 15px;
+    }
+
+    .responsivenav nav ul ul li a:hover {
+        padding-left: 6px;
+    }
+
+    .form-input .bttn, .form-input .k-button.k-small {
+        height: auto;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .form-input.fullwidth {
+        padding-right: 10px;
+    }
+}
+
+#respbtn:hover span + span {
+    background: #fff;
+}
+
+.responsivenav.open {
+    display: block;
+    animation: comein .2s linear forwards;
+}
+
+.responsivenav nav ul ul li a {
+    color: var(--main) !important;
+    margin: 5px 0;
+}
+
+.responsivenav nav ul ul {
+    margin-left: 30px;
+    padding: 0;
+    background: 0;
+}
+
+.responsivenav nav li a {
+    padding: 2px 20px;
+    color: var(--secondary);
+}
+
+.responsivenav {
+    padding-top: 50px;
+}
+
+#respclose div {
+    width: 35px;
+    height: 40px;
+    padding: 0;
+    float: right;
+    margin-right: 10px;
+}
+
+.responsivenav nav li.active > a span, .responsivenav nav li a.active span,
+.responsivenav nav > ul > li:hover > a > span {
+    background: var(--mainhover);
+    color: var(--textmenu);
+}
+
+.k-popup {
+    width: auto !important;
+    max-width: 90vw;
+}
+
+@media screen and (max-width: 480px) {
+    .k-popup {
+        max-width: 200px;
+    }
 }

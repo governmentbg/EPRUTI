@@ -17,6 +17,7 @@
     var model = Model;
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
     var validations = ViewBag.Validations as List<DynamicValidation>;
+    var gridId = Guid.NewGuid().ToString();
 }
 <div class="step-box">
     <div class="step-box-head-unordered">
@@ -34,8 +35,8 @@
         </div>
         <div class="doc-basic-info k-mt-1">
             @{
-                @(Html.RenderInfoIfVisible(Model, m => m.Issuer.AdministrativeBody.Id, validations, Localizer["Issuer"]))
-                @(Html.RenderInfoIfVisible(Model, m => m.RegisterType.Name, validations, Localizer["ААRegisterType"]))
+                @(Html.RenderInfoIfVisible(Model, m => m.Issuer.AdministrativeBody.Id, validations, Localizer["Publisher"]))
+                @(Html.RenderInfoIfVisible(Model, m => m.RegisterType.Name, validations, Localizer["AARegisterType"]))
                 <div class="ib">@Localizer["RegDate"]: <strong>@(Model.RegDate.Value.ToString("d"))</strong></div>
                 @(Html.RenderInfoIfVisible(Model, m => m.RegOffice.Name, validations, Localizer["Office"]))
                 @(Html.RenderInfoIfVisible(Model, m => m.Note, validations, Localizer["FactGrounds"]))
@@ -52,13 +53,13 @@
         @if (Model?.StateUpsertModel?.StateHistory != null && Html.RenderIfVisible(m => m.StateUpsertModel.StateHistory, validations))
         {
             @(
-                Html.Kendo().Grid<AdmActStateHistoryModel>(Model.StateUpsertModel.StateHistory)
-                .Name("grid")
-                .Columns(columns =>
-                {
-                columns.Bound(m => m.State.Name).Title(Localizer["State"]).Filterable(filter => filter.Multi(true).Search(true)).Sortable(true).Width("20%");
-                    columns.Bound(m => m.Date).ClientTemplate("#= Date ? kendo.toString(Date, 'dd.MM.yyyy') : '' #").Title(Localizer["Date"]).Filterable(filter => filter.Operators(ops => ops.ForDate(d => d.IsEqualTo("Equals").IsGreaterThan("After").IsLessThan("Before")))).Sortable(true).Width("20%");
-                    columns.Bound(m => m.Dispute).ClientTemplate(
+                    Html.Kendo().Grid<AdmActStateHistoryModel>(Model.StateUpsertModel.StateHistory)
+                    .Name(gridId)
+                    .Columns(columns =>
+                    {
+                        columns.Bound(m => m.State.Name).Title(Localizer["State"]).Filterable(filter => filter.Multi(true).Search(true)).Sortable(true).Width("20%");
+                        columns.Bound(m => m.Date).ClientTemplate("#= Date ? kendo.toString(Date, 'dd.MM.yyyy') : '' #").Title(Localizer["Date"]).Filterable(filter => filter.Operators(ops => ops.ForDate(d => d.IsEqualTo("Equals").IsGreaterThan("After").IsLessThan("Before")))).Sortable(true).Width("20%");
+                        columns.Bound(m => m.Dispute).ClientTemplate(
                     "# if (Dispute) { #" +
                     "    # if (Dispute.Attachment) { #" +
                     "        # if (Dispute.Attachment.Url) { #" +
@@ -71,12 +72,13 @@
                     "      <span>#= Dispute.Description #</span>" +
                     "    # } #" +
                     "# } #"
-                    ).Title(Localizer["Details"]).Filterable(false).Sortable(false).Title(" ").Width("50px");
-                })
-                .Sortable(false)
-                .HtmlAttributes(new { @class = "k-mt-2" })
-                .Deferred(deferred)
-                )
-        }
+                    ).Title(Localizer["Details"]).Filterable(false).Sortable(false);
+                    })
+                    .Sortable(false)
+                    .Pageable(pager => pager.Refresh(false).PageSizes(new int[] { 10, 20, 50 }).ButtonCount(5))
+                    .HtmlAttributes(new { @class = "k-mt-2" })
+                    .Deferred(deferred)
+                    )
+                }
     </div>
 </div>

@@ -8,6 +8,7 @@
     using Ais.Services.Ais;
     using Ais.Table.Mvc.Controllers;
     using Ais.Table.Mvc.Utilities;
+    using Ais.Utilities.Exception;
     using Ais.Utilities.Extensions;
     using Ais.WebServices.Services.SessionStorage;
     using Ais.WebServices.Services.Storage;
@@ -119,6 +120,7 @@
             {
                 outDocument = await this.outAdmActService.GetAsync(id);
                 outDocument.Versions = await this.outAdmActService.GetModelVersionsAsync(id);
+                outDocument.RegisterType = (await this.nomenclatureService.GetAdmActRegisterTypes(outDocument.Type.Id)).FirstOrDefault();
                 validations = await this.fieldControlService.GetValidationsAsync(outDocument.Type.Id);
                 await this.InitApplicationInfoAsync(outDocument, true);
             }
@@ -142,12 +144,24 @@
         public async Task<IActionResult> VersionInfo(Guid fileId)
         {
             Stream fileStream;
+            OutAdmAct model;
             await using (await this.contextManager.NewConnectionAsync())
             {
                 fileStream = await this.storageService.DownloadAsync(ids: new[] { fileId });
             }
 
-            var model = await ModelToXmlHelper.DeserializeXmlFromStreamAsync<OutAdmAct>(fileStream);
+            try
+            {
+                model = await ModelToXmlHelper.DeserializeXmlFromStreamAsync<OutAdmAct>(fileStream);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new UserException(this.Localizer[ex.Message]);
+            }
+
+            // synchronize attachment visiblity based on current settings
+            await this.InitAttachmentsDataAsync(model, true);
+
             return this.PartialView("Info/_Index", model);
         }
 
@@ -333,7 +347,6 @@
         {
             await this.InitContactDataAsync(outDocument);
             await this.InitAttachmentsDataAsync(outDocument, isInfo);
-            await this.InitAdmActStateDataAsync(outDocument);
 
             if (outDocument.Attachments.IsNotNullOrEmpty())
             {
@@ -464,25 +477,6 @@
                 var groups = await this.InitAttachmentsGroups(outDocument.Type.Id, EnumHelper.GetObjectIdByObjectTypeId(ObjectType.OutDocument));
                 var attachments = await this.InitAttachments(outDocument.Type.Id, EnumHelper.GetObjectIdByObjectTypeId(ObjectType.OutDocument));
                 outDocument.AttachmentGroups = this.BuildGroupsTree(groups, attachments);
-            }
-        }
-
-        /// <summary>
-        /// Initialize the state data.
-        /// </summary>
-        /// <returns>AttachmentType.</returns>
-        private async Task InitAdmActStateDataAsync(OutDocument outDocument)
-        {
-            var admAct = outDocument as OutAdmAct;
-            if (admAct?.Id != null)
-            {
-                // update session from db for update
-                await this.SessionStorageService.SetAsync<List<AdmActStateHistoryModel>>($"StateHistoryGridData_{outDocument.UniqueId}", admAct.StateUpsertModel.StateHistory);
-            }
-            else
-            {
-                // clear session for insert
-                await this.SessionStorageService.RemoveAsync("StateHistoryGridData");
             }
         }
     }

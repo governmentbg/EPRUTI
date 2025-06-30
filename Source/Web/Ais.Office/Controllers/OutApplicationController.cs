@@ -66,13 +66,12 @@
         protected readonly IServiceAttachmentService AttachmentService;
         protected readonly IFieldControlService FieldControlService;
         protected readonly IMapper Mapper;
+        protected readonly IApplicationTypeService applicationTypeService;
 
         private const string AddressesKey = "Addresses";
         private const string FindClientsKey = "FindClients";
         private const string ObjectsKey = "SelectedObjectsKey";
         private const string DynamicValidationKey = "DynamicValidationKey";
-
-        private readonly IApplicationTypeService applicationTypeService;
 
         private readonly bool validateSign;
 

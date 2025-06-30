@@ -192,7 +192,8 @@ function addAdmActStateRow(e: JQuery.EventBase): void {
             data: data,
             success: (data) => {
                 if (data.success) {
-                    let grid = $("#grid").data("kendoGrid") as kendo.ui.Grid;
+                    let gridGuid = $("#gridGuid").val();
+                    let grid = $("#" + gridGuid).data("kendoGrid") as kendo.ui.Grid;
                     grid.dataSource.read();
                     onFileUploadRemove(e);
                     $("#StateUpsertModel_Dispute_Description").val('');

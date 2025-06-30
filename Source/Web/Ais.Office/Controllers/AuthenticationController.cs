@@ -436,10 +436,13 @@
             var statusId = EnumHelper.GetIntegrationLogStatus(IntegrationLogStatus.Success);
             var internalMessage = string.Empty;
             var systemMessage = string.Empty;
+            var employee = new Employee();
 
             try
             {
-                return this.authenticationProvider.SamlRequestToEmployee();
+                var result = this.authenticationProvider.SamlRequestToEmployee();
+                employee = result.Employee;
+                return result;
             }
             catch (Exception ex)
             {
@@ -452,6 +455,7 @@
             {
                 await using var connection = await this.dataBaseContextManager.NewConnectionAsync();
                 await using var transaction = await connection.BeginTransactionAsync();
+
                 await this.integrationLogsService.InsertAsync(
                     new IntegrationLogModel
                     {
@@ -459,6 +463,9 @@
                         StatusId = statusId,
                         InternalMessage = internalMessage,
                         SystemMessage = systemMessage,
+                        UserEgn = employee?.Egn,
+                        UserEmail = employee?.Email,
+                        UserName = $"{employee?.FirstName} {employee?.SurName} {employee?.LastName}"
                     });
                 await transaction.CommitAsync();
             }

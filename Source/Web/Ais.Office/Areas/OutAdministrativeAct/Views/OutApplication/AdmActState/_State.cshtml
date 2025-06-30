@@ -13,8 +13,10 @@
     var deferred = !ViewContext.HttpContext.Request.IsAjaxRequest();
     var uploadId = Guid.NewGuid().ToString();
     var optionLabel = Localizer["Choose"].Value;
+    var gridId = Guid.NewGuid().ToString();
 }
 
+@Html.Hidden("gridGuid", gridId);
 <div class="step-box">
     <div class="step-box-head">
         <h3 class="step-box-title">@Localizer["StateData"]</h3>
@@ -36,22 +38,22 @@
             <div class="form-input">
                 @Html.InfoLabel(Localizer["AnnouncementType"], "AnnouncementType")
                 @(Html.Kendo().DropDownListFor(x => x.StateUpsertModel.AnnouncementType.Id)
-                    .DataSource(d => d.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nannouncementtype" }))))
-                    .DataValueField("Id")
-                    .DataTextField("Name")
-                    .OptionLabel(optionLabel)
-                    .Deferred(deferred))
+                                .DataSource(d => d.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nannouncementtype" }))))
+                                .DataValueField("Id")
+                                .DataTextField("Name")
+                                .OptionLabel(optionLabel)
+                                .Deferred(deferred))
             </div>
         </div>
         <div class="form-row">
             <div class="form-input">
                 @Html.InfoLabel(Localizer["State"], "State")
                 @(Html.Kendo().DropDownListFor(x => x.StateUpsertModel.State.Id)
-                    .DataSource(d => d.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nstatus" }))))
-                    .Events(ev => ev.Change(deferred ? "outapplication.onAdmActStateChange" : "outAdministrativeAct_admact.onAdmActStateChange"))
-                    .DataValueField("Id")
-                    .DataTextField("Name")
-                    .Deferred(deferred))
+                                .DataSource(d => d.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.Index), typeof(NomenclatureController), new { name = "nstatus" }))))
+                                .Events(ev => ev.Change(deferred ? "outapplication.onAdmActStateChange" : "outAdministrativeAct_admact.onAdmActStateChange"))
+                                .DataValueField("Id")
+                                .DataTextField("Name")
+                                .Deferred(deferred))
             </div>
             <div class="form-input">
                 @Html.InfoLabel(Localizer["ChangeDate"], "ChangeDate")
@@ -83,52 +85,51 @@
         <div>
             <input type="hidden" id="StateHistory" name="StateHistory" />
             @(
-                Html.Kendo().Grid<AdmActStateHistoryModel>(Model.StateUpsertModel.StateHistory)
-                .Name("grid")
-                .Columns(columns =>
-                {
-                    columns.Bound(m => m.State.Name)
-                    .ClientTemplate(
-                    "#= State && State.Name ? kendo.htmlEncode(State.Name) : '' #" +
-                    "<input type='hidden' class='grid-hidden-input' data-field='State.Name' value='#= State && State.Name ? State.Name : '' #' />"
-                    )
-                    .Title(Localizer["State"])
-                    .Filterable(filter => filter.Multi(true).Search(true))
-                    .Sortable(true)
-                    .Width("20%");
+                        Html.Kendo().Grid<AdmActStateHistoryModel>(Model.StateUpsertModel.StateHistory)
+                        .Name(gridId)
+                        .Columns(columns =>
+                        {
+                            columns.Bound(m => m.State.Name)
+                            .ClientTemplate(
+                            "#= State && State.Name ? kendo.htmlEncode(State.Name) : '' #" +
+                            "<input type='hidden' class='grid-hidden-input' data-field='State.Name' value='#= State && State.Name ? State.Name : '' #' />"
+                            )
+                            .Title(Localizer["State"])
+                            .Filterable(filter => filter.Multi(true).Search(true))
+                            .Sortable(true)
+                            .Width("20%");
 
-                    columns.Bound(m => m.Date)
-                    .ClientTemplate(
-                    "#= Date ? kendo.toString(Date, 'dd.MM.yyyy') : '' #" +
-                    "<input type='hidden' class='grid-hidden-input' data-field='Date' value='#= Date ? kendo.toString(Date, \"yyyy-MM-ddTHH:mm:ss\") : '' #' />"
-                    )
-                    .Title(Localizer["Date"])
-                    .Filterable(filter => filter.Operators(ops => ops.ForDate(d => d.IsEqualTo("Equals").IsGreaterThan("After").IsLessThan("Before"))))
-                    .Sortable(true)
-                    .Width("20%");
-                    columns.Bound(m => m.Dispute).ClientTemplate(
-                    "# if (Dispute) { #" +
-                    "    # if (Dispute.Attachment) { #" +
-                    "        # if (Dispute.Attachment.Url) { #" +
-                    $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?urls=#= Dispute.Attachment.Url #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
-                    "        # } else if (Dispute.Attachment.Id) { #" +
-                    $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?ids=#= Dispute.Attachment.Id #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
-                    "        # } #" +
-                    "    # } #" +
-                    "    # if (Dispute.Description) { #" +
-                    "        <span>#= Dispute.Description #</span>" +
-                    "    # } #" +
-                    "# } #"
-                    ).Title(Localizer["Details"]).Filterable(false).Sortable(false);
-                    columns.Template(@<text><button class='bttn small cancel delete-admact-history-row-js' data-id='#=Id#'>X</button></text>
-                ).Title(" ").Width("50px");
-                })
-                .Filterable(filter => filter.Mode(GridFilterMode.Row))
-                .Sortable(true)
-                .Pageable(pager => pager.Refresh(true).PageSizes(new int[] { 10, 20, 50 }).ButtonCount(5))
-                .DataSource(ds => ds.Ajax().PageSize(10).Read("AdmActStateHistoryGetData", "OutApplication", new { area = "OutAdministrativeAct" }))
-                .Deferred(deferred)
-                )
+                            columns.Bound(m => m.Date)
+                            .ClientTemplate(
+                            "#= Date ? kendo.toString(Date, 'dd.MM.yyyy') : '' #" +
+                            "<input type='hidden' class='grid-hidden-input' data-field='Date' value='#= Date ? kendo.toString(Date, \"yyyy-MM-ddTHH:mm:ss\") : '' #' />"
+                            )
+                            .Title(Localizer["Date"])
+                            .Filterable(filter => filter.Operators(ops => ops.ForDate(d => d.IsEqualTo("Equals").IsGreaterThan("After").IsLessThan("Before"))))
+                            .Sortable(true)
+                            .Width("20%");
+                            columns.Bound(m => m.Dispute).ClientTemplate(
+                            "# if (Dispute) { #" +
+                            "    # if (Dispute.Attachment) { #" +
+                            "        # if (Dispute.Attachment.Url) { #" +
+                            $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?urls=#= Dispute.Attachment.Url #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
+                            "        # } else if (Dispute.Attachment.Id) { #" +
+                            $"            <a href='{Url.DynamicAction(nameof(AttachmentController.Download), typeof(AttachmentController))}?ids=#= Dispute.Attachment.Id #' target='_blank' class='simplelink' rel='noopener noreferrer' download>#= Dispute.Attachment.Name ? Dispute.Attachment.Name : '' #</a> |" +
+                            "        # } #" +
+                            "    # } #" +
+                            "    # if (Dispute.Description) { #" +
+                            "        <span>#= Dispute.Description #</span>" +
+                            "    # } #" +
+                            "# } #"
+                            ).Title(Localizer["Details"]).Filterable(false).Sortable(false);
+                            columns.Template(@<text><button class='bttn small cancel delete-admact-history-row-js' data-id='#=Id#'>X</button></text>).Title(" ").Width("50px");
+                        })
+                        .Sortable(false)
+                        .Pageable(pager => pager.Refresh(false).PageSizes(new int[] { 10, 20, 50 }).ButtonCount(5))
+                        .DataSource(ds => ds.Ajax().PageSize(10).Read("AdmActStateHistoryGetData", "OutApplication", new { area = "OutAdministrativeAct" }))
+                        .HtmlAttributes(new { @class = "k-mt-2" })
+                        .Deferred(deferred)
+                        )
         </div>
     </div>
 </div>

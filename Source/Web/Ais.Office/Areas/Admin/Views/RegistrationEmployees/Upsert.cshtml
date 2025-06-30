@@ -170,7 +170,7 @@ data-ajax-success="core.onKendoWindowSuccessCallback">
                 </div>
             </div>
             <div class="form-input fullwidth">
-                @Html.LabelFor(x => x.File)
+                @Html.InfoLabel(Localizer["File"], "File")
                 @(Html.Kendo().Upload()
                     .Name($"{filePrefix}Url")
                     .HtmlAttributes(new { id = Guid.NewGuid().ToString(), data_prefix = filePrefix, name = string.Empty })

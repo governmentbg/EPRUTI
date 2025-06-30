@@ -234,9 +234,6 @@
                 try
                 {
                     await using var connection = await this.dataBaseContextManager.NewConnectionAsync();
-                    ////await using var connection = await this.dataBaseContextManager.NewConnectionWithJournalAsync(
-                    ////ActionType.Create,
-                    ////objects: new[] { new KeyValuePair<object, ObjectType>(new RegistrationRequest(), ObjectType.RegistrationRequest) });
                     await using var transaction = await connection.BeginTransactionAsync();
 
                     var employee = this.MapRequestToEmployee(model);
@@ -255,9 +252,10 @@
                     await transaction.CommitAsync();
                     return this.RedirectToAction("RegisteredRequestLogin", model);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    this.ShowMessage(MessageType.Error, e.Message);
+                    this.Logger?.LogException(ex);
+                    this.ShowMessage(MessageType.Error, this.Localizer["Failure"]);
                     return this.PartialView("RequestData", model);
                 }
             }

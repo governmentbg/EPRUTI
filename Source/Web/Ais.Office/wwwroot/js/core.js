@@ -27,6 +27,16 @@ $(document).keyup(function (e) {
     }
 });
 
+$('#respbtn').on('click', function (e) {
+    $('body').addClass('openedmenu');
+    $('.responsivenav').addClass('open');
+});
+
+$('#respclose').on('click', function (e) {
+    $('body').removeClass('openedmenu');
+    $('.responsivenav').removeClass('open');
+});
+
 $('#respmenu').on('click', function (e) {
     $('body').toggleClass('openedmenu');
 });
