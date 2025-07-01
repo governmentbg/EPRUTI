@@ -33,6 +33,8 @@
                         @(Html.Kendo().DropDownListFor(x => x.Issuer.AdministrativeBody.Id)
                         .DataTextField("Name")
                         .DataValueField("Id")
+                        .ValueTemplate("<input type='hidden' name='Issuer.AdministrativeBody.Name' value='#: Name #'>" +
+                        "<span>#= Name #</span>")
                         .DataSource(x => x.Read(r => r.Url(Url.DynamicAction(nameof(NomenclatureController.GetIssuers), typeof(NomenclatureController), new { id = Guid.Empty }))))
                         .Deferred(deferred))
                     </div>

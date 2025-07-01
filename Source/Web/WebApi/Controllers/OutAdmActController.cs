@@ -66,7 +66,7 @@
         /// <param name="id">The identifier.</param>
         /// <returns>The administrative act info.</returns>
         [HttpGet("Info/{id}")]
-        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OutAdmAct), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<OutAdmAct> InfoAsync([FromRoute] Guid? id)

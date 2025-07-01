@@ -199,7 +199,7 @@ function init() {
                                 () => {
                                     let searchClientForm = searchWrapepr.find("#searchClientForm");
                                     searchClientForm.find("input[name!=Limit]").val("");
-                                    searchClientForm.find("[name=Knik]").val(client["Knik"]);
+                                    searchClientForm.find("[name=EgnBulstat]").val(client["EgnBulstat"]);
                                     searchClientForm.find("button[type=submit]").trigger("click");
                                 },
                                 500);
@@ -463,6 +463,17 @@ function ContinueWithSave(saveUrl) {
             type: "POST",
             area: "OutAdministrativeAct",
             success: (data) => {
+            }
+        });
+}
+
+function ContinueWithPublish(url) {
+    requestOptionalUrl(url,
+        {
+            type: "POST",
+            area: "OutAdministrativeAct",
+            success: () => {
+                displayMessage(getResource("SuccessfullPublishAdmAct"), messageType.success, false, 0);
             }
         });
 }
@@ -1120,7 +1131,8 @@ function addAdmActStateRow(e: JQuery.EventBase): void {
             data: data,
             success: (data) => {
                 if (data.success) {
-                    let grid = $("#grid").data("kendoGrid") as kendo.ui.Grid;
+                    let gridGuid = $("#gridGuid").val();
+                    let grid = $("#" + gridGuid).data("kendoGrid") as kendo.ui.Grid;
                     grid.dataSource.read();
                     onFileUploadRemove(e);
                     $("#StateUpsertModel_Dispute_Description").val('');

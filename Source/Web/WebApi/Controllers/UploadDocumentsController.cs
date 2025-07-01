@@ -39,15 +39,6 @@
             this.applicationTypeService = applicationTypeService;
         }
 
-        [HttpGet("Test/{name}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Test([FromRoute] string name)
-        {
-            await Task.Delay(1);
-            return this.Ok(new { test = "ok" });
-        }
-
         [HttpPost("UpsertAdmAct")]
         ////[ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         ////[ProducesResponseType(StatusCodes.Status401Unauthorized)]

@@ -1,9 +1,11 @@
-﻿@using global::Ais.Data.Models.Employee
+﻿@using Ais.Data.Models.Nomenclature
+@using global::Ais.Data.Models.Employee
 @using global::Ais.Data.Models.Helpers
 @using global::Ais.Data.Models.RegistrationRequest
 @using Ais.Office.Controllers
 @using Ais.Utilities.Extensions
 @using Ais.Infrastructure.KendoExt
+@using Ais.Infrastructure.Roles;
 @using Ais.WebUtilities.Extensions
 @using Ais.WebUtilities.Helpers
 @using Microsoft.Extensions.Localization
@@ -39,8 +41,6 @@
     @Html.HiddenFor(m => m.User.SurName)
     @Html.HiddenFor(m => m.User.LastName)
     @Html.HiddenFor(m => m.User.FullName)
-    @Html.HiddenFor(m => m.Role.Id)
-    @Html.HiddenFor(m => m.Role.Name)
     @Html.HiddenFor(m => m.Type.Id)
     @Html.HiddenFor(m => m.Type.Name)
     @Html.HiddenFor(m => m.Office.Id)
@@ -55,10 +55,28 @@
         </div>
         <div class="step-box-body">
             <div class="form-row">
-                <div class="form-input fullwidth ib">
-                    @Localizer["Role"]:
-                    <strong>@Model.Role?.Name</strong>
+                @if (ViewBag.ShowAdminRolesDropdown is true)
+                {
+                    <div class="form-input fullwidth ib">
+                        @Html.InfoLabel(Localizer["Role"], "Role")
+                        @(Html.Kendo().DropDownList()
+                                            .Name("Role.Id")
+                                            .DataValueField("Id")
+                                            .DataTextField("Name")
+                                            .Filter(FilterType.Contains)
+                                            .BindTo((IEnumerable<Nomenclature>)ViewBag.AdminRoles)
+                                            .Deferred(deferred))
                 </div>
+                                }
+                else
+                {
+                    @Html.HiddenFor(m => m.Role.Id)
+                    @Html.HiddenFor(m => m.Role.Name)
+                    <div class="form-input fullwidth ib">
+                        @Localizer["Role"]:
+                        <strong>@Model.Role?.Name</strong>
+                    </div>
+                }
                 <div class="form-input fullwidth ib">
                     @Localizer["RequestType"]:
                     <strong>@Model?.Type?.Name</strong>
@@ -68,7 +86,7 @@
                     <span class="reg-status status@(Model.Status.Code)">@Model.Status.Name</span>
                 </div>
                 @if (EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalAdministrator ||
-                EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.ExternalUserSpecializedAccess)
+                                EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.ExternalUserSpecializedAccess)
                 {
                     if (Model.File?.Id.HasValue == true)
                     {
@@ -105,7 +123,7 @@
                     <strong>@Model.User.LastName</strong>
                 </div>
                 @if (EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalAdministrator ||
-                EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalOperator)
+                                EnumHelper.GetEmployeeRoleEnumTypeById(Model.Role.Id) == EmployeeRoleEnum.DepartmentalOperator)
                 {
                     <div class="form-input fullwidth ib">
                         @Localizer["Administration"]:
@@ -152,18 +170,18 @@
                 <div class="form-input fullwidth">
                     @Html.InfoLabel(Localizer["Status"], "Status")
                     @(Html.Kendo().DropDownList()
-                        .Name("Status.Id")
-                        .OptionLabel(Localizer["Choose"].ToString())
-                        .Value(Model?.Status?.Id.HasValue == true ? Model.Status.Id.ToString() : string.Empty)
-                        .DataValueField("Id")
-                        .DataTextField("Name")
-                        .Events(ev => ev.Change(deferred ? "reqistrationrequests.rejectRequest" : "admin_reqistrationrequests.rejectRequest"))
-                        .ValueTemplate(
-                        $"<input type='hidden' name='Status.Name' value='#:Name#'/>" +
-                        "<span>#:Name#</span>")
-                        .Filter(FilterType.Contains)
-                        .DataSource(d => d.Read(r => r.Action("GetStatuses", "RegistrationRequests", new { area = "Admin" })))
-                        .Deferred(deferred))
+                                        .Name("Status.Id")
+                                        .OptionLabel(Localizer["Choose"].ToString())
+                                        .Value(Model?.Status?.Id.HasValue == true ? Model.Status.Id.ToString() : string.Empty)
+                                        .DataValueField("Id")
+                                        .DataTextField("Name")
+                                        .Events(ev => ev.Change(deferred ? "reqistrationrequests.rejectRequest" : "admin_reqistrationrequests.rejectRequest"))
+                                        .ValueTemplate(
+                                        $"<input type='hidden' name='Status.Name' value='#:Name#'/>" +
+                                        "<span>#:Name#</span>")
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(d => d.Read(r => r.Action("GetStatuses", "RegistrationRequests", new { area = "Admin" })))
+                                        .Deferred(deferred))
                     @Html.HiddenFor(m => m.Status.Code)
                     @Html.ValidationMessage("Status")
                 </div>
@@ -177,10 +195,6 @@
                 <button class="bttn main fullwidth">
                     @Localizer["Save"]
                 </button>
-                @*
-                <button class="bttn error quad reject-request-js" name="statusGuid" value="@EnumHelper.GetRequestStatus(RequestStatus.Denied)">
-                @Localizer["Reject"]
-                </button> *@
             </div>
         </div>
     </div>

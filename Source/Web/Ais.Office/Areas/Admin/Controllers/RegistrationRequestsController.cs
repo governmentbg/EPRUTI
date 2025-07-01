@@ -3,6 +3,8 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
+    using Ais.Data.Models.Helpers;
+    using Ais.Data.Models.Office;
     using Ais.Infrastructure.Roles;
     using Ais.Office.Utilities.Extensions;
     using Ais.Office.ViewModels.RegistrationRequests;
@@ -12,6 +14,8 @@
     using Ais.WebUtilities.Extensions;
 
     using AutoMapper;
+
+    using DocumentFormat.OpenXml.Drawing.Charts;
 
     using global::Ais.Data.Base.Ais;
     using global::Ais.Data.Common.Base;
@@ -91,11 +95,21 @@
         public async Task<IActionResult> Upsert(Guid id, string searchQueryId)
         {
             var model = new RegistrationRequest();
+            List<Nomenclature> adminRoles = new();
             await using (await this.contextManager.NewConnectionAsync())
             {
                 model = await this.registrationRequestsService.GetRegistrationRequest(id);
                 model.User = await this.employeeService.GetAsync(model.User.Id.Value);
+
+                if (this.User.IsInRole(UserRolesConstants.RegistrationRequestRoleChange) && model.Office.Id == EnumHelper.GetOfficeIdByType(OfficeType.MRRB))
+                {
+                    adminRoles = await this.registrationRequestsService.GetAdministrationRoles();
+                }
             }
+
+            adminRoles.Insert(0, model.Role);
+            this.ViewBag.AdminRoles = adminRoles;
+            this.ViewBag.ShowAdminRolesDropdown = true;
 
             return this.ReturnView("Upsert", model);
         }

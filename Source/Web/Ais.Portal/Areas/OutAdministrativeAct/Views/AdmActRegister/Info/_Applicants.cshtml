@@ -27,6 +27,7 @@
                     <div class="number">@(index++).</div>
                     <div class="left">
                         @(Html.RenderInfoIfVisible(Model, m => m.Applicants[i].Recipient.FirstAndLastName, validations, Localizer["FullName"]))
+                        @(Html.RenderInfoIfVisible(Model, m => m.Applicants[i].Recipient.EgnBulstat, validations, Localizer["EgnBulstat"]))
                         @(Html.RenderAddressInfoIfVisible(Model, m => m.Applicants[i].Recipient.ContactData, validations, Localizer["Address"]))
                     </div>
                     <div class="bttn-wrap w-auto">

@@ -12,6 +12,7 @@
     using System.Xml;
 
     using Ais.Common.Context;
+    using Ais.Data.Models.QueryModels;
     using Ais.Infrastructure.BaseTypes;
     using Ais.Infrastructure.Roles;
     using Ais.Office.Controllers;
@@ -93,7 +94,7 @@
 
         private readonly bool validateSign;
         private readonly string certPath;
-        private readonly string certPass = "Password1";
+        private readonly string certPass = string.Empty;
         private readonly string bissInstallerUrl;
 
         /// <summary>
@@ -643,6 +644,7 @@
             await using (await this.ContextManager.NewConnectionAsync())
             {
                 outDocument = await this.outAdmActService.GetAsync(id);
+                outDocument.RegisterType = (await this.nomenclatureService.GetAdmActRegisterTypes(outDocument.Type.Id)).FirstOrDefault();
             }
 
             if (outDocument is null)
@@ -699,6 +701,7 @@
                 }
 
                 outDocument.Versions = await this.outAdmActService.GetModelVersionsAsync(id);
+                outDocument.RegisterType = (await this.nomenclatureService.GetAdmActRegisterTypes(outDocument.Type.Id)).FirstOrDefault();
                 await this.InitApplicationInfoAsync(outDocument, true);
             }
 
@@ -858,9 +861,35 @@
             if (actualityStatus == DocActualityStatus.Published)
             {
                 redirectUrl = await this.SessionStorageService.GetAsync<string>("AfterPublishRedirectUrl") ?? redirectUrl;
+
+                // show kendo dialog after redirect
+                this.AddScript(@"
+                    var actions = [
+                        {
+                            text: resources.getResource('OK'),
+                            action: function (e) {
+                                e.sender.close();
+                            },
+                            primary: true
+                        }
+                    ];
+
+                    core.createKendoDialog({
+                        content: resources.getResource('SuccessfulPublishAdmAct'),
+                        visible: true,
+                        actions: actions,
+                        open: function (e) {
+                              const wrapper = e.sender.wrapper[0];
+                              $(wrapper).find('.k-dialog-titlebar .k-dialog-titlebar-actions').remove();
+                        }
+                    });
+                ");
+            }
+            else
+            {
+                this.ShowMessage(MessageType.Success, this.Localizer["SuccessfulAction"]);
             }
 
-            this.ShowMessage(MessageType.Success, this.Localizer["SuccessfulAction"]);
             return this.RedirectToUrl(redirectUrl);
         }
 
@@ -1472,7 +1501,6 @@
         {
             await this.InitContactDataAsync(outDocument);
             await this.InitAttachmentsDataAsync(outDocument);
-            await this.InitAdmActStateDataAsync(outDocument);
 
             if (outDocument is OutAdmAct admAct)
             {
@@ -1510,7 +1538,6 @@
         {
             await this.InitContactDataAsync(outDocument);
             await this.InitAttachmentsDataAsync(outDocument, isInfo);
-            await this.InitAdmActStateDataAsync(outDocument);
 
             if (outDocument is OutAdmAct admAct)
             {
@@ -1878,7 +1905,7 @@
                 {
                     await this.ValidateAdmActObjects(
                         application.Object.AdmActObjects,
-                        validations.Where(x => x.Step == 12 && !x.PropertyPath.Contains(" AddressList") && !x.PropertyPath.Contains("NameDesc")).ToHashSet());
+                        validations.Where(x => x.Step == 12 && !x.PropertyPath.Contains("AddressList") && !x.PropertyPath.Contains("NameDesc")).ToHashSet());
 
                     var objectValidations = validations
                          .Where(x => x.Step == 12 && (x.PropertyPath.Contains("AddressList") || x.PropertyPath.Contains("NameDesc"))).ToHashSet<DynamicValidation>();
@@ -2170,25 +2197,6 @@
             if (isInfo == false)
             {
                 await this.AddAttachmentGroupsToSessionAsync(outDocument.AttachmentGroups);
-            }
-        }
-
-        /// <summary>
-        /// Initialize the state data.
-        /// </summary>
-        /// <returns>AttachmentType.</returns>
-        private async Task InitAdmActStateDataAsync(OutDocument outDocument)
-        {
-            var admAct = outDocument as OutAdmAct;
-            if (admAct?.Id != null)
-            {
-                // update session from db for update
-                await this.SessionStorageService.SetAsync<List<AdmActStateHistoryModel>>($"StateHistoryGridData", admAct.StateUpsertModel.StateHistory);
-            }
-            else
-            {
-                // clear session for insert
-                await this.SessionStorageService.RemoveAsync("StateHistoryGridData");
             }
         }
 
@@ -2501,6 +2509,7 @@
                 await using (await this.ContextManager.NewConnectionAsync())
                 {
                     modelEN = await this.outAdmActService.GetAsync(application.Id);
+                    modelEN.RegisterType = (await this.nomenclatureService.GetAdmActRegisterTypes(modelEN.Type.Id)).FirstOrDefault();
                     await this.InitApplicationDataAsync(modelEN);
                 }
             }

@@ -180,6 +180,8 @@
                 {
                     await using var connection = await this.contextManager.NewConnectionWithJournalAsync(
                         dbModel.IsNew ? ActionType.Create : ActionType.Edit,
+                        title: $"{(dbModel.IsNew ? this.localizer["JournalCreate"] : this.Localizer["JournalEdit"])} {this.Localizer["PageJournalTitle"]}",
+                        reason: $"{(dbModel.IsNew ? this.localizer["JournalCreate"] : this.Localizer["JournalEdit"])} {this.Localizer["PageJournalReason"]}",
                         objects: new[] { new KeyValuePair<object, ObjectType>(dbModel, ObjectType.Page) });
                     await using var transaction = await connection.BeginTransactionAsync();
                     await this.cmsService.UpsertAsync(dbModel);
@@ -237,6 +239,8 @@
         {
             await using var connection = await this.contextManager.NewConnectionWithJournalAsync(
                 ActionType.Delete,
+                title: $"{this.Localizer["JournalDelete"]} {this.Localizer["PageJournalTitle"]}",
+                reason: $"{this.Localizer["JournalDelete"]} {this.Localizer["PageJournalReason"]}",
                 objects: new[] { new KeyValuePair<object, ObjectType>(new Page { Id = id }, ObjectType.Page) });
             await using var transaction = await connection.BeginTransactionAsync();
             await this.cmsService.DeleteAsync(id);
@@ -359,8 +363,8 @@
             var message = $"Change page position from page {sourceId} to page {destinationId} with position {Enum.GetName(position)}";
             await using var connection = await this.contextManager.NewConnectionWithJournalAsync(
                 ActionType.Edit,
-                title: message,
-                reason: message,
+                title: $"{this.Localizer["JournalEdit"]} {this.Localizer["PageJournalTitle"]}",
+                reason: $"{this.Localizer["JournalEdit"]} {this.Localizer["PageJournalReason"]}",
                 objects: new[] { new KeyValuePair<object, ObjectType>(new Page { Id = sourceId }, ObjectType.Page), new KeyValuePair<object, ObjectType>(new Page { Id = destinationId }, ObjectType.Page) });
             var source = (await this.cmsService.SearchPagesAsync(new PageQueryModel { Id = sourceId })).First();
             var destination = (await this.cmsService.SearchPagesAsync(new PageQueryModel { Id = destinationId })).First();

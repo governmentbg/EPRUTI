@@ -1939,7 +1939,6 @@
             var system = this.configuration.GetValue<string>("SystemStyle");
             if (system.Equals("mrrb"))
             {
-                // TODO: must be refactored with better functionality for base forms
                 var type = EnumHelper.GetClientTypeById(model.Type.Id.Value);
                 var filteredValidations = type switch
                 {
@@ -1949,19 +1948,19 @@
 
                     ClientType.HomeCountry => validations
                     .Where(x => x.Step == 0 &&
-                    !new HashSet<string> { "SurNames", "LastNames", "IsLnch", "HomeCountry", "PlaceAbroad", "EgnBulstat" }.Contains(x.PropertyPath)).ToList(),
+                    !new HashSet<string> { "FirstNames", "SurNames", "FamilyNames", "IsLnch", "HomeCountry", "PlaceAbroad", "EgnBulstat", "RegisterType" }.Contains(x.PropertyPath)).ToList(),
 
                     ClientType.Municipality => validations
                     .Where(x => x.Step == 0 &&
-                    !new HashSet<string> { "RegisterType", "IsLnch", "FirstNames", "SurNames", "LastNames", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
+                    !new HashSet<string> { "IsLnch", "FirstNames", "SurNames", "FamilyNames", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
 
                     ClientType.ForeignPhysical => validations
                     .Where(x => x.Step == 0 &&
-                    !new HashSet<string> { "IsLnch", "FirstNames", "SurNames", "LastNames", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
+                    !new HashSet<string> { "IsLnch", "FirstNames", "SurNames", "FamilyNames", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
 
                     ClientType.Legal => validations
                     .Where(x => x.Step == 0 &&
-                    !new HashSet<string> { "IsLnch", "FirstNames", "SurNames", "LastNames", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
+                    !new HashSet<string> { "IsLnch", "FirstNames", "SurNames", "FamilyNames", "HomeCountry", "PlaceAbroad" }.Contains(x.PropertyPath)).ToList(),
 
                     _ => validations
                 };
